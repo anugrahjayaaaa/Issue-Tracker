@@ -75,6 +75,13 @@ return [
     'member_role_updated' => 'Peran anggota diperbarui.',
     'member_removed' => 'Anggota dihapus.',
 
+    // ── issue tracker: issues ──
+    'issue_created' => 'Isu dibuat.',
+    'issue_updated' => 'Isu diperbarui.',
+    'issue_deleted' => 'Isu dihapus.',
+    'issue_status_changed' => 'Status isu diubah.',
+    'issues_deleted_count' => ':count isu dihapus.',
+
     // ── auth (login lock / verification) ──
     'too_many_attempts' => 'Terlalu banyak percobaan. Coba lagi dalam :seconds detik.',
     'account_locked_permanent' => 'Akun dikunci permanen. Hubungi administrator.',

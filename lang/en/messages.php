@@ -75,6 +75,13 @@ return [
     'member_role_updated' => 'Member role updated.',
     'member_removed' => 'Member removed.',
 
+    // ── issue tracker: issues ──
+    'issue_created' => 'Issue created.',
+    'issue_updated' => 'Issue updated.',
+    'issue_deleted' => 'Issue deleted.',
+    'issue_status_changed' => 'Issue status changed.',
+    'issues_deleted_count' => ':count issue(s) deleted.',
+
     // ── auth (login lock / verification) ──
     'too_many_attempts' => 'Too many attempts. Try again in :seconds s.',
     'account_locked_permanent' => 'Account permanently locked. Contact an administrator.',
