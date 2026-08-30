@@ -115,7 +115,6 @@ return [
     'feature_flags_intro' => 'Fitur yang dimatikan tidak bisa diakses siapa pun — kecuali pengguna pemegang izin :code, yang tetap bisa mengelola modul walau fiturnya mati.',
     'feature' => 'Fitur',
     'slug' => 'Slug',
-    'status' => 'Status',
     'enabled' => 'Aktif',
     'disabled' => 'Nonaktif',
     'no_features' => 'Tidak ada fitur.',
@@ -133,7 +132,6 @@ return [
     'price_monthly' => 'Harga (bulanan)',
     'limits' => 'Limit',
     'features' => 'Fitur',
-    'active' => 'Aktif',
     'inactive' => 'Nonaktif',
     'slug_help' => 'Identifier unik, mis. starter-2026. Huruf, angka, dash/underscore. Otomatis dari nama — edit bila perlu.',
     'slug_auto' => 'otomatis dari nama',
@@ -157,11 +155,6 @@ return [
     'limits_help' => 'Batas numerik yang diterapkan pada paket.',
     'features_help' => 'Modul yang aktif untuk paket ini.',
     'no_plans' => 'Belum ada paket.',
-    'cancel' => 'Batal',
-    'save' => 'Simpan',
-    'edit' => 'Edit',
-    'delete' => 'Hapus',
-    'confirm_delete' => 'Hapus paket ini?',
 
     // ── sessions ──
     'active_sessions' => 'Sesi Aktif',

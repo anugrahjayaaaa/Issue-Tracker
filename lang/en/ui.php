@@ -115,7 +115,6 @@ return [
     'feature_flags_intro' => 'A disabled feature is inaccessible to everyone — except users who hold the :code permission, who stay in so they can operate modules while off.',
     'feature' => 'Feature',
     'slug' => 'Slug',
-    'status' => 'Status',
     'enabled' => 'Enabled',
     'disabled' => 'Disabled',
     'no_features' => 'No features.',
@@ -133,7 +132,6 @@ return [
     'price_monthly' => 'Price (monthly)',
     'limits' => 'Limits',
     'features' => 'Features',
-    'active' => 'Active',
     'inactive' => 'Inactive',
     'slug_help' => 'Unique identifier, e.g. starter-2026. Letters, numbers, dash/underscore. Auto-filled from name — edit if needed.',
     'slug_auto' => 'auto from name',
@@ -157,11 +155,6 @@ return [
     'limits_help' => 'Numeric caps applied to the plan.',
     'features_help' => 'Modules enabled for this plan.',
     'no_plans' => 'No plans yet.',
-    'cancel' => 'Cancel',
-    'save' => 'Save',
-    'edit' => 'Edit',
-    'delete' => 'Delete',
-    'confirm_delete' => 'Delete this plan?',
 
     // ── sessions ──
     'active_sessions' => 'Active Sessions',
