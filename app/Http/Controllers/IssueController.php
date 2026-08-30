@@ -10,6 +10,8 @@ use App\Models\Issue;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\User;
+use App\Notifications\IssueAssigned;
+use App\Notifications\IssueStatusChanged;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -88,6 +90,10 @@ class IssueController extends Controller
         $issue->reporter_id = $request->user()->id;
         $issue->save();
 
+        if ($issue->assignee_id && $issue->assignee_id !== $request->user()->id) {
+            $issue->assignee->notify(new IssueAssigned($issue));
+        }
+
         return redirect()->route('issues.index', ['project_id' => $project->id])
             ->with('success', __('messages.issue_created'));
     }
@@ -112,7 +118,12 @@ class IssueController extends Controller
 
     public function update(IssueUpdateRequest $request, Issue $issue): RedirectResponse
     {
+        $oldAssignee = $issue->assignee_id;
         $issue->update($request->validated());
+
+        if ($issue->assignee_id && $issue->assignee_id !== $oldAssignee && $issue->assignee_id !== $request->user()->id) {
+            $issue->assignee->notify(new IssueAssigned($issue));
+        }
 
         return redirect()->route('issues.index', ['project_id' => $issue->project_id])
             ->with('success', __('messages.issue_updated'));
@@ -120,11 +131,21 @@ class IssueController extends Controller
 
     public function changeStatus(IssueStatusRequest $request, Issue $issue): RedirectResponse
     {
+        $old = $issue->status;
         $issue->status = $request->input('status');
         if ($request->filled('order')) {
             $issue->order = $request->input('order');
         }
         $issue->save();
+
+        if ($old !== $issue->status) {
+            $recipients = collect([$issue->reporter, $issue->assignee])->filter();
+            foreach ($recipients as $recipient) {
+                if ($recipient->id !== $request->user()->id) {
+                    $recipient->notify(new IssueStatusChanged($issue, $old, $issue->status));
+                }
+            }
+        }
 
         return redirect()->route('issues.board', ['project_id' => $issue->project_id])
             ->with('success', __('messages.issue_status_changed'));

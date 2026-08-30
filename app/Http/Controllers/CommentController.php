@@ -9,6 +9,8 @@ use App\Models\Attachment;
 use App\Models\Comment;
 use App\Models\Issue;
 use App\Models\ProjectMember;
+use App\Models\User;
+use App\Notifications\Mentioned;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,11 +28,19 @@ class CommentController extends Controller
 
     public function store(CommentStoreRequest $request, Issue $issue): RedirectResponse
     {
-        Comment::create([
+        $comment = Comment::create([
             'issue_id' => $issue->id,
             'user_id' => $request->user()->id,
             'body' => $request->input('body'),
         ]);
+
+        // notify mentioned users (by @username)
+        $mentioned = User::whereIn('username', parseMentions($request->input('body')))->get();
+        foreach ($mentioned as $mentionedUser) {
+            if ($mentionedUser->id !== $request->user()->id) {
+                $mentionedUser->notify(new Mentioned($comment));
+            }
+        }
 
         return redirect()->route('issues.show', $issue)
             ->with('success', __('messages.comment_added'));
