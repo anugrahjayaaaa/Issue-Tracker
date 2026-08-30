@@ -49,11 +49,25 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">{{ ui('description') }}</label>
-                <textarea name="description" class="form-control" rows="6">{{ old('description', $issue->description) }}</textarea>
+                <div id="issue-description-editor" class="form-control" style="min-height:140px">{!! old('description', $issue->description) !!}</div>
+                <input type="hidden" name="description" id="issue-description" value="{{ old('description', $issue->description) }}">
             </div>
             @include('partials.labels-field')
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
         </form>
     </div>
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const editor = document.getElementById('issue-description-editor');
+    const hidden = document.getElementById('issue-description');
+    if (!editor) return;
+    editor.setAttribute('contenteditable', 'true');
+    const sync = () => { hidden.value = editor.innerHTML; };
+    editor.addEventListener('input', sync);
+    document.getElementById('issue-form')?.addEventListener('submit', sync);
+});
+</script>
+@endpush
 @endsection

@@ -145,4 +145,16 @@ class IssueTest extends TestCase
         $this->assertStringNotContainsString('<script>', $issue->description);
         $this->assertStringContainsString('<strong>bold</strong>', $issue->description);
     }
+
+    public function test_store_succeeds_without_status_field(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        $this->actingAs($user)->post(route('issues.store'), [
+            'project_id' => $project->id, 'title' => 'No status', 'type' => 'task', 'priority' => 'low',
+        ])->assertRedirect(route('issues.index', ['project_id' => $project->id]));
+
+        $issue = Issue::where('code', 'HEL-1')->first();
+        $this->assertNotNull($issue);
+        $this->assertSame(Issue::STATUS_OPEN, $issue->status);
+    }
 }

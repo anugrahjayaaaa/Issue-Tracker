@@ -91,6 +91,7 @@ class IssueController extends Controller
         $issue = new Issue($request->validated());
         $issue->code = $project->nextIssueCode();
         $issue->reporter_id = $request->user()->id;
+        $issue->status = $request->input('status', Issue::STATUS_OPEN);
         $issue->save();
         $issue->labels()->sync($request->input('labels', []));
 

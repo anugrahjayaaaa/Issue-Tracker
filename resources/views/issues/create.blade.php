@@ -7,7 +7,7 @@
 </div>
 <div class="card shadow-sm">
     <div class="card-body">
-        <form method="POST" action="{{ route('issues.store') }}">
+        <form method="POST" action="{{ route('issues.store') }}" id="issue-form">
             @csrf
             <div class="mb-3">
                 <label class="form-label">{{ ui('project') }}</label>
@@ -53,8 +53,8 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">{{ ui('description') }}</label>
-                <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="6">{{ old('description') }}</textarea>
-                @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                <div id="issue-description-editor" class="form-control" style="min-height:140px">{{ old('description') }}</div>
+                <input type="hidden" name="description" id="issue-description" value="{{ old('description') }}">
             </div>
             @include('partials.labels-field')
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
@@ -62,4 +62,18 @@
         </form>
     </div>
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const editor = document.getElementById('issue-description-editor');
+    const hidden = document.getElementById('issue-description');
+    if (!editor) return;
+    // ponytail: contenteditable + hidden-input sync; reuse Issue::setDescriptionAttribute sanitize
+    editor.setAttribute('contenteditable', 'true');
+    const sync = () => { hidden.value = editor.innerHTML; };
+    editor.addEventListener('input', sync);
+    document.getElementById('issue-form')?.addEventListener('submit', sync);
+});
+</script>
+@endpush
 @endsection
