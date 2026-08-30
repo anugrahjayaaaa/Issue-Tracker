@@ -36,6 +36,12 @@
             <option value="{{ $u->id }}" {{ request('assignee_id') == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
         @endforeach
     </select></div>
+    <div class="col-md-2"><select name="label_id" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">{{ ui('all_labels') }}</option>
+        @foreach ($project->labels as $l)
+            <option value="{{ $l->id }}" {{ request('label_id') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>
+        @endforeach
+    </select></div>
     @endif
 </form>
 
@@ -60,6 +66,11 @@
                     <td><span class="badge text-bg-{{ $issue->status == 'done' ? 'success' : ($issue->status == 'blocked' ? 'danger' : 'warning') }}">{{ ui('issue_status_'.$issue->status) }}</span></td>
                     <td>{{ ui('issue_priority_'.$issue->priority) }}</td>
                     <td>{{ $issue->assignee->name ?? '-' }}</td>
+                    <td>
+                        @foreach ($issue->labels as $l)
+                            <span class="badge" style="background:{{ $l->color }}">{{ $l->name }}</span>
+                        @endforeach
+                    </td>
                     <td class="text-end">
                         <x-action-buttons
                             :edit="auth()->user()->can('issue.edit') ? route('issues.edit', $issue) : null"
@@ -67,7 +78,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center text-muted py-4">{{ ui('no_issues_found') }}</td></tr>
+                <tr><td colspan="8" class="text-center text-muted py-4">{{ ui('no_issues_found') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

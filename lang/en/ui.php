@@ -283,4 +283,12 @@ return [
     'comment_updated' => 'Comment updated.',
     'comment_deleted' => 'Comment deleted.',
     'attachment_added' => 'Image attached.',
+
+    // ── issue tracker: labels ──
+    'labels' => 'Labels',
+    'label_name' => 'Label name',
+    'no_labels' => 'No labels yet.',
+    'no_labels_hint' => 'Create labels on the project page first.',
+    'all_labels' => 'All labels',
+    'confirm_delete_label' => 'Delete this label? Issues tagged with it will be untagged.',
 ];

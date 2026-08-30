@@ -84,6 +84,13 @@
                     <tr><td>{{ ui('assignee') }}</td><td>{{ $issue->assignee->name ?? '-' }}</td></tr>
                     <tr><td>{{ ui('reporter') }}</td><td>{{ $issue->reporter->name ?? '-' }}</td></tr>
                     <tr><td>{{ ui('due_date') }}</td><td>{{ $issue->due_date ?? '-' }}</td></tr>
+                    <tr><td>{{ ui('labels') }}</td><td>
+                        @forelse ($issue->labels as $l)
+                            <span class="badge" style="background:{{ $l->color }}">{{ $l->name }}</span>
+                        @empty
+                            -
+                        @endforelse
+                    </td></tr>
                 </table>
             </div>
         </div>

@@ -37,6 +37,11 @@ class Project extends Model
             ->withTimestamps();
     }
 
+    public function labels(): HasMany
+    {
+        return $this->hasMany(Label::class);
+    }
+
     /** Next issue code, e.g. HEL-12. Increments issue_seq atomically-ish. */
     public function nextIssueCode(): string
     {

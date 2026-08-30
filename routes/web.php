@@ -17,6 +17,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\IssueController;
+use App\Http\Controllers\LabelController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
@@ -124,6 +125,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
         Route::put('/{project}/members/{member}', [ProjectMemberController::class, 'update'])->name('projects.members.update');
         Route::delete('/{project}/members/{member}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
+
+        Route::post('/{project}/labels', [LabelController::class, 'store'])->name('projects.labels.store');
+        Route::put('/{project}/labels/{label}', [LabelController::class, 'update'])->name('projects.labels.update');
+        Route::delete('/{project}/labels/{label}', [LabelController::class, 'destroy'])->name('projects.labels.destroy');
     });
 
     // Issues (project-scoped): read = any member; write = lead/member (enforced in Form Requests)

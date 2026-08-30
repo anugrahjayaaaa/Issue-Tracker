@@ -79,6 +79,9 @@ return [
     'issue_created' => 'Isu dibuat.',
     'issue_updated' => 'Isu diperbarui.',
     'issue_deleted' => 'Isu dihapus.',
+    'label_created' => 'Label dibuat.',
+    'label_updated' => 'Label diperbarui.',
+    'label_deleted' => 'Label dihapus.',
     'issue_status_changed' => 'Status isu diubah.',
     'issues_deleted_count' => ':count isu dihapus.',
 
