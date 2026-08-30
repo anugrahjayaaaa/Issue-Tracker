@@ -12,7 +12,11 @@
                 <tr><th>{{ ui('feature') }}</th><th>{{ ui('slug') }}</th><th>{{ ui('status') }}</th><th class="text-end">{{ ui('action') }}</th></tr>
             </thead>
             <tbody>
-                @forelse ($features as $feature)
+                @forelse ($features as $group => $items)
+                <tr class="table-group-divider">
+                    <th colspan="4" class="text-uppercase small text-muted fw-bold">{{ ui('feature_group_'.$group) }}</th>
+                </tr>
+                @foreach ($items as $feature)
                 <tr>
                     <td>{{ $feature['label'] }}</td>
                     <td><span class="text-muted small">{{ $feature['slug'] }}</span></td>
@@ -34,6 +38,7 @@
                         </div>
                     </td>
                 </tr>
+                @endforeach
                 @empty
                 <tr><td colspan="4" class="text-center text-muted py-4">{{ ui('no_features') }}</td></tr>
                 @endforelse

@@ -54,19 +54,24 @@ return [
     */
 
     'features' => [
-        'users' => ['label' => 'Users'],
-        'roles' => ['label' => 'Roles'],
-        'permissions' => ['label' => 'Permissions'],
-        'audit' => ['label' => 'Audit Log'],
-        'sessions' => ['label' => 'Sessions'],
-        'api-tokens' => ['label' => 'API Tokens'],
-        'translations' => ['label' => 'Translations'],
-        'logs' => ['label' => 'Logs'],
-        'telescope' => ['label' => 'Telescope'],
-        'periscope' => ['label' => 'Periscope'],
-        'plans' => ['label' => 'Plans'],
-        'billing' => ['label' => 'Billing'],
-        'issues' => ['label' => 'Issue Tracker'],
+        // Access Management
+        'users' => ['label' => 'Users', 'group' => 'access'],
+        'roles' => ['label' => 'Roles', 'group' => 'access'],
+        'permissions' => ['label' => 'Permissions', 'group' => 'access'],
+        // Monitoring
+        'audit' => ['label' => 'Audit Log', 'group' => 'monitoring'],
+        'logs' => ['label' => 'Logs', 'group' => 'monitoring'],
+        'telescope' => ['label' => 'Telescope', 'group' => 'monitoring'],
+        'periscope' => ['label' => 'Periscope', 'group' => 'monitoring'],
+        // System
+        'sessions' => ['label' => 'Sessions', 'group' => 'system'],
+        'api-tokens' => ['label' => 'API Tokens', 'group' => 'system'],
+        'translations' => ['label' => 'Translations', 'group' => 'system'],
+        // Billing
+        'plans' => ['label' => 'Plans', 'group' => 'billing'],
+        'billing' => ['label' => 'Billing', 'group' => 'billing'],
+        // Workspace (core issue-tracker module)
+        'issues' => ['label' => 'Issue Tracker', 'group' => 'workspace'],
     ],
 
 ];

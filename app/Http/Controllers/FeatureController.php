@@ -15,10 +15,12 @@ class FeatureController extends Controller
             ->map(fn ($meta, $slug) => [
                 'slug' => $slug,
                 'label' => $meta['label'] ?? $slug,
+                'group' => $meta['group'] ?? 'other',
                 'enabled' => Feature::active($slug),
             ])
             ->sortBy('label')
-            ->values();
+            ->groupBy('group')
+            ->map(fn ($items) => $items->values());
 
         return view('settings.features.index', compact('features'));
     }
