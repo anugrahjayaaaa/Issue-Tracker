@@ -41,6 +41,11 @@
                         </div>
                         <div class="fw-medium small">{{ $issue->title }}</div>
                         <div class="text-muted small">{{ $issue->assignee->name ?? '-' }}</div>
+                        <div class="mt-1">
+                            @foreach ($issue->labels as $l)
+                                <span class="badge" style="background:{{ $l->color }}">{{ $l->name }}</span>
+                            @endforeach
+                        </div>
                         <a href="{{ route('issues.show', $issue) }}" class="stretched-link"></a>
                     </div>
                 </div>

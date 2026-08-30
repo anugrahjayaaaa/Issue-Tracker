@@ -42,6 +42,7 @@ class IssueController extends Controller
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
                 ->when($request->filled('assignee_id'), fn ($q) => $q->where('assignee_id', $request->assignee_id))
                 ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
+                ->when($request->filled('label_id'), fn ($q) => $q->whereHas('labels', fn ($l) => $l->where('labels.id', $request->label_id)))
                 ->orderBy('order')
                 ->paginate(20)
                 ->withQueryString();
@@ -89,6 +90,7 @@ class IssueController extends Controller
         $issue->code = $project->nextIssueCode();
         $issue->reporter_id = $request->user()->id;
         $issue->save();
+        $issue->labels()->sync($request->input('labels', []));
 
         if ($issue->assignee_id && $issue->assignee_id !== $request->user()->id) {
             $issue->assignee->notify(new IssueAssigned($issue));
@@ -120,6 +122,7 @@ class IssueController extends Controller
     {
         $oldAssignee = $issue->assignee_id;
         $issue->update($request->validated());
+        $issue->labels()->sync($request->input('labels', []));
 
         if ($issue->assignee_id && $issue->assignee_id !== $oldAssignee && $issue->assignee_id !== $request->user()->id) {
             $issue->assignee->notify(new IssueAssigned($issue));

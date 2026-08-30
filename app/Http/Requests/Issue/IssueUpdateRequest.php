@@ -5,6 +5,7 @@ namespace App\Http\Requests\Issue;
 use App\Models\Issue;
 use App\Models\ProjectMember;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class IssueUpdateRequest extends FormRequest
 {
@@ -31,6 +32,8 @@ class IssueUpdateRequest extends FormRequest
             'assignee_id' => 'nullable|exists:users,id',
             'parent_id' => 'nullable|exists:issues,id|not_in:'.$issue->id,
             'due_date' => 'nullable|date',
+            'labels' => ['nullable', 'array'],
+            'labels.*' => Rule::exists('labels', 'id')->where(fn ($q) => $q->where('project_id', $issue->project->id)),
         ];
     }
 }

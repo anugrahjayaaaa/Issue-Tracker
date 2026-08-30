@@ -6,6 +6,7 @@ use App\Models\Issue;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class IssueStoreRequest extends FormRequest
 {
@@ -23,6 +24,11 @@ class IssueStoreRequest extends FormRequest
     /** @return array<string,mixed> */
     public function rules(): array
     {
+        $project = $this->route('project') ?? Project::find($this->input('project_id'));
+        if (! $project) {
+            return ['project_id' => 'required|exists:projects,id'];
+        }
+
         return [
             'project_id' => 'required|exists:projects,id',
             'title' => 'required|string|max:255',
@@ -33,6 +39,8 @@ class IssueStoreRequest extends FormRequest
             'assignee_id' => 'nullable|exists:users,id',
             'parent_id' => 'nullable|exists:issues,id',
             'due_date' => 'nullable|date',
+            'labels' => ['nullable', 'array'],
+            'labels.*' => Rule::exists('labels', 'id')->where(fn ($q) => $q->where('project_id', $project->id)),
         ];
     }
 }

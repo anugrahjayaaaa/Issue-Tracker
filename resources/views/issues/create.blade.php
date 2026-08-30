@@ -55,6 +55,7 @@
                 <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="6">{{ old('description') }}</textarea>
                 @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
+            @include('partials.labels-field')
             @endif
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
         </form>

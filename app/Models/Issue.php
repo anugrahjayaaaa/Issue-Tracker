@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -76,5 +77,10 @@ class Issue extends Model
     {
         // viewer+ may read; this scope is for write actions (lead/member).
         return ProjectMember::hasRole($user, $project, [ProjectMember::ROLE_LEAD, ProjectMember::ROLE_MEMBER]);
+    }
+
+    public function labels(): BelongsToMany
+    {
+        return $this->belongsToMany(Label::class);
     }
 }

@@ -283,4 +283,12 @@ return [
     'comment_updated' => 'Komentar diperbarui.',
     'comment_deleted' => 'Komentar dihapus.',
     'attachment_added' => 'Gambar dilampirkan.',
+
+    // ── issue tracker: labels ──
+    'labels' => 'Label',
+    'label_name' => 'Nama label',
+    'no_labels' => 'Belum ada label.',
+    'no_labels_hint' => 'Buat label di halaman proyek dulu.',
+    'all_labels' => 'Semua label',
+    'confirm_delete_label' => 'Hapus label ini? Isu yang menempel padanya akan dilepas.',
 ];

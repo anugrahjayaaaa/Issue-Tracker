@@ -88,4 +88,6 @@
         </div>
     </div>
 </div>
+
+@include('partials.labels')
 @endsection

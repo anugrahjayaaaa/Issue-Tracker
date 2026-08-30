@@ -51,6 +51,7 @@
                 <label class="form-label">{{ ui('description') }}</label>
                 <textarea name="description" class="form-control" rows="6">{{ old('description', $issue->description) }}</textarea>
             </div>
+            @include('partials.labels-field')
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
         </form>
     </div>

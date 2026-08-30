@@ -41,7 +41,7 @@ class ProjectController extends Controller
 
     public function show(Project $project): View
     {
-        $project->load('members.user');
+        $project->load('members.user', 'labels');
         $users = User::orderBy('name')->get();
 
         return view('projects.show', compact('project', 'users'));
