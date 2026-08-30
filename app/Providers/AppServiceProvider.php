@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Permission;
+use App\Models\Project;
 use App\Models\Role;
 use App\Models\User;
 use App\Observers\PermissionObserver;
+use App\Observers\ProjectObserver;
 use App\Observers\RoleObserver;
 use App\Observers\UserObserver;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -46,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
         User::observe(UserObserver::class);
         Role::observe(RoleObserver::class);
         Permission::observe(PermissionObserver::class);
+        Project::observe(ProjectObserver::class);
 
         // ponytail: Sentry DSN-gated; no-op locally when DSN empty
         if (class_exists(Sentry::class) && config('sentry.dsn')) {

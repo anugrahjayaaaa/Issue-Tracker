@@ -67,6 +67,14 @@ return [
     'feature_enabled' => ':label diaktifkan.',
     'feature_disabled' => ':label dinonaktifkan.',
 
+    // ── issue tracker: projects ──
+    'project_created' => 'Proyek dibuat.',
+    'project_updated' => 'Proyek diperbarui.',
+    'project_deleted' => 'Proyek dihapus.',
+    'member_added' => 'Anggota ditambahkan.',
+    'member_role_updated' => 'Peran anggota diperbarui.',
+    'member_removed' => 'Anggota dihapus.',
+
     // ── auth (login lock / verification) ──
     'too_many_attempts' => 'Terlalu banyak percobaan. Coba lagi dalam :seconds detik.',
     'account_locked_permanent' => 'Akun dikunci permanen. Hubungi administrator.',

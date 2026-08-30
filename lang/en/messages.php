@@ -67,6 +67,14 @@ return [
     'feature_enabled' => ':label enabled.',
     'feature_disabled' => ':label disabled.',
 
+    // ── issue tracker: projects ──
+    'project_created' => 'Project created.',
+    'project_updated' => 'Project updated.',
+    'project_deleted' => 'Project deleted.',
+    'member_added' => 'Member added.',
+    'member_role_updated' => 'Member role updated.',
+    'member_removed' => 'Member removed.',
+
     // ── auth (login lock / verification) ──
     'too_many_attempts' => 'Too many attempts. Try again in :seconds s.',
     'account_locked_permanent' => 'Account permanently locked. Contact an administrator.',

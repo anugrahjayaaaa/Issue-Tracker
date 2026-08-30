@@ -219,4 +219,21 @@ return [
     'selected' => 'selected',
     'confirm_bulk_delete_title' => 'Confirm bulk delete',
     'confirm_bulk_delete_body' => 'You are about to :action :count item(s). Continue?',
+
+    // ── issue tracker: projects ──
+    'projects' => 'Projects',
+    'project' => 'Project',
+    'new_project' => 'New Project',
+    'edit_project' => 'Edit Project',
+    'project_key' => 'Key',
+    'project_key_hint' => 'Short code, e.g. HEL (uppercase, letters/numbers).',
+    'search_project' => 'Search project name or key…',
+    'no_projects_found' => 'No projects found.',
+    'members' => 'Members',
+    'no_members' => 'No members yet.',
+    'select_user' => 'Select user',
+    'role_lead' => 'Lead',
+    'role_member' => 'Member',
+    'role_viewer' => 'Viewer',
+    'confirm_remove_member' => 'Remove this member from the project?',
 ];
