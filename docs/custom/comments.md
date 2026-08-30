@@ -9,7 +9,14 @@ delete. Supports `@mention` (drives notifications, see notifications.md).
 ## Scope
 - In scope: Comment CRUD on an issue, rich-text (HTML) body, image attachment
   upload (drag/paste), edit, delete (owner or lead), `@mention` parsing.
-- Out of scope: threaded replies (Phase 2), emoji reactions.
+- Out of scope: threaded replies (Phase 2), emoji reactions, @mention notification (P1.4).
+
+## Status: ✅ implemented (P1.3)
+
+Editor: MVP uses `contenteditable` + hidden-input sync (no extra JS dep).
+TipTap/mention upgrade tracked for P1.5. Image upload via `storage/app/public`
++ `php artisan storage:link`, validated `image|max:2048` in CommentAttachRequest.
+
 
 ## Models / Tables (new)
 | Table | Purpose | Notes |

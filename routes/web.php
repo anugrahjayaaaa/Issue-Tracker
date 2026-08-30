@@ -17,6 +17,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\IssueController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TranslationController;
@@ -137,6 +138,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
         Route::delete('/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->middleware('can:issue.delete');
         Route::post('/bulk', [IssueController::class, 'bulk'])->name('issues.bulk')->middleware('can:issue.delete');
+
+        // Comments (project-scoped, same gate as issues)
+        Route::post('/{issue}/comments', [CommentController::class, 'store'])->name('issues.comments.store')->middleware('can:comment.create');
+        Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('issues.comments.update')->middleware('can:comment.edit');
+        Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('issues.comments.destroy')->middleware('can:comment.delete');
+        Route::post('/{issue}/attachments', [CommentController::class, 'attach'])->name('issues.attachments.store')->middleware('can:comment.create');
     });
 
     Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');

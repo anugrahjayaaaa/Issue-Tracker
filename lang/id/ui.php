@@ -272,4 +272,15 @@ return [
     'issue_priority_medium' => 'Sedang',
     'issue_priority_high' => 'Tinggi',
     'issue_priority_urgent' => 'Urgent',
+
+    // ── issue tracker: comments ──
+    'comments' => 'Komentar',
+    'no_comments' => 'Belum ada komentar.',
+    'post_comment' => 'Kirim komentar',
+    'attach_image' => 'Lampirkan gambar',
+    'confirm_delete_comment' => 'Hapus komentar ini?',
+    'comment_added' => 'Komentar ditambahkan.',
+    'comment_updated' => 'Komentar diperbarui.',
+    'comment_deleted' => 'Komentar dihapus.',
+    'attachment_added' => 'Gambar dilampirkan.',
 ];
