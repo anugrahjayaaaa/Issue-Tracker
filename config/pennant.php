@@ -66,6 +66,7 @@ return [
         'periscope' => ['label' => 'Periscope'],
         'plans' => ['label' => 'Plans'],
         'billing' => ['label' => 'Billing'],
+        'issues' => ['label' => 'Issue Tracker'],
     ],
 
 ];

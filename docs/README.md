@@ -33,7 +33,13 @@ with docs, **docs win** (change via an ADR).
 | licensing-and-billing.md | Licensing + billing (Model 1/2, dummy PG). **§11 plan limit model** — `limits` keys, dynamic feature→permission map, server guards |
 | packages.md | Verified packages (don't reinvent) |
 | adr.md | Architecture Decision Records |
-| custom/README.md | **Custom features** for derived projects (separate from base docs) |
+| custom/README.md | **Custom features** for THIS project (Issue Tracker) — index |
+| custom/PRD-issue-tracker.md | Issue Tracker PRD: goal, project-level roles, phases |
+| custom/projects.md | Projects CRUD + dynamic project-level membership/roles |
+| custom/issues.md | Issues + Kanban + List view (filters + bulk) |
+| custom/comments.md | Comments rich text + image upload |
+| custom/notifications.md | Assign/mention/status notifications (extends base) |
+| custom/phases.md | Phase 2-3 roadmap |
 
 ## LOCKED DECISIONS (user confirmed, 27 Aug 2026)
 1. All proposed extra features are in v1 (reset pwd, lockout, verify, self-service, session mgmt, seed, dashboard, /up).

@@ -14,6 +14,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TranslationController;
@@ -105,6 +107,21 @@ Route::middleware('auth')->group(function () {
     // Billing admin: KPIs + analytics (separate popular page, gated by billing.view)
     Route::prefix('admin/billing')->middleware(['can:billing.view', 'feature:billing'])->group(function () {
         Route::get('/', [BillingAdminController::class, 'index'])->name('admin.billing.index');
+    });
+
+    // ── Issue Tracker module (feature:issues) ──────────────────────────────
+    Route::prefix('projects')->middleware(['can:project.manage', 'feature:issues'])->group(function () {
+        Route::get('/', [ProjectController::class, 'index'])->name('projects.index')->withoutMiddleware('can:project.manage');
+        Route::get('/create', [ProjectController::class, 'create'])->name('projects.create');
+        Route::post('/', [ProjectController::class, 'store'])->name('projects.store');
+        Route::get('/{project}', [ProjectController::class, 'show'])->name('projects.show')->withoutMiddleware('can:project.manage');
+        Route::get('/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+        Route::put('/{project}', [ProjectController::class, 'update'])->name('projects.update');
+        Route::delete('/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+
+        Route::post('/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
+        Route::put('/{project}/members/{member}', [ProjectMemberController::class, 'update'])->name('projects.members.update');
+        Route::delete('/{project}/members/{member}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
     });
 
     Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');

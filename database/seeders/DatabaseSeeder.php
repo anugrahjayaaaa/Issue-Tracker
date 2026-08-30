@@ -25,6 +25,10 @@ class DatabaseSeeder extends Seeder
         'translation.view', 'translation.edit',
         'telescope.view',
         'periscope.view',
+        // Issue Tracker
+        'project.manage',
+        'issue.view', 'issue.create', 'issue.edit', 'issue.delete',
+        'comment.create', 'comment.edit', 'comment.delete',
     ];
 
     public function run(): void
@@ -59,7 +63,7 @@ class DatabaseSeeder extends Seeder
         $staff = Role::findOrCreate('staff', 'web');
 
         $admin->syncPermissions(self::PERMISSIONS);
-        $staff->syncPermissions(['user.view', 'audit.view']);
+        $staff->syncPermissions(['user.view', 'audit.view', 'project.manage', 'issue.view', 'comment.create']);
         $superAdmin->syncPermissions(self::PERMISSIONS);
 
         // Super-admin user (first-run)

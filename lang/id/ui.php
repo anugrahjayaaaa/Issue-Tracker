@@ -219,4 +219,21 @@ return [
     'selected' => 'dipilih',
     'confirm_bulk_delete_title' => 'Konfirmasi hapus massal',
     'confirm_bulk_delete_body' => 'Anda akan :action :count item. Lanjutkan?',
+
+    // ── issue tracker: projects ──
+    'projects' => 'Proyek',
+    'project' => 'Proyek',
+    'new_project' => 'Proyek Baru',
+    'edit_project' => 'Edit Proyek',
+    'project_key' => 'Kode',
+    'project_key_hint' => 'Kode pendek, mis. HEL (huruf besar, huruf/angka).',
+    'search_project' => 'Cari nama atau kode proyek…',
+    'no_projects_found' => 'Tidak ada proyek ditemukan.',
+    'members' => 'Anggota',
+    'no_members' => 'Belum ada anggota.',
+    'select_user' => 'Pilih pengguna',
+    'role_lead' => 'Lead',
+    'role_member' => 'Member',
+    'role_viewer' => 'Viewer',
+    'confirm_remove_member' => 'Hapus anggota ini dari proyek?',
 ];
