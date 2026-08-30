@@ -11,7 +11,8 @@
             @csrf
             <div class="mb-3">
                 <label class="form-label">{{ ui('project') }}</label>
-                <select name="project_id" class="form-select @error('project_id') is-invalid @enderror" onchange="this.form.submit()">
+                <select name="project_id" class="form-select @error('project_id') is-invalid @enderror"
+                        onchange="window.location='{{ route('issues.create') }}?project_id='+this.value">
                     <option value="">{{ ui('select_project') }}</option>
                     @foreach ($projects as $p)
                         <option value="{{ $p->id }}" {{ old('project_id', $project?->id) == $p->id ? 'selected' : '' }}>{{ $p->key }} - {{ $p->name }}</option>
@@ -56,8 +57,8 @@
                 @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             @include('partials.labels-field')
-            @endif
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
+            @endif
         </form>
     </div>
 </div>

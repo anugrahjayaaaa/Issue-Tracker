@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>{{ ui('issues') }}</h3>
     @can('issue.create')
-    <a href="{{ route('issues.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> {{ ui('new_issue') }}</a>
+    <a href="{{ route('issues.create', ['project_id' => $project?->id]) }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> {{ ui('new_issue') }}</a>
     @endcan
 </div>
 
