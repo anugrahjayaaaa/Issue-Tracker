@@ -79,9 +79,13 @@ return [
     'issue_created' => 'Isu dibuat.',
     'issue_updated' => 'Isu diperbarui.',
     'issue_deleted' => 'Isu dihapus.',
+    'issue_restored' => 'Isu dipulihkan.',
     'label_created' => 'Label dibuat.',
     'label_updated' => 'Label diperbarui.',
     'label_deleted' => 'Label dihapus.',
+    'comment_created' => 'Komentar ditambahkan.',
+    'comment_updated' => 'Komentar diperbarui.',
+    'comment_deleted' => 'Komentar dihapus.',
     'issue_status_changed' => 'Status isu diubah.',
     'issues_deleted_count' => ':count isu dihapus.',
 

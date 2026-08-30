@@ -79,9 +79,13 @@ return [
     'issue_created' => 'Issue created.',
     'issue_updated' => 'Issue updated.',
     'issue_deleted' => 'Issue deleted.',
+    'issue_restored' => 'Issue restored.',
     'label_created' => 'Label created.',
     'label_updated' => 'Label updated.',
     'label_deleted' => 'Label deleted.',
+    'comment_created' => 'Comment added.',
+    'comment_updated' => 'Comment updated.',
+    'comment_deleted' => 'Comment deleted.',
     'issue_status_changed' => 'Issue status changed.',
     'issues_deleted_count' => ':count issue(s) deleted.',
 

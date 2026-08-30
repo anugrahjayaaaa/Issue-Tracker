@@ -71,6 +71,28 @@
                 @endcan
             </div>
         </div>
+        {{-- Activity timeline --}}
+        <div class="card shadow-sm">
+            <div class="card-header">{{ ui('activity_timeline') }}</div>
+            <div class="card-body">
+                @php $timeline = $issue->activityTimeline(); @endphp
+                @if ($timeline->isEmpty())
+                <div class="text-muted small text-center py-3">{{ ui('no_activity') }}</div>
+                @else
+                <ul class="list-unstyled mb-0">
+                    @foreach ($timeline as $entry)
+                    <li class="d-flex gap-2 pb-3 @if(!$loop->last) border-bottom @endif">
+                        <i class="bi bi-circle-fill text-{{ $entry->description === 'issue_created' || $entry->description === 'comment_created' ? 'success' : ($entry->description === 'issue_deleted' || $entry->description === 'comment_deleted' ? 'danger' : 'secondary') }} small mt-1"></i>
+                        <div>
+                            <div class="small">{{ __('messages.'.$entry->description) }}</div>
+                            <div class="text-muted" style="font-size:11px">{{ $entry->causer->name ?? '-' }} · {{ $entry->created_at->diffForHumans() }}</div>
+                        </div>
+                    </li>
+                    @endforeach
+                </ul>
+                @endif
+            </div>
+        </div>
     </div>
     <div class="col-lg-4">
         <div class="card shadow-sm">

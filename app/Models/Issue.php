@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Activity;
 
 class Issue extends Model
 {
@@ -72,6 +74,11 @@ class Issue extends Model
         return $this->hasMany(Issue::class, 'parent_id');
     }
 
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     /** Project members who may act on issues (lead/member). Viewers excluded. */
     public static function scopeForMember($query, Project $project, User $user)
     {
@@ -82,5 +89,27 @@ class Issue extends Model
     public function labels(): BelongsToMany
     {
         return $this->belongsToMany(Label::class);
+    }
+
+    /**
+     * Aggregated activity timeline: issue events + events on its comments.
+     * Reuses the existing activity_log (written by observers) — no new schema.
+     */
+    public function activityTimeline(): Collection
+    {
+        $commentIds = $this->comments()->pluck('id');
+
+        return Activity::query()
+            ->with('causer')
+            ->where(function ($q) use ($commentIds) {
+                $q->where('subject_type', self::class)->where('subject_id', $this->id);
+                if ($commentIds->isNotEmpty()) {
+                    $q->orWhere(function ($q2) use ($commentIds) {
+                        $q2->where('subject_type', Comment::class)->whereIn('subject_id', $commentIds);
+                    });
+                }
+            })
+            ->orderBy('id', 'desc')
+            ->get();
     }
 }
