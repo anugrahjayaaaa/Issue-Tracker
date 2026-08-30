@@ -9,25 +9,26 @@
 </div>
 
 <form method="GET" class="card card-body shadow-sm mb-3">
+    <div class="mb-2">
+        <label class="form-label small mb-1">{{ ui('select_project') }}</label>
+        <select name="project_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+            <option value="">{{ ui('select_project') }}</option>
+            @foreach ($projects as $p)
+                <option value="{{ $p->id }}" {{ $project && $project->id == $p->id ? 'selected' : '' }}>{{ $p->key }} - {{ $p->name }}</option>
+            @endforeach
+        </select>
+    </div>
+    @if ($project)
+    @php
+        $filters = [
+            'status' => [App\Models\Issue::STATUS_OPEN, App\Models\Issue::STATUS_IN_PROGRESS, App\Models\Issue::STATUS_BLOCKED, App\Models\Issue::STATUS_DONE],
+            'priority' => [App\Models\Issue::PRIORITY_LOW, App\Models\Issue::PRIORITY_MEDIUM, App\Models\Issue::PRIORITY_HIGH, App\Models\Issue::PRIORITY_URGENT],
+        ];
+    @endphp
     <div class="d-flex flex-wrap gap-2 align-items-end">
         <div>
-            <label class="form-label small mb-1">{{ ui('select_project') }}</label>
-            <select name="project_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                <option value="">{{ ui('select_project') }}</option>
-                @foreach ($projects as $p)
-                    <option value="{{ $p->id }}" {{ $project && $project->id == $p->id ? 'selected' : '' }}>{{ $p->key }} - {{ $p->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        @php
-            $filters = [
-                'status' => [App\Models\Issue::STATUS_OPEN, App\Models\Issue::STATUS_IN_PROGRESS, App\Models\Issue::STATUS_BLOCKED, App\Models\Issue::STATUS_DONE],
-                'priority' => [App\Models\Issue::PRIORITY_LOW, App\Models\Issue::PRIORITY_MEDIUM, App\Models\Issue::PRIORITY_HIGH, App\Models\Issue::PRIORITY_URGENT],
-            ];
-        @endphp
-        <div>
             <label class="form-label small mb-1">{{ ui('all_status') }}</label>
-            <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()" {{ $project ? '' : 'disabled' }}>
+            <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                 <option value="">{{ ui('all_status') }}</option>
                 @foreach ($filters['status'] as $s)
                     <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ ui('issue_status_'.$s) }}</option>
@@ -36,7 +37,7 @@
         </div>
         <div>
             <label class="form-label small mb-1">{{ ui('all_priority') }}</label>
-            <select name="priority" class="form-select form-select-sm w-auto" onchange="this.form.submit()" {{ $project ? '' : 'disabled' }}>
+            <select name="priority" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                 <option value="">{{ ui('all_priority') }}</option>
                 @foreach ($filters['priority'] as $pr)
                     <option value="{{ $pr }}" {{ request('priority') == $pr ? 'selected' : '' }}>{{ ui('issue_priority_'.$pr) }}</option>
@@ -45,26 +46,27 @@
         </div>
         <div>
             <label class="form-label small mb-1">{{ ui('all_assignee') }}</label>
-            <select name="assignee_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()" {{ $project ? '' : 'disabled' }}>
+            <select name="assignee_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                 <option value="">{{ ui('all_assignee') }}</option>
-                @foreach (($project->users ?? collect()) as $u)
+                @foreach ($project->users as $u)
                     <option value="{{ $u->id }}" {{ request('assignee_id') == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
                 @endforeach
             </select>
         </div>
         <div>
             <label class="form-label small mb-1">{{ ui('all_labels') }}</label>
-            <select name="label_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()" {{ $project ? '' : 'disabled' }}>
+            <select name="label_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                 <option value="">{{ ui('all_labels') }}</option>
-                @foreach (($project->labels ?? collect()) as $l)
+                @foreach ($project->labels as $l)
                     <option value="{{ $l->id }}" {{ request('label_id') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>
                 @endforeach
             </select>
         </div>
-        @if ($project || request()->anyFilled(['status','priority','assignee_id','label_id']))
-            <a href="{{ route('issues.index', ['project_id' => $project?->id]) }}" class="btn btn-sm btn-outline-secondary mb-1">{{ ui('reset') }}</a>
+        @if (request()->anyFilled(['status','priority','assignee_id','label_id']))
+            <a href="{{ route('issues.index', ['project_id' => $project->id]) }}" class="btn btn-sm btn-outline-secondary mb-1">{{ ui('reset') }}</a>
         @endif
     </div>
+    @endif
 </form>
 
 @if (!$project)
