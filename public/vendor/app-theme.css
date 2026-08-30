@@ -1,0 +1,162 @@
+/* Laravel Base Project — intentional theme layer over AdminLTE/Bootstrap.
+   Scoped overrides only; native dark variant via [data-bs-theme]. */
+
+:root {
+  --lbp-bg: #0f1115;
+  --lbp-surface: #171a21;
+  --lbp-surface-2: #1e222b;
+  --lbp-border: #272b36;
+  --lbp-text: #e5e7eb;
+  --lbp-muted: #9ca3af;
+  --lbp-primary: #6366f1;
+  --lbp-primary-ink: #ffffff;
+  --lbp-success: #22c55e;
+  --lbp-danger: #ef4444;
+  --lbp-warning: #f59e0b;
+  --lbp-radius: 12px;
+  --lbp-radius-sm: 8px;
+  --lbp-shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.25);
+  --lbp-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+[data-bs-theme="dark"] {
+  --lbp-bg: #0f1115;
+  --lbp-surface: #171a21;
+  --lbp-surface-2: #1e222b;
+  --lbp-border: #272b36;
+  --lbp-text: #e5e7eb;
+  --lbp-muted: #9ca3af;
+}
+[data-bs-theme="light"] {
+  --lbp-bg: #f5f6f8;
+  --lbp-surface: #ffffff;
+  --lbp-surface-2: #f0f2f5;
+  --lbp-border: #e3e6ea;
+  --lbp-text: #1f2430;
+  --lbp-muted: #6b7280;
+}
+
+body {
+  font-family: var(--lbp-font);
+  background: var(--lbp-bg);
+  color: var(--lbp-text);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* App chrome */
+.app-header.navbar {
+  background: var(--lbp-surface) !important;
+  border-bottom: 1px solid var(--lbp-border);
+  min-height: 60px;
+}
+/* keep header items horizontal even if a grid/flex override kicks in */
+.app-header.navbar,
+.app-header .container-fluid,
+.app-header .navbar-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.app-header .container-fluid { flex-wrap: nowrap; gap: 0.5rem; }
+.app-header .navbar-nav { flex-wrap: nowrap; }
+/* neutralize AdminLTE's fixed 2.5rem nav-link height that breaks header alignment */
+.app-header .nav-link {
+  height: auto;
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.app-sidebar.sidebar {
+  background: var(--lbp-surface) !important;
+  border-right: 1px solid var(--lbp-border);
+  width: 250px;
+}
+.app-sidebar .sidebar-brand {
+  border-bottom: 1px solid var(--lbp-border);
+  padding: 1rem .75rem;
+}
+.app-sidebar .nav-link {
+  color: var(--lbp-muted);
+  border-radius: var(--lbp-radius-sm);
+  margin: 2px .5rem;
+  padding: .55rem .75rem;
+  transition: background .15s ease, color .15s ease;
+}
+.app-sidebar .nav-link:hover { background: var(--lbp-surface-2); color: var(--lbp-text); }
+.app-sidebar .nav-link.active {
+  background: color-mix(in srgb, var(--lbp-primary) 16%, transparent);
+  color: var(--lbp-primary);
+  font-weight: 600;
+}
+.app-sidebar .nav-link.active .nav-icon { color: var(--lbp-primary); }
+.app-sidebar .nav-header {
+  color: var(--lbp-muted);
+  font-size: 11px;
+  letter-spacing: .08em;
+  padding: 1rem .75rem .25rem;
+  opacity: .8;
+}
+
+/* Cards */
+.card {
+  background: var(--lbp-surface);
+  border: 1px solid var(--lbp-border);
+  border-radius: var(--lbp-radius);
+  box-shadow: var(--lbp-shadow);
+}
+.card.shadow-sm { box-shadow: var(--lbp-shadow); }
+
+/* Tables */
+.table { --bs-table-bg: transparent; color: var(--lbp-text); }
+.table > :not(caption) > * > * { background: transparent; border-color: var(--lbp-border); padding: .75rem 1rem; }
+.table thead th {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--lbp-muted); font-weight: 600; border-bottom: 1px solid var(--lbp-border);
+}
+.table-hover > tbody > tr:hover > * { background: var(--lbp-surface-2); }
+.table-light, .table-light > th { background: var(--lbp-surface-2) !important; color: var(--lbp-muted) !important; }
+
+/* Buttons */
+.btn { border-radius: var(--lbp-radius-sm); font-weight: 500; }
+.btn-primary { background: var(--lbp-primary); border-color: var(--lbp-primary); color: var(--lbp-primary-ink); }
+.btn-primary:hover { background: color-mix(in srgb, var(--lbp-primary) 88%, #000); border-color: transparent; }
+.btn-light { background: var(--lbp-surface-2); border-color: var(--lbp-border); color: var(--lbp-text); }
+.btn-light:hover { background: color-mix(in srgb, var(--lbp-surface-2) 80%, #fff); }
+.btn-danger { --bs-btn-bg: var(--lbp-danger); --bs-btn-border-color: var(--lbp-danger); }
+
+/* Badges (soft semantic) */
+.bg-primary-subtle { background: color-mix(in srgb, var(--lbp-primary) 18%, transparent) !important; color: var(--lbp-primary) !important; border-color: color-mix(in srgb, var(--lbp-primary) 30%, transparent) !important; }
+.bg-success-subtle { background: color-mix(in srgb, var(--lbp-success) 16%, transparent) !important; color: var(--lbp-success) !important; }
+.bg-danger-subtle { background: color-mix(in srgb, var(--lbp-danger) 16%, transparent) !important; color: var(--lbp-danger) !important; }
+.bg-secondary-subtle { background: var(--lbp-surface-2) !important; color: var(--lbp-muted) !important; }
+
+/* Avatar */
+.avatar { font-weight: 600; }
+
+/* Focus ring (a11y) */
+.btn:focus-visible, a:focus-visible, input:focus-visible, .nav-link:focus-visible {
+  outline: 2px solid var(--lbp-primary);
+  outline-offset: 2px;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+  background: var(--lbp-surface-2);
+  border: 1px solid var(--lbp-border);
+  border-radius: var(--lbp-radius-sm);
+  box-shadow: var(--lbp-shadow);
+  color: var(--lbp-text);
+}
+.dropdown-item { color: var(--lbp-text); }
+.dropdown-item:hover, .dropdown-item:focus { background: var(--lbp-surface); color: var(--lbp-text); }
+.dropdown-header { color: var(--lbp-muted); }
+
+/* Page title */
+.app-content-header h3 { font-weight: 600; font-size: 1.35rem; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

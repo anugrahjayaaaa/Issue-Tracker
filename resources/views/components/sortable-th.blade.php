@@ -1,0 +1,19 @@
+@props(['label', 'column', 'sort' => '', 'dir' => 'asc'])
+
+@php
+    $active = $sort === $column;
+    $nextDir = ($active && $dir === 'asc') ? 'desc' : 'asc';
+    $qs = request()->except(['page']);
+    $qs['sort'] = $column;
+    $qs['dir'] = $nextDir;
+@endphp
+<th>
+    <a href="{{ url()->current() . '?' . http_build_query($qs) }}" class="text-decoration-none text-reset">
+        {{ $label }}
+        @if ($active)
+            <i class="bi bi-caret-{{ $dir === 'asc' ? 'up' : 'down' }}-fill small"></i>
+        @else
+            <i class="bi bi-caret-up small text-muted opacity-50"></i>
+        @endif
+    </a>
+</th>
