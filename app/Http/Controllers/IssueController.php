@@ -12,12 +12,14 @@ use App\Models\ProjectMember;
 use App\Models\User;
 use App\Notifications\IssueAssigned;
 use App\Notifications\IssueStatusChanged;
+use App\Http\Controllers\Concerns\Sortable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class IssueController extends Controller
 {
+    use Sortable;
     /** Read-gate: must be a project member (any role). */
     private function abortIfNotReader(Project $project): void
     {
@@ -37,13 +39,13 @@ class IssueController extends Controller
         $issues = collect();
         if ($project) {
             $this->abortIfNotReader($project);
-            $issues = Issue::with('assignee')
+            $issues = Issue::with(['assignee', 'labels'])
                 ->where('project_id', $project->id)
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
                 ->when($request->filled('assignee_id'), fn ($q) => $q->where('assignee_id', $request->assignee_id))
                 ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
                 ->when($request->filled('label_id'), fn ($q) => $q->whereHas('labels', fn ($l) => $l->where('labels.id', $request->label_id)))
-                ->orderBy('order')
+                ->when(true, fn ($q) => $this->sortIndex($q, $request, 'order', ['code', 'title', 'type', 'status', 'priority', 'assignee_id', 'due_date']))
                 ->paginate(20)
                 ->withQueryString();
         }

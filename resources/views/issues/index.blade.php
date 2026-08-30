@@ -8,8 +8,8 @@
     @endcan
 </div>
 
-<form method="GET" class="row g-2 mb-3">
-    <div class="col-md-4">
+<form method="GET" class="d-flex align-items-center gap-2 flex-wrap mb-3">
+    <div class="col-md-4 ps-0">
         <select name="project_id" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value="">{{ ui('select_project') }}</option>
             @foreach ($projects as $p)
@@ -17,32 +17,36 @@
             @endforeach
         </select>
     </div>
-    @if ($project)
-    <div class="col-md-2"><select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+    @php
+        $filters = [
+            'status' => [App\Models\Issue::STATUS_OPEN, App\Models\Issue::STATUS_IN_PROGRESS, App\Models\Issue::STATUS_BLOCKED, App\Models\Issue::STATUS_DONE],
+            'priority' => [App\Models\Issue::PRIORITY_LOW, App\Models\Issue::PRIORITY_MEDIUM, App\Models\Issue::PRIORITY_HIGH, App\Models\Issue::PRIORITY_URGENT],
+        ];
+    @endphp
+    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" {{ $project ? '' : 'disabled' }}>
         <option value="">{{ ui('all_status') }}</option>
-        @foreach ([App\Models\Issue::STATUS_OPEN, App\Models\Issue::STATUS_IN_PROGRESS, App\Models\Issue::STATUS_BLOCKED, App\Models\Issue::STATUS_DONE] as $s)
+        @foreach ($filters['status'] as $s)
             <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ ui('issue_status_'.$s) }}</option>
         @endforeach
-    </select></div>
-    <div class="col-md-2"><select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+    </select>
+    <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()" {{ $project ? '' : 'disabled' }}>
         <option value="">{{ ui('all_priority') }}</option>
-        @foreach ([App\Models\Issue::PRIORITY_LOW, App\Models\Issue::PRIORITY_MEDIUM, App\Models\Issue::PRIORITY_HIGH, App\Models\Issue::PRIORITY_URGENT] as $pr)
+        @foreach ($filters['priority'] as $pr)
             <option value="{{ $pr }}" {{ request('priority') == $pr ? 'selected' : '' }}>{{ ui('issue_priority_'.$pr) }}</option>
         @endforeach
-    </select></div>
-    <div class="col-md-3"><select name="assignee_id" class="form-select form-select-sm" onchange="this.form.submit()">
+    </select>
+    <select name="assignee_id" class="form-select form-select-sm" onchange="this.form.submit()" {{ $project ? '' : 'disabled' }}>
         <option value="">{{ ui('all_assignee') }}</option>
-        @foreach ($project->users as $u)
+        @foreach (($project->users ?? collect()) as $u)
             <option value="{{ $u->id }}" {{ request('assignee_id') == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
         @endforeach
-    </select></div>
-    <div class="col-md-2"><select name="label_id" class="form-select form-select-sm" onchange="this.form.submit()">
+    </select>
+    <select name="label_id" class="form-select form-select-sm" onchange="this.form.submit()" {{ $project ? '' : 'disabled' }}>
         <option value="">{{ ui('all_labels') }}</option>
-        @foreach ($project->labels as $l)
+        @foreach (($project->labels ?? collect()) as $l)
             <option value="{{ $l->id }}" {{ request('label_id') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>
         @endforeach
-    </select></div>
-    @endif
+    </select>
 </form>
 
 @if (!$project)
@@ -53,9 +57,15 @@
         <div class="table-responsive">
         <table class="table table-hover align-middle m-0">
             <thead><tr>
-                <th>{{ ui('issue_code') }}</th><th>{{ ui('title') }}</th>
-                <th>{{ ui('type') }}</th><th>{{ ui('status') }}</th><th>{{ ui('priority') }}</th>
-                <th>{{ ui('assignee') }}</th><th class="text-end">{{ ui('action') }}</th>
+                <x-sortable-th label="{{ ui('issue_code') }}" column="code" :sort="request('sort')" :dir="request('dir', 'asc')" />
+                <x-sortable-th label="{{ ui('title') }}" column="title" :sort="request('sort')" :dir="request('dir', 'asc')" />
+                <x-sortable-th label="{{ ui('type') }}" column="type" :sort="request('sort')" :dir="request('dir', 'asc')" />
+                <x-sortable-th label="{{ ui('status') }}" column="status" :sort="request('sort')" :dir="request('dir', 'asc')" />
+                <x-sortable-th label="{{ ui('priority') }}" column="priority" :sort="request('sort')" :dir="request('dir', 'asc')" />
+                <x-sortable-th label="{{ ui('assignee') }}" column="assignee_id" :sort="request('sort')" :dir="request('dir', 'asc')" />
+                <th>{{ ui('labels') }}</th>
+                <x-sortable-th label="{{ ui('due_date') }}" column="due_date" :sort="request('sort')" :dir="request('dir', 'asc')" />
+                <th class="text-end">{{ ui('action') }}</th>
             </tr></thead>
             <tbody>
                 @forelse ($issues as $issue)
@@ -71,6 +81,7 @@
                             <span class="badge" style="background:{{ $l->color }}">{{ $l->name }}</span>
                         @endforeach
                     </td>
+                    <td>{{ $issue->due_date ? $issue->due_date->format('Y-m-d') : '-' }}</td>
                     <td class="text-end">
                         <x-action-buttons
                             :edit="auth()->user()->can('issue.edit') ? route('issues.edit', $issue) : null"
@@ -78,7 +89,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8" class="text-center text-muted py-4">{{ ui('no_issues_found') }}</td></tr>
+                <tr><td colspan="9" class="text-center text-muted py-4">{{ ui('no_issues_found') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

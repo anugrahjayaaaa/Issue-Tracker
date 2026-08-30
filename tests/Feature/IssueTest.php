@@ -94,6 +94,19 @@ class IssueTest extends TestCase
             ->assertSee('hi');
     }
 
+    public function test_index_sorts_by_query_and_renders_due_date_column(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'A', 'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id, 'due_date' => '2026-01-01']);
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-2', 'title' => 'B', 'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id, 'due_date' => '2026-02-01']);
+
+        $this->actingAs($user)
+            ->get(route('issues.index', ['project_id' => $project->id, 'sort' => 'due_date', 'dir' => 'desc']))
+            ->assertOk()
+            ->assertSee('2026-02-01')   // newest first
+            ->assertSee('bi-caret-down-fill'); // active sort indicator
+    }
+
     public function test_non_member_cannot_view_board(): void
     {
         $this->seed();
