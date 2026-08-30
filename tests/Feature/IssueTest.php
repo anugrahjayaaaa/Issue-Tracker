@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Issue;
 use App\Models\Project;
 use App\Models\ProjectMember;
+use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -75,6 +76,22 @@ class IssueTest extends TestCase
         $issue->refresh();
         $this->assertEquals('done', $issue->status);
         $this->assertEquals(3, $issue->order);
+    }
+
+    public function test_show_renders_with_timeline_and_comments(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'X',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+        Comment::create(['issue_id' => $issue->id, 'user_id' => $user->id, 'body' => 'hi']);
+
+        $this->actingAs($user)
+            ->get(route('issues.show', $issue))
+            ->assertOk()
+            ->assertSee('Activity')
+            ->assertSee('hi');
     }
 
     public function test_non_member_cannot_view_board(): void

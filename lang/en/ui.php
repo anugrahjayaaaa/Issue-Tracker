@@ -291,4 +291,5 @@ return [
     'no_labels_hint' => 'Create labels on the project page first.',
     'all_labels' => 'All labels',
     'confirm_delete_label' => 'Delete this label? Issues tagged with it will be untagged.',
+    'activity_timeline' => 'Activity',
 ];

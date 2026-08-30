@@ -291,4 +291,5 @@ return [
     'no_labels_hint' => 'Buat label di halaman proyek dulu.',
     'all_labels' => 'Semua label',
     'confirm_delete_label' => 'Hapus label ini? Isu yang menempel padanya akan dilepas.',
+    'activity_timeline' => 'Aktivitas',
 ];
