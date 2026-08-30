@@ -248,6 +248,7 @@ return [
     'edit_issue' => 'Edit Isu',
     'board' => 'Papan',
     'select_project' => 'Pilih proyek',
+    'reset' => 'Reset',
     'pick_project_first' => 'Pilih proyek untuk melihat isu.',
     'issue_code' => 'Kode',
     'title' => 'Judul',

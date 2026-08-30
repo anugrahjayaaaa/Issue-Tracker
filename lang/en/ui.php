@@ -248,6 +248,7 @@ return [
     'edit_issue' => 'Edit Issue',
     'board' => 'Board',
     'select_project' => 'Select project',
+    'reset' => 'Reset',
     'pick_project_first' => 'Select a project to view issues.',
     'issue_code' => 'Code',
     'title' => 'Title',

@@ -107,6 +107,18 @@ class IssueTest extends TestCase
             ->assertSee('bi-caret-down-fill'); // active sort indicator
     }
 
+    public function test_index_filter_bar_renders_reset_when_filtered(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'A', 'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->get(route('issues.index', ['project_id' => $project->id, 'status' => 'open']))
+            ->assertOk()
+            ->assertSee('form-select')      // filter selects present
+            ->assertSee('btn-outline-secondary'); // reset button shown
+    }
+
     public function test_non_member_cannot_view_board(): void
     {
         $this->seed();
