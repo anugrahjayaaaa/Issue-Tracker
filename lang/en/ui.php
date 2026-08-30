@@ -272,4 +272,15 @@ return [
     'issue_priority_medium' => 'Medium',
     'issue_priority_high' => 'High',
     'issue_priority_urgent' => 'Urgent',
+
+    // ── issue tracker: comments ──
+    'comments' => 'Comments',
+    'no_comments' => 'No comments yet.',
+    'post_comment' => 'Post comment',
+    'attach_image' => 'Attach image',
+    'confirm_delete_comment' => 'Delete this comment?',
+    'comment_added' => 'Comment added.',
+    'comment_updated' => 'Comment updated.',
+    'comment_deleted' => 'Comment deleted.',
+    'attachment_added' => 'Image attached.',
 ];

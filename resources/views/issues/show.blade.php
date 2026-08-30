@@ -16,6 +16,61 @@
             <div class="card-header">{{ ui('description') }}</div>
             <div class="card-body">{!! $issue->description ?: '-' !!}</div>
         </div>
+
+        {{-- Comments --}}
+        <div class="card shadow-sm">
+            <div class="card-header">{{ ui('comments') }} ({{ $issue->comments->count() }})</div>
+            <div class="card-body">
+                @foreach ($issue->comments as $comment)
+                <div class="d-flex gap-2 mb-3 @if(!$loop->last) border-bottom pb-3 @endif">
+                    <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:32px;height:32px">{{ strtoupper(substr($comment->user->name,0,1)) }}</span>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between">
+                            <strong class="small">{{ $comment->user->name }}</strong>
+                            <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
+                        </div>
+                        <div class="small mb-1">{!! $comment->body !!}</div>
+                        @if ($comment->attachments->isNotEmpty())
+                            <div class="d-flex flex-wrap gap-2">
+                            @foreach ($comment->attachments as $att)
+                                <a href="{{ $att->url() }}" target="_blank"><img src="{{ $att->url() }}" style="max-height:120px" class="img-thumbnail"></a>
+                            @endforeach
+                            </div>
+                        @endif
+                        @can('comment.edit')
+                        @if ($comment->user_id === auth()->id() || App\Models\ProjectMember::isLead(auth()->user(), $issue->project))
+                        <div class="mt-1">
+                            <button class="btn btn-sm btn-light border rounded-2" onclick="editComment({{ $comment->id }}, {{ json_encode($comment->body) }})"><i class="bi bi-pencil"></i></button>
+                            <form method="POST" action="{{ route('issues.comments.destroy', $comment) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_delete_comment') }}')">
+                                @csrf @method('DELETE')
+                                <button class="btn btn-sm btn-light border rounded-2 text-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                        @endif
+                        @endcan
+                    </div>
+                </div>
+                @endforeach
+                @if ($issue->comments->isEmpty())
+                <div class="text-muted small text-center py-3">{{ ui('no_comments') }}</div>
+                @endif
+
+                @can('comment.create')
+                <form method="POST" action="{{ route('issues.comments.store', $issue) }}" class="mt-3" id="comment-form">
+                    @csrf
+                    <input type="hidden" name="body" id="comment-body">
+                    <div id="comment-editor" style="min-height:120px" class="border rounded p-2"></div>
+                    <div class="d-flex gap-2 mt-2">
+                        <button type="submit" class="btn btn-primary btn-sm" id="comment-submit">{{ ui('post_comment') }}</button>
+                        <form method="POST" action="{{ route('issues.attachments.store', $issue) }}" enctype="multipart/form-data" class="d-inline">
+                            @csrf
+                            <input type="file" name="file" accept="image/*" class="form-control form-control-sm" onchange="this.form.submit()" title="{{ ui('attach_image') }}">
+                        </form>
+                    </div>
+                </form>
+                @endcan
+            </div>
+        </div>
     </div>
     <div class="col-lg-4">
         <div class="card shadow-sm">
@@ -34,4 +89,28 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const editorEl = document.getElementById('comment-editor');
+    const hidden = document.getElementById('comment-body');
+    const form = document.getElementById('comment-form');
+    if (!editorEl) return;
+    // ponytail: contenteditable + hidden-input sync for MVP; swap to TipTap later
+    editorEl.setAttribute('contenteditable', 'true');
+    editorEl.addEventListener('input', () => { hidden.value = editorEl.innerHTML; });
+    form.addEventListener('submit', () => { hidden.value = editorEl.innerHTML; });
+    window._editComment = function (id, body) {
+        editorEl.innerHTML = body;
+        hidden.value = body;
+        form.action = '/issues/comments/' + id;
+        const m = document.createElement('input'); m.type = 'hidden'; m.name = '_method'; m.value = 'PUT';
+        form.appendChild(m);
+        document.getElementById('comment-submit').textContent = '{{ ui('save') }}';
+        editorEl.scrollIntoView({ behavior: 'smooth' });
+    };
+});
+</script>
+@endpush
 @endsection

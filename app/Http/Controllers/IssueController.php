@@ -95,7 +95,7 @@ class IssueController extends Controller
     public function show(Issue $issue): View
     {
         $this->abortIfNotReader($issue->project);
-        $issue->load('assignee', 'reporter', 'parent');
+        $issue->load('assignee', 'reporter', 'parent', 'comments.user', 'comments.attachments');
 
         return view('issues.show', compact('issue'));
     }
