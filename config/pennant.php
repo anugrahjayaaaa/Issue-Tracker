@@ -63,10 +63,10 @@ return [
         'logs' => ['label' => 'Logs', 'group' => 'monitoring'],
         'telescope' => ['label' => 'Telescope', 'group' => 'monitoring'],
         'periscope' => ['label' => 'Periscope', 'group' => 'monitoring'],
-        // System
-        'sessions' => ['label' => 'Sessions', 'group' => 'system'],
-        'api-tokens' => ['label' => 'API Tokens', 'group' => 'system'],
-        'translations' => ['label' => 'Translations', 'group' => 'system'],
+        // Settings (system-level)
+        'sessions' => ['label' => 'Sessions', 'group' => 'settings'],
+        'api-tokens' => ['label' => 'API Tokens', 'group' => 'settings'],
+        'translations' => ['label' => 'Translations', 'group' => 'settings'],
         // Billing
         'plans' => ['label' => 'Plans', 'group' => 'billing'],
         'billing' => ['label' => 'Billing', 'group' => 'billing'],

@@ -11,6 +11,8 @@ class FeatureController extends Controller
 {
     public function index(): View
     {
+        $order = ['access', 'monitoring', 'settings', 'billing', 'workspace', 'other'];
+
         $features = collect(config('pennant.features'))
             ->map(fn ($meta, $slug) => [
                 'slug' => $slug,
@@ -20,7 +22,7 @@ class FeatureController extends Controller
             ])
             ->sortBy('label')
             ->groupBy('group')
-            ->map(fn ($items) => $items->values());
+            ->sortBy(fn ($_, $group) => array_search($group, $order, true));
 
         return view('settings.features.index', compact('features'));
     }
