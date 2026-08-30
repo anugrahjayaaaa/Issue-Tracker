@@ -16,6 +16,7 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
+use App\Http\Controllers\IssueController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TranslationController;
@@ -122,6 +123,20 @@ Route::middleware('auth')->group(function () {
         Route::post('/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
         Route::put('/{project}/members/{member}', [ProjectMemberController::class, 'update'])->name('projects.members.update');
         Route::delete('/{project}/members/{member}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
+    });
+
+    // Issues (project-scoped): read = any member; write = lead/member (enforced in Form Requests)
+    Route::prefix('issues')->middleware(['can:issue.view', 'feature:issues'])->group(function () {
+        Route::get('/', [IssueController::class, 'index'])->name('issues.index');
+        Route::get('/board', [IssueController::class, 'board'])->name('issues.board');
+        Route::get('/create', [IssueController::class, 'create'])->name('issues.create');
+        Route::post('/', [IssueController::class, 'store'])->name('issues.store')->middleware('can:issue.create');
+        Route::get('/{issue}', [IssueController::class, 'show'])->name('issues.show');
+        Route::get('/{issue}/edit', [IssueController::class, 'edit'])->name('issues.edit')->middleware('can:issue.edit');
+        Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update')->middleware('can:issue.edit');
+        Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
+        Route::delete('/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->middleware('can:issue.delete');
+        Route::post('/bulk', [IssueController::class, 'bulk'])->name('issues.bulk')->middleware('can:issue.delete');
     });
 
     Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
