@@ -10,8 +10,17 @@ bell (already present in base — `NotificationController`, bell in layout).
 
 ## Scope
 - In scope: 3 event notifications (assign, mention, status-change). Fired from
-  Issue/Comment services.
+  Issue/Comment controllers (single source, not duplicated per action).
 - Out of scope: email digest, Slack/Teams webhook (Phase 3).
+
+## Status: ✅ implemented (P1.4)
+
+Reuses base DB notification channel + header bell (no new routes).
+- `IssueAssigned` → assignee on issue create/update with new assignee.
+- `IssueStatusChanged` → reporter + assignee when status changes (actor excluded).
+- `Mentioned` → users parsed via `parseMentions()` helper (matches @username
+  in comment body; resolves against `users.username`).
+- All fire from IssueController / CommentController (single source, not inline).
 
 ## How it works
 - Reuse base `app/Notifications/*` + `database` channel. Create
