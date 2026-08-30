@@ -63,16 +63,43 @@
                         <li class="nav-item"><a href="{{ url('/periscope') }}" data-menu-text="Periscope" target="_blank" rel="noopener noreferrer" class="nav-link {{ request()->is('periscope*') ? 'active' : '' }}"><i class="nav-icon bi bi-funnel"></i> <span>Periscope</span></a></li>
                         @endfeature
                         @endcan
+                        @can('audit.view')
+                        @feature('audit')
+                        <li class="nav-item"><a href="{{ route('notifications.index') }}" data-menu-text="{{ ui('notifications') }}" class="nav-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}"><i class="nav-icon bi bi-bell"></i> <span>{{ ui('notifications') }}</span></a></li>
+                        @endfeature
+                        @endcan
                     </ul>
                 </li>
 
-                <li class="nav-item"><a href="{{ route('profile.show') }}" data-menu-text="{{ __('messages.profile') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}"><i class="nav-icon bi bi-person"></i> <span>{{ __('messages.profile') }}</span></a></li>
+                {{-- Workspace (Issue Tracker) --}}
+                @php($wsActive = request()->routeIs('projects.*','issues.*'))
+                <li class="nav-item {{ $wsActive ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ $wsActive ? 'active' : '' }}" aria-expanded="{{ $wsActive ? 'true' : 'false' }}"><i class="nav-icon bi bi-kanban"></i> <span>{{ ui('projects') }}</span><i class="nav-arrow bi bi-chevron-right"></i></a>
+                    <ul class="nav nav-treeview">
+                        @can('project.manage')
+                        @feature('issues')
+                        <li class="nav-item"><a href="{{ route('projects.index') }}" data-menu-text="{{ ui('projects') }}" class="nav-link {{ request()->routeIs('projects.*') ? 'active' : '' }}"><i class="nav-icon bi bi-collection"></i> <span>{{ ui('projects') }}</span></a></li>
+                        @endfeature
+                        @endcan
+                        @can('issue.view')
+                        @feature('issues')
+                        <li class="nav-item"><a href="{{ route('issues.index') }}" data-menu-text="{{ ui('issues') }}" class="nav-link {{ request()->routeIs('issues.index') ? 'active' : '' }}"><i class="nav-icon bi bi-list-task"></i> <span>{{ ui('issues') }}</span></a></li>
+                        @endfeature
+                        @endcan
+                        @can('issue.view')
+                        @feature('issues')
+                        <li class="nav-item"><a href="{{ route('issues.board') }}" data-menu-text="{{ ui('board') }}" class="nav-link {{ request()->routeIs('issues.board') ? 'active' : '' }}"><i class="nav-icon bi bi-grid-1x2"></i> <span>{{ ui('board') }}</span></a></li>
+                        @endfeature
+                        @endcan
+                    </ul>
+                </li>
 
                 {{-- System / Settings --}}
-                @php($setActive = request()->routeIs('sessions.*','api-tokens.*','features.*','translations.*','plans.*'))
+                @php($setActive = request()->routeIs('sessions.*','api-tokens.*','features.*','translations.*','plans.*','profile.*'))
                 <li class="nav-item {{ $setActive ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ $setActive ? 'active' : '' }}" aria-expanded="{{ $setActive ? 'true' : 'false' }}"><i class="nav-icon bi bi-gear"></i> <span>{{ __('messages.settings') }}</span><i class="nav-arrow bi bi-chevron-right"></i></a>
                     <ul class="nav nav-treeview">
+                        <li class="nav-item"><a href="{{ route('profile.show') }}" data-menu-text="{{ __('messages.profile') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}"><i class="nav-icon bi bi-person"></i> <span>{{ __('messages.profile') }}</span></a></li>
                         @can('feature.manage')
                         @feature('sessions')
                         <li class="nav-item"><a href="{{ route('sessions.index') }}" data-menu-text="{{ __('messages.sessions') }}" class="nav-link {{ request()->routeIs('sessions.*') ? 'active' : '' }}"><i class="nav-icon bi bi-pc-display"></i> <span>{{ __('messages.sessions') }}</span></a></li>
