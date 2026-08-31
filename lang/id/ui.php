@@ -105,6 +105,8 @@ return [
     'token_name' => 'Nama token (cth. mobile-iphone)',
     'abilities' => 'Hak akses',
     'created' => 'Dibuat',
+    'view_all' => 'Lihat semua',
+    'remove' => 'Hapus',
     'last_used' => 'Terakhir digunakan',
     'new_token_copy_now' => 'Token baru (salin sekarang):',
     'no_tokens_yet' => 'Belum ada token.',

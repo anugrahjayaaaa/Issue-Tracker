@@ -3,10 +3,15 @@
 @include('partials.flash-message')
 <div class="d-flex align-items-center justify-content-between mb-3">
     <div class="d-flex align-items-center">
-        <a href="{{ route('projects.index') }}" class="btn btn-sm btn-light border rounded-2 me-2"><i class="bi bi-arrow-left"></i></a>
+        <a href="{{ route('projects.index') }}" class="btn btn-sm btn-light border rounded-2 me-2" data-bs-toggle="tooltip" data-bs-title="{{ ui('back') }}" aria-label="{{ ui('back') }}"><i class="bi bi-arrow-left"></i></a>
         <div>
             <h3 class="mb-0"><span class="badge text-bg-secondary me-1">{{ $project->key }}</span> {{ $project->name }}</h3>
-            <div class="text-muted small">{{ ui('owner') }}: {{ $project->owner->name ?? '-' }}</div>
+            <div class="text-muted small d-flex align-items-center gap-2">
+                <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:22px;height:22px;font-size:.7rem">{{ strtoupper(substr($project->owner->name ?? '?', 0, 1)) }}</span>
+                {{ $project->owner->name ?? '-' }}
+                <span class="text-secondary">·</span>
+                {{ ui('created') }}: {{ $project->created_at->format('d M Y') }}
+            </div>
         </div>
     </div>
     @can('project.manage')
@@ -17,14 +22,37 @@
 <div class="row">
     <div class="col-lg-8">
         <div class="card shadow-sm mb-3">
-            <div class="card-header">{{ ui('description') }}</div>
+            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-card-text text-secondary"></i> {{ ui('description') }}</div>
             <div class="card-body">{{ $project->description ? nl2br(e($project->description)) : '-' }}</div>
         </div>
-    </div>
-    <div class="col-lg-4">
+
+        @if ($project->issues->isNotEmpty())
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>{{ ui('members') }}</span>
+                <span class="d-flex align-items-center gap-2"><i class="bi bi-list-task text-secondary"></i> {{ ui('issues') }}</span>
+                <a href="{{ route('issues.index', ['project_id' => $project->id]) }}" class="small text-decoration-none">{{ ui('view_all') }}</a>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    @foreach ($project->issues->take(5) as $issue)
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-3">
+                        <a href="{{ route('issues.show', $issue) }}" class="text-decoration-none">
+                            <span class="badge text-bg-secondary me-1">{{ $issue->code }}</span>{{ $issue->title }}
+                        </a>
+                        <span class="badge bg-{{ match($issue->status) { 'open' => 'primary', 'in_progress' => 'info', 'blocked' => 'danger', 'done' => 'success', default => 'secondary' } }}-subtle text-{{ match($issue->status) { 'open' => 'primary', 'in_progress' => 'info', 'blocked' => 'danger', 'done' => 'success', default => 'secondary' } }} border border-{{ match($issue->status) { 'open' => 'primary', 'in_progress' => 'info', 'blocked' => 'danger', 'done' => 'success', default => 'secondary' } }}-subtle">{{ ui('issue_status_'.$issue->status) }}</span>
+                    </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+        @endif
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="d-flex align-items-center gap-2"><i class="bi bi-people text-secondary"></i> {{ ui('members') }}</span>
+                <span class="badge text-bg-light">{{ $project->members->count() }}</span>
             </div>
             <div class="card-body">
                 @can('project.manage')
@@ -57,9 +85,12 @@
                 <ul class="list-group list-group-flush">
                     @forelse ($project->members as $m)
                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <div>
-                            <div class="fw-medium">{{ $m->user->name ?? '-' }}</div>
-                            <small class="text-muted">{{ $m->user->email ?? '' }}</small>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:30px;height:30px">{{ strtoupper(substr($m->user->name ?? '?', 0, 1)) }}</span>
+                            <div>
+                                <div class="fw-medium">{{ $m->user->name ?? '-' }}</div>
+                                <small class="text-muted">{{ $m->user->email ?? '' }}</small>
+                            </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             @can('project.manage')
@@ -73,7 +104,7 @@
                             </form>
                             <form method="POST" action="{{ route('projects.members.destroy', [$project, $m]) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_remove_member') }}')">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-light border rounded-2 text-danger"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-sm btn-light border rounded-2 text-danger" title="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
                             </form>
                             @else
                             <span class="badge text-bg-info">{{ ui('role_'.$m->role) }}</span>
@@ -86,8 +117,8 @@
                 </ul>
             </div>
         </div>
+
+        @include('partials.labels')
     </div>
 </div>
-
-@include('partials.labels')
 @endsection

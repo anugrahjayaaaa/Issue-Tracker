@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Issue;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
@@ -40,6 +41,11 @@ class Project extends Model
     public function labels(): HasMany
     {
         return $this->hasMany(Label::class);
+    }
+
+    public function issues(): HasMany
+    {
+        return $this->hasMany(Issue::class);
     }
 
     /** Next issue code, e.g. HEL-12. Increments issue_seq atomically-ish. */

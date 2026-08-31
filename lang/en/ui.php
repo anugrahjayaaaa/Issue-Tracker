@@ -105,6 +105,8 @@ return [
     'token_name' => 'Token name (e.g. mobile-iphone)',
     'abilities' => 'Abilities',
     'created' => 'Created',
+    'view_all' => 'View all',
+    'remove' => 'Remove',
     'last_used' => 'Last used',
     'new_token_copy_now' => 'New token (copy now):',
     'no_tokens_yet' => 'No tokens yet.',
