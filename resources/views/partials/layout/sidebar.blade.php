@@ -60,7 +60,7 @@
                         @endcan
                         @can('periscope.view')
                         @feature('periscope')
-                        <li class="nav-item"><a href="{{ url('/periscope') }}" data-menu-text="Periscope" target="_blank" rel="noopener noreferrer" class="nav-link {{ request()->is('periscope*') ? 'active' : '' }}"><i class="nav-icon bi bi-funnel"></i> <span>Periscope</span></a></li>
+                        <li class="nav-item"><a href="{{ url('/periscope') }}" data-menu-text="{{ __('messages.periscope') }}" target="_blank" rel="noopener noreferrer" class="nav-link {{ request()->is('periscope*') ? 'active' : '' }}"><i class="nav-icon bi bi-funnel"></i> <span>{{ __('messages.periscope') }}</span></a></li>
                         @endfeature
                         @endcan
                         @can('audit.view')
