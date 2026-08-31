@@ -20,7 +20,12 @@ class SavedFilterController extends Controller
 
     public function store(StoreSavedFilterRequest $request)
     {
-        $filter = SavedFilter::create($request->validated());
+        $filter = SavedFilter::create([
+            'user_id' => $request->user()->id,
+            'project_id' => $request->input('project_id'),
+            'name' => $request->input('name'),
+            'filter_params' => $request->query(),
+        ]);
 
         return response()->json($filter, 201);
     }
