@@ -94,6 +94,6 @@ class IssueApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('message', trans('messages.issue_deleted'));
 
-        $this->assertDatabaseMissing('issues', ['id' => $issue->id]);
+        $this->assertSoftDeleted('issues', ['id' => $issue->id]);
     }
 }
