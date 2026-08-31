@@ -21,6 +21,6 @@
 - A11y: contrast, focus ring, form labels, aria on nav.
 
 ## Build
-- Vite + Blade, asset fingerprinting in prod.
+- Blade + committed vendor assets (`public/vendor/*`). **No npm/Vite build step** — AdminLTE/Bootstrap ship prebuilt.
 - Use Bootstrap utilities + AdminLTE Sass variables; no large custom CSS.
 - Icons: Bootstrap Icons. Consistency via `x-*` components.

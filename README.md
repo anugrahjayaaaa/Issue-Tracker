@@ -10,7 +10,7 @@ use as the foundation for internal web applications.
 |-------|------|
 | PHP | 8.3+ |
 | Framework | Laravel 13 (`laravel/framework` ^13.17) |
-| Frontend | Bootstrap 5.3 + Bootstrap Icons + AdminLTE 4.9.1 (Blade), Vite |
+| Frontend | Bootstrap 5.3 + Bootstrap Icons + AdminLTE 4.9.1 (Blade) |
 | Auth | Laravel built-in + `spatie/laravel-permission` + `laravel/sanctum` (API) |
 | Audit | `spatie/laravel-activitylog` |
 | Monitoring | Laravel Log (`daily`) + Sentry (`sentry/sentry-laravel`) + `/up` health check |
@@ -54,7 +54,6 @@ use as the foundation for internal web applications.
 ```bash
 # 1. Dependencies
 composer install
-npm install
 
 # 2. Environment
 cp .env.example .env
@@ -64,10 +63,7 @@ php artisan key:generate
 # Edit .env: DB_CONNECTION=mysql (or leave it as sqlite)
 php artisan migrate --seed
 
-# 4. Frontend assets
-npm run build        # or `npm run dev` for watch mode
-
-# 5. Run
+# 4. Run (no npm/Vite build — all CSS/JS ships from public/vendor/*, committed)
 php artisan serve    # http://localhost:8000
 ```
 
@@ -90,8 +86,6 @@ php artisan serve              # start dev server
 php artisan migrate --seed     # migrate + seed initial data (roles/permissions/users)
 php artisan route:list         # list all routes
 php artisan test               # run all tests (Pest)
-npm run dev                    # Vite watch (frontend)
-npm run build                  # build production assets
 composer test                  # same as php artisan test
 ```
 
