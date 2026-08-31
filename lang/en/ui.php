@@ -248,6 +248,7 @@ return [
     'edit_issue' => 'Edit Issue',
     'board' => 'Board',
     'select_project' => 'Select project',
+    'reset' => 'Reset',
     'pick_project_first' => 'Select a project to view issues.',
     'issue_code' => 'Code',
     'title' => 'Title',
@@ -283,6 +284,7 @@ return [
     'post_comment' => 'Post comment',
     'attach_image' => 'Attach image',
     'confirm_delete_comment' => 'Delete this comment?',
+    'comment' => 'Comment',
     'comment_added' => 'Comment added.',
     'comment_updated' => 'Comment updated.',
     'comment_deleted' => 'Comment deleted.',
@@ -298,4 +300,17 @@ return [
     'all_labels' => 'All labels',
     'confirm_delete_label' => 'Delete this label? Issues tagged with it will be untagged.',
     'activity_timeline' => 'Activity',
+
+    // ── issue tracker: dynamic fields (types/statuses/workflow) ──
+    'issue_fields' => 'Issue Fields',
+    'issue_types' => 'Issue Types',
+    'statuses' => 'Statuses',
+    'workflow_transitions' => 'Workflow Transitions',
+    'workflow_transitions_hint' => 'Define allowed status changes. If no transitions are defined, any status change is permitted.',
+    'no_transitions_free' => 'No transitions defined — all status changes allowed.',
+    'closed' => 'Closed',
+    'add' => 'Add',
+    'name' => 'Name',
+    'invalid_transition' => 'A transition cannot start and end on the same status.',
+    'saved' => 'Saved.',
 ];

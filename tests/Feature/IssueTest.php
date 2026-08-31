@@ -5,9 +5,12 @@ namespace Tests\Feature;
 use App\Models\Issue;
 use App\Models\Project;
 use App\Models\ProjectMember;
+use App\Models\StatusTransition;
 use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class IssueTest extends TestCase
@@ -41,8 +44,8 @@ class IssueTest extends TestCase
         $response = $this->actingAs($user)->post(route('issues.store'), [
             'project_id' => $project->id,
             'title' => 'Login broken',
-            'type' => 'bug',
-            'status' => 'open',
+            'type' => 'Bug',
+            'status' => 'Open',
             'priority' => 'high',
         ]);
 
@@ -53,29 +56,38 @@ class IssueTest extends TestCase
     public function test_issue_code_increments_per_project(): void
     {
         [$manager, $project, $user] = $this->seedAndProject();
-        $this->actingAs($user)->post(route('issues.store'), ['project_id' => $project->id, 'title' => 'A', 'type' => 'task', 'status' => 'open', 'priority' => 'low']);
-        $this->actingAs($user)->post(route('issues.store'), ['project_id' => $project->id, 'title' => 'B', 'type' => 'task', 'status' => 'open', 'priority' => 'low']);
+        $this->actingAs($user)->post(route('issues.store'), ['project_id' => $project->id, 'title' => 'A', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low']);
+        $this->actingAs($user)->post(route('issues.store'), ['project_id' => $project->id, 'title' => 'B', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low']);
 
         $this->assertDatabaseHas('issues', ['code' => 'HEL-1']);
         $this->assertDatabaseHas('issues', ['code' => 'HEL-2']);
     }
 
-    public function test_drag_change_status_updates_status_and_order(): void
+    public function test_status_transition_blocked_when_not_in_workflow(): void
     {
         [$manager, $project, $user] = $this->seedAndProject();
+        $open = $project->statuses()->where('name', 'Open')->first();
+        $inProgress = $project->statuses()->where('name', 'In Progress')->first();
+        $done = $project->statuses()->where('name', 'Done')->first();
+        // workflow: Open -> In Progress only (Done not reachable from Open)
+        StatusTransition::create(['project_id' => $project->id, 'from_status_id' => $open->id, 'to_status_id' => $inProgress->id]);
+
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'X',
-            'type' => 'task', 'status' => 'open', 'priority' => 'low',
-            'reporter_id' => $user->id,
+            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
         ]);
 
-        $this->actingAs($user)->post(route('issues.status', $issue), [
-            'status' => 'done', 'order' => 3,
-        ])->assertRedirect();
-
+        // allowed
+        $this->actingAs($user)->post(route('issues.status', $issue), ['status' => 'In Progress', 'order' => 0])
+            ->assertRedirect();
         $issue->refresh();
-        $this->assertEquals('done', $issue->status);
-        $this->assertEquals(3, $issue->order);
+        $this->assertSame('In Progress', $issue->status);
+
+        // blocked: In Progress -> Done has no rule
+        $this->actingAs($user)->post(route('issues.status', $issue), ['status' => 'Done', 'order' => 0])
+            ->assertRedirect();
+        $issue->refresh();
+        $this->assertSame('In Progress', $issue->status, 'status must not change when transition disallowed');
     }
 
     public function test_show_renders_with_timeline_and_comments(): void
@@ -83,7 +95,7 @@ class IssueTest extends TestCase
         [$manager, $project, $user] = $this->seedAndProject();
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'X',
-            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
         ]);
         Comment::create(['issue_id' => $issue->id, 'user_id' => $user->id, 'body' => 'hi']);
 
@@ -92,6 +104,31 @@ class IssueTest extends TestCase
             ->assertOk()
             ->assertSee('Activity')
             ->assertSee('hi');
+    }
+
+    public function test_index_sorts_by_query_and_renders_due_date_column(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'A', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id, 'due_date' => '2026-01-01']);
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-2', 'title' => 'B', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id, 'due_date' => '2026-02-01']);
+
+        $this->actingAs($user)
+            ->get(route('issues.index', ['project_id' => $project->id, 'sort' => 'due_date', 'dir' => 'desc']))
+            ->assertOk()
+            ->assertSee('2026-02-01')   // newest first
+            ->assertSee('bi-caret-down-fill'); // active sort indicator
+    }
+
+    public function test_index_filter_bar_renders_reset_when_filtered(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'A', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->get(route('issues.index', ['project_id' => $project->id, 'status' => 'Open']))
+            ->assertOk()
+            ->assertSee('form-select')      // filter selects present
+            ->assertSee('btn-outline-secondary'); // reset button shown
     }
 
     public function test_non_member_cannot_view_board(): void
@@ -111,13 +148,95 @@ class IssueTest extends TestCase
     {
         [$manager, $project, $user] = $this->seedAndProject();
         $this->actingAs($user)->post(route('issues.store'), [
-            'project_id' => $project->id, 'title' => 'X', 'type' => 'task',
-            'status' => 'open', 'priority' => 'low',
+            'project_id' => $project->id, 'title' => 'X', 'type' => 'Task',
+            'status' => 'Open', 'priority' => 'low',
             'description' => '<script>alert(1)</script><p>ok <strong>bold</strong></p>',
         ]);
 
         $issue = Issue::where('code', 'HEL-1')->first();
         $this->assertStringNotContainsString('<script>', $issue->description);
         $this->assertStringContainsString('<strong>bold</strong>', $issue->description);
+    }
+
+    public function test_store_succeeds_without_status_field(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        $this->actingAs($user)->post(route('issues.store'), [
+            'project_id' => $project->id, 'title' => 'No status', 'type' => 'Task', 'priority' => 'low',
+        ])->assertRedirect(route('issues.index', ['project_id' => $project->id]));
+
+        $issue = Issue::where('code', 'HEL-1')->first();
+        $this->assertNotNull($issue);
+        $this->assertSame('Open', $issue->status);
+    }
+
+    public function test_image_upload_is_scoped_to_issue_folder_and_returns_url(): void
+    {
+        Storage::fake('public');
+        [$manager, $project, $user] = $this->seedAndProject();
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
+            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('issues.image.upload', $issue), [
+                'file' => UploadedFile::fake()->image('pic.png', 10, 10),
+            ]);
+
+        $response->assertOk()->assertJsonStructure(['location']);
+        Storage::disk('public')->assertExists(
+            'projects/'.$project->folder().'/issues/'.$issue->code.'/description/'.$this->filenameFrom($response)
+        );
+    }
+
+    public function test_image_upload_blocked_when_quota_exceeded(): void
+    {
+        Storage::fake('public');
+        [$manager, $project, $user] = $this->seedAndProject(ProjectMember::ROLE_LEAD);
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
+            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        $free = \App\Models\Plan::where('slug', 'free')->first();
+        $limits = array_merge($free->limits ?? [], ['max_storage_mb' => 1]); // 1 MB cap
+        \App\Models\Plan::where('slug', 'free')->update(['limits' => $limits]);
+
+        // Pre-fill the issue folder with ~1.5 MB so a new upload exceeds the 1 MB cap.
+        Storage::disk('public')->put(
+            'projects/'.$project->folder().'/issues/'.$issue->code.'/description/seed.bin',
+            str_repeat('x', 1536 * 1024)
+        );
+
+        $this->actingAs($user)
+            ->post(route('issues.image.upload', $issue), ['file' => UploadedFile::fake()->image('pic.png', 10, 10)])
+            ->assertInvalid('file');
+    }
+
+    public function test_member_can_patch_assignee_and_due_date(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
+            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        // member (no issue.edit permission) patches only meta fields
+        $user->revokePermissionTo('issue.edit');
+        $this->assertFalse($user->can('issue.edit'));
+
+        $this->actingAs($user)
+            ->put(route('issues.update', $issue), ['assignee_id' => $manager->id, 'due_date' => '2026-09-15'])
+            ->assertRedirect(route('issues.show', $issue));
+
+        $issue->refresh();
+        $this->assertEquals($manager->id, $issue->assignee_id);
+        $this->assertEquals('2026-09-15', $issue->due_date->format('Y-m-d'));
+    }
+
+    private function filenameFrom($response): string
+    {
+        return basename(json_decode($response->getContent())->location);
     }
 }

@@ -5,13 +5,15 @@
     <a href="{{ route('issues.index') }}" class="btn btn-sm btn-light border rounded-2 me-2"><i class="bi bi-arrow-left"></i></a>
     <h3 class="mb-0">{{ ui('new_issue') }}</h3>
 </div>
+
 <div class="card shadow-sm">
     <div class="card-body">
-        <form method="POST" action="{{ route('issues.store') }}">
+        <form method="POST" action="{{ route('issues.store') }}" id="issue-form">
             @csrf
             <div class="mb-3">
                 <label class="form-label">{{ ui('project') }}</label>
-                <select name="project_id" class="form-select @error('project_id') is-invalid @enderror" onchange="this.form.submit()">
+                <select name="project_id" class="form-select @error('project_id') is-invalid @enderror"
+                        onchange="window.location='{{ route('issues.create') }}?project_id='+this.value">
                     <option value="">{{ ui('select_project') }}</option>
                     @foreach ($projects as $p)
                         <option value="{{ $p->id }}" {{ old('project_id', $project?->id) == $p->id ? 'selected' : '' }}>{{ $p->key }} - {{ $p->name }}</option>
@@ -29,7 +31,14 @@
                 <div class="col-md-3">
                     <label class="form-label">{{ ui('type') }}</label>
                     <select name="type" class="form-select">
-                        @foreach ($types as $t)<option value="{{ $t }}" {{ old('type') == $t ? 'selected' : '' }}>{{ ui('issue_type_'.$t) }}</option>@endforeach
+                        @foreach ($project->issueTypes as $t)<option value="{{ $t->name }}" {{ old('type') == $t->name ? 'selected' : '' }}>{{ $t->name }}</option>@endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ ui('status') }}</label>
+                    <select name="status" class="form-select">
+                        <option value="">-</option>
+                        @foreach ($project->statuses as $s)<option value="{{ $s->name }}" {{ old('status') == $s->name ? 'selected' : '' }}>{{ $s->name }}</option>@endforeach
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -52,13 +61,15 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">{{ ui('description') }}</label>
-                <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="6">{{ old('description') }}</textarea>
-                @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                @include('partials.rich-text-field', ['uploadUrl' => ''])
             </div>
             @include('partials.labels-field')
-            @endif
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
+            @endif
         </form>
     </div>
 </div>
+@push('scripts')
+{{-- ponytail: rich-text-field (TinyMCE) owns the description editor + submit sync. --}}
+@endpush
 @endsection

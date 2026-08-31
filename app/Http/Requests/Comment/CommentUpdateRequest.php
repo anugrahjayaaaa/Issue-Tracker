@@ -12,12 +12,10 @@ class CommentUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         $comment = $this->route('comment');
-        $project = $comment->issue->project;
 
-        // owner or project lead may edit
+        // Only the comment's author may edit it.
         return $this->user()->can('comment.edit')
-            && ($comment->user_id === $this->user()->id
-                || ProjectMember::isLead($this->user(), $project));
+            && $comment->user_id === $this->user()->id;
     }
 
     /** @return array<string,mixed> */

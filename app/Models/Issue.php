@@ -75,6 +75,27 @@ class Issue extends Model
         return $this->hasMany(Comment::class);
     }
 
+    /**
+     * Whether a status change to $toName is allowed by the project's workflow.
+     * ponytail: empty transition table = free transitions (no scheme yet).
+     */
+    public function canTransitionTo(string $toName): bool
+    {
+        $transitions = $this->project->statusTransitions;
+        if ($transitions->isEmpty()) {
+            return true;
+        }
+        $from = $this->project->statuses()->where('name', $this->status)->first();
+        if (! $from) {
+            return true;
+        }
+
+        return $transitions->contains(
+            fn ($t) => $t->from_status_id === $from->id
+                && $t->to->name === $toName
+        );
+    }
+
     /** Project members who may act on issues (lead/member). Viewers excluded. */
     public static function scopeForMember($query, Project $project, User $user)
     {

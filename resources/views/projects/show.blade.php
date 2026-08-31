@@ -34,7 +34,7 @@
                         <a href="{{ route('issues.show', $issue) }}" class="text-decoration-none">
                             <span class="badge text-bg-secondary me-1">{{ $issue->code }}</span>{{ $issue->title }}
                         </a>
-                        <span class="badge bg-{{ match($issue->status) { 'open' => 'primary', 'in_progress' => 'info', 'blocked' => 'danger', 'done' => 'success', default => 'secondary' } }}-subtle text-{{ match($issue->status) { 'open' => 'primary', 'in_progress' => 'info', 'blocked' => 'danger', 'done' => 'success', default => 'secondary' } }} border border-{{ match($issue->status) { 'open' => 'primary', 'in_progress' => 'info', 'blocked' => 'danger', 'done' => 'success', default => 'secondary' } }}-subtle">{{ ui('issue_status_'.$issue->status) }}</span>
+                        <span class="badge" style="background:{{ $project->statuses->firstWhere('name', $issue->status)?->color ?? '#6c757d' }};color:#fff">{{ $issue->status }}</span>
                     </li>
                     @endforeach
                 </ul>

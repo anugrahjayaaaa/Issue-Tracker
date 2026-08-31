@@ -248,6 +248,7 @@ return [
     'edit_issue' => 'Edit Isu',
     'board' => 'Papan',
     'select_project' => 'Pilih proyek',
+    'reset' => 'Reset',
     'pick_project_first' => 'Pilih proyek untuk melihat isu.',
     'issue_code' => 'Kode',
     'title' => 'Judul',
@@ -283,6 +284,7 @@ return [
     'post_comment' => 'Kirim komentar',
     'attach_image' => 'Lampirkan gambar',
     'confirm_delete_comment' => 'Hapus komentar ini?',
+    'comment' => 'Komentar',
     'comment_added' => 'Komentar ditambahkan.',
     'comment_updated' => 'Komentar diperbarui.',
     'comment_deleted' => 'Komentar dihapus.',
@@ -298,4 +300,17 @@ return [
     'all_labels' => 'Semua label',
     'confirm_delete_label' => 'Hapus label ini? Isu yang menempel padanya akan dilepas.',
     'activity_timeline' => 'Aktivitas',
+
+    // ── issue tracker: dynamic fields (types/statuses/workflow) ──
+    'issue_fields' => 'Field Isu',
+    'issue_types' => 'Tipe Isu',
+    'statuses' => 'Status',
+    'workflow_transitions' => 'Transisi Workflow',
+    'workflow_transitions_hint' => 'Tentukan perubahan status yang diizinkan. Jika tidak ada transisi, semua perubahan status diperbolehkan.',
+    'no_transitions_free' => 'Tidak ada transisi — semua perubahan status diizinkan.',
+    'closed' => 'Tertutup',
+    'add' => 'Tambah',
+    'name' => 'Nama',
+    'invalid_transition' => 'Transisi tidak boleh berawal dan berakhir di status sama.',
+    'saved' => 'Tersimpan.',
 ];

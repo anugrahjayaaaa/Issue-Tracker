@@ -15,9 +15,12 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectFieldController;
 use App\Http\Controllers\ProjectImageController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\IssueController;
+use App\Http\Controllers\IssueImageController;
+use App\Http\Controllers\CommentImageController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RoleController;
@@ -130,6 +133,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/{project}/labels', [LabelController::class, 'store'])->name('projects.labels.store');
         Route::put('/{project}/labels/{label}', [LabelController::class, 'update'])->name('projects.labels.update');
         Route::delete('/{project}/labels/{label}', [LabelController::class, 'destroy'])->name('projects.labels.destroy');
+        // dynamic issue types / statuses / workflow transitions (per-project, lead only)
+        Route::get('/{project}/fields', [ProjectFieldController::class, 'index'])->name('projects.fields')->withoutMiddleware('can:project.manage');
+        Route::post('/{project}/types', [ProjectFieldController::class, 'storeType'])->name('projects.types.store')->withoutMiddleware('can:project.manage');
+        Route::put('/{project}/types/{issueType}', [ProjectFieldController::class, 'updateType'])->name('projects.types.update')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/types/{issueType}', [ProjectFieldController::class, 'destroyType'])->name('projects.types.destroy')->withoutMiddleware('can:project.manage');
+        Route::post('/{project}/statuses', [ProjectFieldController::class, 'storeStatus'])->name('projects.statuses.store')->withoutMiddleware('can:project.manage');
+        Route::put('/{project}/statuses/{status}', [ProjectFieldController::class, 'updateStatus'])->name('projects.statuses.update')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/statuses/{status}', [ProjectFieldController::class, 'destroyStatus'])->name('projects.statuses.destroy')->withoutMiddleware('can:project.manage');
+        Route::post('/{project}/transitions', [ProjectFieldController::class, 'storeTransition'])->name('projects.transitions.store')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/transitions/{transition}', [ProjectFieldController::class, 'destroyTransition'])->name('projects.transitions.destroy')->withoutMiddleware('can:project.manage');
 
         // rich-text description image upload (scoped to project folder)
         Route::post('/{project}/image', [ProjectImageController::class, 'store'])->name('projects.image.upload');
@@ -143,10 +156,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [IssueController::class, 'store'])->name('issues.store')->middleware('can:issue.create');
         Route::get('/{issue}', [IssueController::class, 'show'])->name('issues.show');
         Route::get('/{issue}/edit', [IssueController::class, 'edit'])->name('issues.edit')->middleware('can:issue.edit');
-        Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update')->middleware('can:issue.edit');
+        Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update');
         Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
         Route::delete('/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->middleware('can:issue.delete');
-        Route::post('/bulk', [IssueController::class, 'bulk'])->name('issues.bulk')->middleware('can:issue.delete');
+        // rich-text description image upload (scoped to issue folder)
+        Route::post('/{issue}/image', [IssueImageController::class, 'store'])->name('issues.image.upload');
+        Route::post('/comments/{comment}/image', [CommentImageController::class, 'store'])->name('comments.image.upload');
 
         // Comments (project-scoped, same gate as issues)
         Route::post('/{issue}/comments', [CommentController::class, 'store'])->name('issues.comments.store')->middleware('can:comment.create');

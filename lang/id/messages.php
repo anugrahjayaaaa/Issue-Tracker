@@ -89,6 +89,7 @@ return [
     'comment_updated' => 'Komentar diperbarui.',
     'comment_deleted' => 'Komentar dihapus.',
     'issue_status_changed' => 'Status isu diubah.',
+    'status_transition_not_allowed' => 'Perubahan status itu tidak diizinkan oleh workflow.',
     'issues_deleted_count' => ':count isu dihapus.',
 
     // ── auth (login lock / verification) ──

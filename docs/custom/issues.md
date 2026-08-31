@@ -1,61 +1,183 @@
-# Issues + Kanban + List View
+# Issues — Feature & Behaviour Spec (Jira / Linear / GitHub-style)
 
-> Custom feature for Issue Tracker. Built on Laravel Base Project.
+> Custom feature for Issue Tracker, built on Laravel Base Project.
+> Replaces the older MVP `issues.md`. Last revised: 2026-08-31.
 
-## Goal
-Track work items inside a project: create/edit issues, move them on a Kanban
-board, triage in a list view with filters + bulk actions. Auto issue code
-`KEY-NN`.
+## 1. Purpose
 
-## Scope
-- In scope: Issue CRUD, types (bug/feature/task/epic), status
-  (open/in_progress/blocked/done), priority (low/med/high/urgent), assignee,
-  reporter, due_date, `parent_id` (nullable — sub-task ready, UI in Phase 2),
-  rich-text `description` (HTML, sanitized), `order` (kanban sort), project_id.
-- Out of scope (Phase 2): epic/sub-task tree UI, sprints, saved filters/JQL.
+An **issue** is the unit of work in a project. This spec covers the full
+lifecycle and the behaviours users expect from modern trackers (Jira, Linear,
+GitHub Issues, YouTrack): create → triage → collaborate → resolve → close,
+with rich context, workflow, and auditability.
 
-## Models / Tables (new)
-| Table | Purpose | Notes |
-|-------|---------|-------|
-| `issues` | id, project_id, code, title, description(html), type, status, priority, reporter_id, assignee_id, parent_id(nullable), due_date, `order`(int), timestamps, SoftDeletes | migration `create_issues_table` |
+## 2. Competitive feature matrix
 
-Issue code: generated on create as `{project.key}-{nextSeq}` (per project
-counter via `projects.issue_seq` or `max(code)`). Resolve in a service.
+| Capability | Jira | Linear | GitHub Issues | Our target |
+|------------|------|--------|---------------|------------|
+| Issue types (bug/feature/task/epic) | ✅ | ✅ (type) | ⚠️ labels | ✅ |
+| Status / workflow | ✅ custom WF | ✅ states | ✅ open/closed | ✅ 4-status |
+| Priority | ✅ | ✅ | ⚠️ labels | ✅ |
+| Assignee / Reporter | ✅ | ✅ | ✅ | ✅ |
+| Due date | ✅ | ✅ | ✅ milestone | ✅ |
+| Labels / tags | ✅ | ✅ | ✅ | ✅ |
+| Components / modules | ✅ | ❌ | ❌ | ⏳ Phase 2 |
+| Sub-tasks / parent | ✅ | ✅ | ⚠️ | ⏳ (parent_id ready) |
+| Watchers / participants | ✅ | ✅ (subscribers) | ✅ | ⏳ Phase 2 |
+| @mention in comments | ✅ | ✅ | ✅ | ✅ |
+| Rich-text description + images | ✅ | ✅ | ✅ (md) | ✅ TinyMCE |
+| Comments (rich, edit/del) | ✅ | ✅ | ✅ | ✅ (see comments.md) |
+| Activity timeline | ✅ | ✅ | partial | ✅ |
+| Attachments | ✅ | ✅ | ✅ | ⚠️ comment-img only |
+| List view + filters + sort | ✅ | ✅ | ✅ | ✅ |
+| Kanban board (drag) | ✅ | ✅ | ✅ projects | ✅ |
+| Bulk actions | ✅ | ✅ | ⚠️ | ✅ delete/sort |
+| Search (global/JQL) | ✅ | ✅ (Cmd+K) | ✅ | ⏳ Phase 2 |
+| Saved filters | ✅ | ✅ | ❌ | ⏳ Phase 2 |
+| Sprints / Cycles | ✅ | ✅ | ❌ | ⏳ Phase 2 |
+| REST/GraphQL API | ✅ | ✅ | ✅ | ⏳ Phase 2 |
+| Notifications | ✅ | ✅ | ✅ | ✅ (notifications.md) |
 
-## Routes (auth group, `feature:issues`)
-| Method | URI | Controller@action | Gate |
-|--------|-----|-------------------|------|
-| GET | `/issues` | `IssueController@index` | `can:issue.view` + project-scope |
-| GET | `/issues/board` | `IssueController@board` | `can:issue.view` + project-scope |
-| GET | `/issues/create` | `IssueController@create` | `can:issue.create` |
-| POST | `/issues` | `IssueController@store` | `can:issue.create` |
-| GET | `/issues/{issue}` | `IssueController@show` | `can:issue.view` + scope |
-| GET | `/issues/{issue}/edit` | `IssueController@edit` | `can:issue.edit` + scope |
-| PUT | `/issues/{issue}` | `IssueController@update` | `can:issue.edit` + scope |
-| DELETE | `/issues/{issue}` | `IssueController@destroy` | `can:issue.delete` + scope |
-| POST | `/issues/{issue}/status` | `IssueController@changeStatus` | `can:issue.edit` + scope (drag) |
-| POST | `/issues/bulk` | `IssueController@bulk` | `can:issue.delete` + scope |
+Legend: ✅ done · ⚠️ partial · ⏳ planned · ❌ out of scope.
 
-## How it works
-- Kanban: columns = status enum; cards sorted by `order`. Drag → `changeStatus`
-  updates `status` + `order` (reuse SortableJS, already AdminLTE-friendly).
-- List view: table with filters (project/status/assignee/priority) + bulk
-  action. Reuse base `app/Http/Controllers/Concerns/Sortable.php` + bulk
-  pattern from `UserController`.
-- Project-scope gate: reuse `ProjectMember::hasRole(...)` from projects.md.
-- Reporter = auth user on create; assignee nullable.
-- Rich text: store HTML; sanitize on save (see comments.md for sanitizer).
-- Audit: issue create/update/delete/status via activitylog observer.
+## 3. Data model (fields)
 
-## UI / API surface
-- Web: `resources/views/issues/*` (board.blade, index.blade, show.blade,
-  form partial). Reuse AdminLTE Kanban template.
-- API: `/api/v1/issues` (Phase 2).
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | PK | |
+| `project_id` | FK | scoping; every issue belongs to one project |
+| `code` | string | `KEY-NN`, auto from project key + per-project sequence |
+| `title` | string | required, ≤255 |
+| `description` | HTML (sanitized) | TinyMCE rich text; inline images scoped |
+| `type` | enum | bug / feature / task / epic |
+| `status` | enum | open / in_progress / blocked / done |
+| `priority` | enum | low / medium / high / urgent |
+| `reporter_id` | FK users | set on create = actor |
+| `assignee_id` | FK users nullable | project member; editable by members |
+| `parent_id` | FK issues nullable | sub-task ready (UI Phase 2) |
+| `due_date` | date nullable | editable by members |
+| `order` | int | kanban sort order |
+| `SoftDeletes` | | audit retained |
 
-## i18n
-New keys: `ui.issues.*`, `ui.issue.type.*`, `ui.issue.status.*`,
-`ui.issue.priority.*`. Add to `lang/{en,id}/ui.php`; reseed.
+## 4. Views & flows
 
-## Tests
-`tests/Feature/IssueTest.php`: create (code generated), status change via drag,
-scope gate (non-member blocked), bulk delete. SQLite `:memory:`.
+### 4.1 List view (`/issues?project_id=`)
+- Table: code, title, type, status, priority, assignee, due_date.
+- Filters: project, status, assignee, priority, label.
+- Sortable columns (server-side, reusable `Sortable` concern).
+- Bulk: delete, re-status (member/lead gated).
+- Progressive reveal: project must be selected first.
+
+### 4.2 Kanban board (`/issues/board`)
+- Columns = status enum.
+- Cards drag → `changeStatus` (updates status + order).
+- Reuses SortableJS; member-gated writes.
+
+### 4.3 Detail (`/issues/{issue}`)
+Layout (2-col, Jira-like):
+```
+Left (8):  Description (rich)
+           Comments (rich composer, scrollable, see comments.md)
+           Activity timeline (issue + comment events)
+Right (4): Details card
+           - Project (ro)
+           - Type / Status / Priority (ro, change via Edit page)
+           - Assignee (inline editable, member-scoped search)
+           - Reporter (ro)
+           - Due date (inline editable, members)
+           - Labels (ro, manage on project page)
+```
+
+### 4.4 Create / Edit
+- Create: progressive reveal (pick project → form). Assignee searchable.
+- Edit: full form (`issues.edit`, gated `issue.edit`).
+- Inline meta edits (assignee/due_date) also possible from detail (member-gated,
+  `IssueUpdateRequest` is `sometimes` + member-authorized).
+
+## 5. Workflow & state
+
+- New issue → `open`.
+- Drag/status change → any status; `issue_status_changed` activity logged.
+- Resolve → `done`. Delete → soft delete + `issue_deleted` activity.
+- No mandatory transition rules yet (Jira-style WF schemes are Phase 3).
+
+## 6. Collaboration layer
+
+- **Comments**: rich text, mentions, edit/delete, audit — full spec in
+  `comments.md`.
+- **Mentions**: `@username` → notification; only project members mentionable.
+- **Activity timeline**: aggregated issue + child-comment events with causer +
+  relative time.
+- **Watchers** (planned): auto-subscribe reporter + assignee; notify on change.
+- **Attachments** (partial): images inline in description/comments; standalone
+  file attachments (Jira-style) planned Phase 2.
+
+## 7. Permissions model
+
+| Action | Gate |
+|--------|------|
+| View issue | project member (any role) |
+| Create | `issue.create` + member |
+| Edit (full) | `issue.edit` + member/lead |
+| Edit meta (assignee/due_date) | project member (lead/member) |
+| Delete | `issue.delete` + member/lead |
+| Comment | `comment.*` (see comments.md) |
+| Bulk | `issue.delete` + member/lead |
+
+Scoping enforced by `ProjectMember::hasRole(...)`; route-level `can:` middleware
+for the broad permission, finer checks in FormRequest/controller.
+
+## 8. Best practices we adopt (popular consensus)
+
+1. **Auto issue keys** — stable `KEY-NN` reference everywhere (Jira/GitHub #).
+2. **One editor, everywhere** — description + comments share `rich-text-field`.
+3. **Progressive disclosure** — don't show project-scoped data until chosen.
+4. **Inline meta edits** — assignee/due_date editable without full edit page.
+5. **Activity as truth** — every mutation is logged and visible.
+6. **Member-scoped assignment** — only people in the project are assignable.
+7. **Soft delete + audit** — never lose history.
+8. **Reusable sort/filter/bulk** — list & board share concerns.
+9. **Theme-aware UI** — dark/light follows app toggle (editor too).
+10. **Quota-scoped uploads** — images per entity, plan-quota enforced.
+
+## 9. Implementation status (this repo)
+
+### Done
+- [x] Issue CRUD + auto `KEY-NN` code (`nextIssueCode()`)
+- [x] Types/status/priority/assignee/reporter/due_date/parent/order
+- [x] Rich-text description (TinyMCE, theme-aware, scoped image upload)
+- [x] List view (filters, sortable, bulk delete/sort) + progressive reveal
+- [x] Kanban board (drag → changeStatus)
+- [x] Detail: inline assignee (searchable) + due_date edit (member-gated)
+- [x] `IssueUpdateRequest` `sometimes` + member authorize; redirect to show
+- [x] Comments full (rich/edit/del/mention/activity) — `comments.md`
+- [x] `IssueObserver` → created/updated/deleted/status in timeline
+- [x] Tests: `IssueTest` (code gen, scope gate, quota, meta patch) + `CommentTest`
+
+### TODO (phased)
+- [ ] **Sub-task tree UI** (parent_id exists; render hierarchy + rollup)
+- [ ] **Labels management on issue** (currently project-page only)
+- [ ] **Watchers / participants** + auto-subscribe
+- [ ] **Standalone attachments** (non-image files on issue)
+- [ ] **Search / Cmd+K** global issue search
+- [ ] **Saved filters / JQL-lite**
+- [ ] **Sprints / Cycles**
+- [ ] **Components / modules**
+- [ ] **REST API** `/api/v1/issues`
+- [ ] **Comment threading** (see comments.md §6)
+- [ ] **Workflow schemes** (mandatory transitions)
+
+## 10. Open decisions (discuss)
+
+1. **Workflow strictness** — free transitions now; add required rules later?
+2. **Sub-task rollup** — should parent status derive from children?
+3. **Watcher default** — reporter + assignee auto-subscribe (recommend yes).
+4. **Attachment model** — comment-img only vs separate `attachments` table
+   extended to issues (recommend: extend, unify cleanup).
+5. **Search scope** — client filter vs server index (Elastic/DB) at scale.
+6. **Bulk actions** — add move-status / assign / label in bulk?
+
+## 11. References
+- Jira: issue types, workflows, components, watchers, subtasks, sprints.
+- Linear: states, cycles, priorities, labels, relations, Cmd+K.
+- GitHub Issues: labels, milestones, assignees, linked PRs, projects board.
+- YouTrack: custom workflows, Agile boards, commands.

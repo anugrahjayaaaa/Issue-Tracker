@@ -12,12 +12,14 @@ use App\Models\ProjectMember;
 use App\Models\User;
 use App\Notifications\IssueAssigned;
 use App\Notifications\IssueStatusChanged;
+use App\Http\Controllers\Concerns\Sortable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class IssueController extends Controller
 {
+    use Sortable;
     /** Read-gate: must be a project member (any role). */
     private function abortIfNotReader(Project $project): void
     {
@@ -37,13 +39,13 @@ class IssueController extends Controller
         $issues = collect();
         if ($project) {
             $this->abortIfNotReader($project);
-            $issues = Issue::with('assignee')
+            $issues = Issue::with(['assignee', 'labels'])
                 ->where('project_id', $project->id)
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
                 ->when($request->filled('assignee_id'), fn ($q) => $q->where('assignee_id', $request->assignee_id))
                 ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
                 ->when($request->filled('label_id'), fn ($q) => $q->whereHas('labels', fn ($l) => $l->where('labels.id', $request->label_id)))
-                ->orderBy('order')
+                ->when(true, fn ($q) => $this->sortIndex($q, $request, 'order', ['code', 'title', 'type', 'status', 'priority', 'assignee_id', 'due_date']))
                 ->paginate(20)
                 ->withQueryString();
         }
@@ -59,7 +61,7 @@ class IssueController extends Controller
         $columns = [];
         if ($project) {
             $this->abortIfNotReader($project);
-            $statuses = [Issue::STATUS_OPEN, Issue::STATUS_IN_PROGRESS, Issue::STATUS_BLOCKED, Issue::STATUS_DONE];
+            $statuses = $project->statuses->pluck('name')->all();
             foreach ($statuses as $status) {
                 $columns[$status] = Issue::with('assignee')
                     ->where('project_id', $project->id)
@@ -77,10 +79,11 @@ class IssueController extends Controller
         $projects = Project::orderBy('name')->get();
         $project = $request->filled('project_id') ? Project::find($request->project_id) : null;
         $users = $project ? $project->users : collect();
-        $types = [Issue::TYPE_BUG, Issue::TYPE_FEATURE, Issue::TYPE_TASK, Issue::TYPE_EPIC];
+        $types = $project ? $project->issueTypes : collect();
+        $statuses = $project ? $project->statuses : collect();
         $priorities = [Issue::PRIORITY_LOW, Issue::PRIORITY_MEDIUM, Issue::PRIORITY_HIGH, Issue::PRIORITY_URGENT];
 
-        return view('issues.create', compact('projects', 'project', 'users', 'types', 'priorities'));
+        return view('issues.create', compact('projects', 'project', 'users', 'types', 'statuses', 'priorities'));
     }
 
     public function store(IssueStoreRequest $request): RedirectResponse
@@ -89,6 +92,8 @@ class IssueController extends Controller
         $issue = new Issue($request->validated());
         $issue->code = $project->nextIssueCode();
         $issue->reporter_id = $request->user()->id;
+        $issue->status = $request->input('status')
+            ?? $project->statuses()->orderBy('order')->value('name');
         $issue->save();
         $issue->labels()->sync($request->input('labels', []));
 
@@ -112,14 +117,19 @@ class IssueController extends Controller
     {
         $project = $issue->project;
         $users = $project->users;
-        $types = [Issue::TYPE_BUG, Issue::TYPE_FEATURE, Issue::TYPE_TASK, Issue::TYPE_EPIC];
+        $types = $project->issueTypes;
+        $statuses = $project->statuses;
         $priorities = [Issue::PRIORITY_LOW, Issue::PRIORITY_MEDIUM, Issue::PRIORITY_HIGH, Issue::PRIORITY_URGENT];
 
-        return view('issues.edit', compact('issue', 'project', 'users', 'types', 'priorities'));
+        return view('issues.edit', compact('issue', 'project', 'users', 'types', 'statuses', 'priorities'));
     }
 
     public function update(IssueUpdateRequest $request, Issue $issue): RedirectResponse
     {
+        if ($request->filled('status') && ! $issue->canTransitionTo($request->input('status'))) {
+            return redirect()->route('issues.show', $issue)
+                ->with('error', __('messages.status_transition_not_allowed'));
+        }
         $oldAssignee = $issue->assignee_id;
         $issue->update($request->validated());
         $issue->labels()->sync($request->input('labels', []));
@@ -128,12 +138,17 @@ class IssueController extends Controller
             $issue->assignee->notify(new IssueAssigned($issue));
         }
 
-        return redirect()->route('issues.index', ['project_id' => $issue->project_id])
+        return redirect()->route('issues.show', $issue)
             ->with('success', __('messages.issue_updated'));
     }
 
     public function changeStatus(IssueStatusRequest $request, Issue $issue): RedirectResponse
     {
+        $newStatus = $request->input('status');
+        if (! $issue->canTransitionTo($newStatus)) {
+            return redirect()->route('issues.board', ['project_id' => $issue->project_id])
+                ->with('error', __('messages.status_transition_not_allowed'));
+        }
         $old = $issue->status;
         $issue->status = $request->input('status');
         if ($request->filled('order')) {

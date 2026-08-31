@@ -5,6 +5,7 @@
     <a href="{{ route('issues.index', ['project_id' => $issue->project_id]) }}" class="btn btn-sm btn-light border rounded-2 me-2"><i class="bi bi-arrow-left"></i></a>
     <h3 class="mb-0">{{ ui('edit_issue') }} <span class="badge text-bg-secondary">{{ $issue->code }}</span></h3>
 </div>
+
 <div class="card shadow-sm">
     <div class="card-body">
         <form method="POST" action="{{ route('issues.update', $issue) }}">
@@ -18,15 +19,13 @@
                 <div class="col-md-3">
                     <label class="form-label">{{ ui('status') }}</label>
                     <select name="status" class="form-select">
-                        @foreach ([App\Models\Issue::STATUS_OPEN, App\Models\Issue::STATUS_IN_PROGRESS, App\Models\Issue::STATUS_BLOCKED, App\Models\Issue::STATUS_DONE] as $s)
-                            <option value="{{ $s }}" {{ old('status', $issue->status) == $s ? 'selected' : '' }}>{{ ui('issue_status_'.$s) }}</option>
-                        @endforeach
+                        @foreach ($issue->project->statuses as $s)<option value="{{ $s->name }}" {{ old('status', $issue->status) == $s->name ? 'selected' : '' }}>{{ $s->name }}</option>@endforeach
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ ui('type') }}</label>
                     <select name="type" class="form-select">
-                        @foreach ($types as $t)<option value="{{ $t }}" {{ old('type', $issue->type) == $t ? 'selected' : '' }}>{{ ui('issue_type_'.$t) }}</option>@endforeach
+                        @foreach ($issue->project->issueTypes as $t)<option value="{{ $t->name }}" {{ old('type', $issue->type) == $t->name ? 'selected' : '' }}>{{ $t->name }}</option>@endforeach
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -49,11 +48,17 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">{{ ui('description') }}</label>
-                <textarea name="description" class="form-control" rows="6">{{ old('description', $issue->description) }}</textarea>
+                @include('partials.rich-text-field', [
+                    'value' => old('description', $issue->description),
+                    'uploadUrl' => route('issues.image.upload', $issue),
+                ])
             </div>
             @include('partials.labels-field')
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
         </form>
     </div>
 </div>
+@push('scripts')
+{{-- ponytail: rich-text-field (TinyMCE) owns the description editor + submit sync. --}}
+@endpush
 @endsection

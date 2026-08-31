@@ -20,16 +20,16 @@
         {{-- Comments --}}
         <div class="card shadow-sm">
             <div class="card-header">{{ ui('comments') }} ({{ $issue->comments->count() }})</div>
-            <div class="card-body">
+            <div class="card-body" style="max-height:520px;overflow-y:auto">
                 @foreach ($issue->comments as $comment)
-                <div class="d-flex gap-2 mb-3 @if(!$loop->last) border-bottom pb-3 @endif">
+                <div class="d-flex gap-2 mb-3 @if(!$loop->last) border-bottom pb-3 @endif" id="comment-row-{{ $comment->id }}">
                     <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:32px;height:32px">{{ strtoupper(substr($comment->user->name,0,1)) }}</span>
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between">
                             <strong class="small">{{ $comment->user->name }}</strong>
                             <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
                         </div>
-                        <div class="small mb-1">{!! $comment->body !!}</div>
+                        <div class="small mb-1 comment-body" id="comment-body-{{ $comment->id }}">{!! $comment->body !!}</div>
                         @if ($comment->attachments->isNotEmpty())
                             <div class="d-flex flex-wrap gap-2">
                             @foreach ($comment->attachments as $att)
@@ -38,14 +38,18 @@
                             </div>
                         @endif
                         @can('comment.edit')
-                        @if ($comment->user_id === auth()->id() || App\Models\ProjectMember::isLead(auth()->user(), $issue->project))
+                        @if ($comment->user_id === auth()->id())
                         <div class="mt-1">
-                            <button class="btn btn-sm btn-light border rounded-2" onclick="editComment({{ $comment->id }}, {{ json_encode($comment->body) }})"><i class="bi bi-pencil"></i></button>
-                            <form method="POST" action="{{ route('issues.comments.destroy', $comment) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_delete_comment') }}')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-light border rounded-2 text-danger"><i class="bi bi-trash"></i></button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-light border rounded-2" onclick="editComment({{ $comment->id }})"><i class="bi bi-pencil"></i></button>
+                            <button type="button" class="btn btn-sm btn-light border rounded-2 text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-action="{{ route('issues.comments.destroy', $comment) }}"><i class="bi bi-trash"></i></button>
                         </div>
+                        {{-- inline edit form (toggled) --}}
+                        <form method="POST" action="{{ route('issues.comments.update', $comment) }}" class="mt-2 d-none" id="comment-edit-form-{{ $comment->id }}">
+                            @csrf @method('PUT')
+                            @include('partials.rich-text-field', ['name' => 'body', 'id' => 'comment-edit-'.$comment->id, 'label' => ui('comment'), 'value' => $comment->body, 'uploadUrl' => route('comments.image.upload', $comment)])
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">{{ ui('save') }}</button>
+                            <button type="button" class="btn btn-light btn-sm mt-2" onclick="cancelEditComment({{ $comment->id }})">{{ ui('cancel') }}</button>
+                        </form>
                         @endif
                         @endcan
                     </div>
@@ -58,14 +62,9 @@
                 @can('comment.create')
                 <form method="POST" action="{{ route('issues.comments.store', $issue) }}" class="mt-3" id="comment-form">
                     @csrf
-                    <input type="hidden" name="body" id="comment-body">
-                    <div id="comment-editor" style="min-height:120px" class="border rounded p-2"></div>
+                    @include('partials.rich-text-field', ['name' => 'body', 'id' => 'comment-new', 'label' => ui('comment'), 'uploadUrl' => ''])
                     <div class="d-flex gap-2 mt-2">
                         <button type="submit" class="btn btn-primary btn-sm" id="comment-submit">{{ ui('post_comment') }}</button>
-                        <form method="POST" action="{{ route('issues.attachments.store', $issue) }}" enctype="multipart/form-data" class="d-inline">
-                            @csrf
-                            <input type="file" name="file" accept="image/*" class="form-control form-control-sm" onchange="this.form.submit()" title="{{ ui('attach_image') }}">
-                        </form>
                     </div>
                 </form>
                 @endcan
@@ -100,12 +99,47 @@
             <div class="card-body">
                 <table class="table table-sm mb-0">
                     <tr><td>{{ ui('project') }}</td><td>{{ $issue->project->key }}</td></tr>
-                    <tr><td>{{ ui('type') }}</td><td>{{ ui('issue_type_'.$issue->type) }}</td></tr>
-                    <tr><td>{{ ui('status') }}</td><td>{{ ui('issue_status_'.$issue->status) }}</td></tr>
+                    <tr><td>{{ ui('type') }}</td><td><span class="badge" style="background:{{ $issue->project->issueTypes->firstWhere('name', $issue->type)?->color ?? '#6c757d' }};color:#fff">{{ $issue->type }}</span></td></tr>
+                    <tr><td>{{ ui('status') }}</td><td><span class="badge" style="background:{{ $issue->project->statuses->firstWhere('name', $issue->status)?->color ?? '#6c757d' }};color:#fff">{{ $issue->status }}</span></td></tr>
                     <tr><td>{{ ui('priority') }}</td><td>{{ ui('issue_priority_'.$issue->priority) }}</td></tr>
-                    <tr><td>{{ ui('assignee') }}</td><td>{{ $issue->assignee->name ?? '-' }}</td></tr>
+                    @php
+                        $canEditMeta = App\Models\ProjectMember::hasRole(auth()->user(), $issue->project, [App\Models\ProjectMember::ROLE_LEAD, App\Models\ProjectMember::ROLE_MEMBER]);
+                    @endphp
+                    <tr>
+                        <td>{{ ui('assignee') }}</td>
+                        <td>
+                            @if ($canEditMeta)
+                            <form method="POST" action="{{ route('issues.update', $issue) }}" class="d-inline">
+                                @csrf @method('PUT')
+                                <input list="assignee-options" name="assignee_id" class="form-control form-control-sm" value="{{ $issue->assignee_id ?? '' }}" placeholder="-">
+                                <datalist id="assignee-options">
+                                    <option value="">-</option>
+                                    @foreach ($issue->project->users as $u)
+                                        <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
+                                    @endforeach
+                                </datalist>
+                                <button type="submit" class="btn btn-sm btn-light border rounded-2 mt-1"><i class="bi bi-check-lg"></i></button>
+                            </form>
+                            @else
+                                {{ $issue->assignee->name ?? '-' }}
+                            @endif
+                        </td>
+                    </tr>
                     <tr><td>{{ ui('reporter') }}</td><td>{{ $issue->reporter->name ?? '-' }}</td></tr>
-                    <tr><td>{{ ui('due_date') }}</td><td>{{ $issue->due_date ?? '-' }}</td></tr>
+                    <tr>
+                        <td>{{ ui('due_date') }}</td>
+                        <td>
+                            @if ($canEditMeta)
+                            <form method="POST" action="{{ route('issues.update', $issue) }}" class="d-inline">
+                                @csrf @method('PUT')
+                                <input type="date" name="due_date" class="form-control form-control-sm" value="{{ $issue->due_date?->format('Y-m-d') }}">
+                                <button type="submit" class="btn btn-sm btn-light border rounded-2 mt-1"><i class="bi bi-check-lg"></i></button>
+                            </form>
+                            @else
+                                {{ $issue->due_date ?? '-' }}
+                            @endif
+                        </td>
+                    </tr>
                     <tr><td>{{ ui('labels') }}</td><td>
                         @forelse ($issue->labels as $l)
                             <span class="badge" style="background:{{ $l->color }}">{{ $l->name }}</span>
@@ -119,25 +153,22 @@
     </div>
 </div>
 
+@include('partials.modals.delete-modal')
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const editorEl = document.getElementById('comment-editor');
-    const hidden = document.getElementById('comment-body');
-    const form = document.getElementById('comment-form');
-    if (!editorEl) return;
-    // ponytail: contenteditable + hidden-input sync for MVP; swap to TipTap later
-    editorEl.setAttribute('contenteditable', 'true');
-    editorEl.addEventListener('input', () => { hidden.value = editorEl.innerHTML; });
-    form.addEventListener('submit', () => { hidden.value = editorEl.innerHTML; });
-    window._editComment = function (id, body) {
-        editorEl.innerHTML = body;
-        hidden.value = body;
-        form.action = '/issues/comments/' + id;
-        const m = document.createElement('input'); m.type = 'hidden'; m.name = '_method'; m.value = 'PUT';
-        form.appendChild(m);
-        document.getElementById('comment-submit').textContent = '{{ ui('save') }}';
-        editorEl.scrollIntoView({ behavior: 'smooth' });
+    window._editComment = function (id) {
+        const body = document.getElementById('comment-body-' + id);
+        const form = document.getElementById('comment-edit-form-' + id);
+        body.classList.add('d-none');
+        form.classList.remove('d-none');
+        const ta = form.querySelector('textarea[data-upload-url]');
+        if (ta) window.initTinyMCE(ta.id, ta.dataset.uploadUrl);
+    };
+    window._cancelEditComment = function (id) {
+        document.getElementById('comment-edit-form-' + id).classList.add('d-none');
+        document.getElementById('comment-body-' + id).classList.remove('d-none');
     };
 });
 </script>
