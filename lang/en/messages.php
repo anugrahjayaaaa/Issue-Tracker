@@ -93,6 +93,10 @@ return [
     'issues_deleted_count' => ':count issue(s) deleted.',
     'status_in_use' => 'Cannot delete a status that is still used by issues.',
     'issue_type_in_use' => 'Cannot delete an issue type that is still used by issues.',
+    'watched' => 'You are now watching this issue.',
+    'unwatched' => 'You are no longer watching this issue.',
+    'attachment_deleted' => 'Attachment deleted.',
+    'invalid_parent' => 'Invalid parent: an issue cannot be nested under its own sub-task.',
 
     // ── auth (login lock / verification) ──
     'too_many_attempts' => 'Too many attempts. Try again in :seconds s.',

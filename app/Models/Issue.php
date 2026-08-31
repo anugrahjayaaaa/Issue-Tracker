@@ -81,6 +81,11 @@ class Issue extends Model
         return $this->belongsTo(Issue::class, 'parent_id');
     }
 
+    public function statusLink(): BelongsTo
+    {
+        return $this->belongsTo(Status::class, 'status', 'key');
+    }
+
     public function children(): HasMany
     {
         return $this->hasMany(Issue::class, 'parent_id');
@@ -125,9 +130,61 @@ class Issue extends Model
         return $this->belongsToMany(Label::class);
     }
 
+    public function watchers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'issue_watchers')->withTimestamps();
+    }
+
+    /** Auto-subscribe reporter + assignee + commenter (decision #3). */
+    public function syncWatchers(array $userIds): void
+    {
+        $ids = collect($userIds)->filter()->unique()->all();
+        $this->watchers()->syncWithoutDetaching($ids);
+    }
+
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class);
+    }
+
+    /** True if $candidateParentId is this issue or one of its descendants (cycle guard). */
+    public function wouldCreateCycle(?int $candidateParentId): bool
+    {
+        if (! $candidateParentId) {
+            return false;
+        }
+        if ($candidateParentId === $this->id) {
+            return true;
+        }
+        // ponytail: bounded BFS over children; depth-1 only in v1 so cheap.
+        $seen = collect([$this->id]);
+        $queue = $this->children()->pluck('id')->all();
+        while ($queue) {
+            $id = array_shift($queue);
+            if ($id === $candidateParentId) {
+                return true;
+            }
+            if ($seen->contains($id)) {
+                continue;
+            }
+            $seen->push($id);
+            $queue = array_merge($queue, Issue::where('parent_id', $id)->pluck('id')->all());
+        }
+
+        return false;
+    }
+
+    /** Sub-task rollup: n of m children in a closed status. */
+    public function subtaskProgress(): array
+    {
+        $children = $this->children()->with('statusLink')->get();
+        $total = $children->count();
+        if ($total === 0) {
+            return ['done' => 0, 'total' => 0];
+        }
+        $done = $children->filter(fn ($c) => optional($c->statusLink)->is_closed)->count();
+
+        return ['done' => $done, 'total' => $total];
     }
 
     /**

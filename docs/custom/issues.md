@@ -21,13 +21,13 @@ with rich context, workflow, and auditability.
 | Due date | ✅ | ✅ | ✅ milestone | ✅ |
 | Labels / tags | ✅ | ✅ | ✅ | ✅ |
 | Components / modules | ✅ | ❌ | ❌ | ⏳ Phase 2 |
-| Sub-tasks / parent | ✅ | ✅ | ⚠️ | ⏳ (parent_id ready) |
-| Watchers / participants | ✅ | ✅ (subscribers) | ✅ | ⏳ Phase 2 |
+| Sub-tasks / parent | ✅ | ✅ | ⚠️ | ✅ (tree + rollup) |
+| Watchers / participants | ✅ | ✅ (subscribers) | ✅ | ✅ (auto-subscribe) |
 | @mention in comments | ✅ | ✅ | ✅ | ✅ |
 | Rich-text description + images | ✅ | ✅ | ✅ (md) | ✅ TinyMCE |
 | Comments (rich, edit/del) | ✅ | ✅ | ✅ | ✅ (see comments.md) |
 | Activity timeline | ✅ | ✅ | partial | ✅ |
-| Attachments | ✅ | ✅ | ✅ | ⚠️ comment-img only |
+| Attachments | ✅ | ✅ | ✅ | ✅ (issue + comment) |
 | List view + filters + sort | ✅ | ✅ | ✅ | ✅ |
 | Kanban board (drag) | ✅ | ✅ | ✅ projects | ✅ |
 | Bulk actions | ✅ | ✅ | ⚠️ | ✅ delete/sort |
@@ -162,9 +162,13 @@ for the broad permission, finer checks in FormRequest/controller.
 - [x] **`issue-badge` component** (status/type) replacing inline copies
 - [x] **SortableJS vendored** to `public/vendor/sortable.min.js` (no CDN)
 - [x] Tests: `IssueTest` + `CommentTest` + `NotificationTest` + `LabelTest` + `IssueTimelineTest` green
+- [x] **Phase B — watchers** (`issue_watchers` pivot; reporter/assignee/commenter auto-subscribe; watch/unwatch; status-change fans out to watchers)
+- [x] **Phase B — sub-task tree** (parent select on create/edit, breadcrumb + children list + n/m rollup badge; cycle guard rejects nesting under own descendant)
+- [x] **Phase B — labels editable on detail** (multi-select sync, member-gated)
+- [x] **Phase B — attachments delete** (per-file delete button; `AttachmentObserver` removes the file)
+- [x] Tests: `WatcherSubtaskTest` green (auto-subscribe, fan-out, cycle guard, rollup, attachment delete)
 
 ### TODO (phased — see `roadmap-issue-tracker.md`)
-- [ ] **Phase B** — labels on issue, sub-task tree + rollup, watchers, standalone attachments UI
 - [ ] **Phase C** — search/Cmd+K, saved filters/views, REST API, correct board ordering + JSON
 - [ ] **Phase D (deferred)** — sprints/cycles, components, comment threading, automation, strict workflow
 

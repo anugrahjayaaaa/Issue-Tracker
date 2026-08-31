@@ -294,6 +294,15 @@ return [
 
     // ── issue tracker: labels ──
     'labels' => 'Labels',
+    'watchers' => 'Watchers',
+    'no_watchers' => 'No watchers yet.',
+    'watch' => 'Watch',
+    'unwatch' => 'Unwatch',
+    'subtasks' => 'Sub-tasks',
+    'add_subtask' => 'Add sub-task',
+    'no_subtasks' => 'No sub-tasks yet.',
+    'confirm_delete' => 'Delete this item?',
+    'parent' => 'Parent',
     'label_name' => 'Label name',
     'color' => 'Color',
     'labels_hint' => 'Tag issues within this project by topic, priority, or type. Visible when creating/editing issues.',

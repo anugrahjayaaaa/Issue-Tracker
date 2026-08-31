@@ -212,7 +212,7 @@ Every phase reuses existing patterns (FormRequest, observers, `ProjectMember::ha
 - `public/vendor/sortable.min.js` + `board.blade.php` script src (drop CDN).
 **Acceptance:** renaming a status keeps issues on their board column + valid transitions; deleting an in-use status is rejected; deleting issue/project removes its storage folder (`Storage::fake` asserted); bulk delete works + rejects out-of-project IDs; non-member sees 0 projects + 403 on `projects.show`; `php artisan test` green; `issues.md` §9 updated.
 
-### Phase B — Cheap Jira parity on the issue page
+### Phase B — Cheap Jira parity on the issue page — ✅ DONE (2026-09-02)
 **Goal:** high perceived completeness from mostly-existing schema.
 **Features:** labels editable on detail; sub-task tree (children list, add sub-task, parent breadcrumb, depth guard, `n/m done` rollup badge); watchers (pivot, auto-subscribe reporter+assignee+commenter, watch/unwatch, fan-out notify); standalone issue attachments UI (list/upload/delete).
 **Files:** migration `create_issue_watchers_table`; `Issue::watchers()`/`children()`; `IssueWatcherController` (or routes on `IssueController`); `IssueAttachmentController` + `IssueAttachRequest` (mirror `CommentAttachRequest`); edit `show.blade.php` (labels editor, sub-task card, watchers card, attachments card), `create.blade.php` (`parent_id`), `IssueController::show/store/update` (eager-load + notify watchers); lang keys; `issues.md`.

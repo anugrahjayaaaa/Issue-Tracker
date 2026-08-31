@@ -58,6 +58,15 @@
                     <label class="form-label">{{ ui('due_date') }}</label>
                     <input type="date" name="due_date" class="form-control" value="{{ old('due_date') }}">
                 </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ ui('parent') }}</label>
+                    <select name="parent_id" class="form-select">
+                        <option value="">-</option>
+                        @foreach ($project->issues()->whereNull('parent_id')->where('id', '!=', old('parent_id', request('parent_id')))->get() as $pi)
+                            <option value="{{ $pi->id }}" {{ old('parent_id', request('parent_id')) == $pi->id ? 'selected' : '' }}>{{ $pi->code }} · {{ $pi->title }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div class="mb-3">
                 <label class="form-label">{{ ui('description') }}</label>
