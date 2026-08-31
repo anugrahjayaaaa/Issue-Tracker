@@ -22,8 +22,20 @@ final class LicenseService
     /** Build the signed key string. */
     private static function sign(string $slug, ?string $expiresAt): string
     {
+        $secret = config('app.license_secret');
+
+        // ponytail: fail closed only in prod/staging — an unset/placeholder secret makes
+        // every key forgeable. Local/test run dummy mode and sign with a dev key so the
+        // template works out-of-the-box.
+        if (empty($secret) || $secret === 'change-me-in-production') {
+            if (app()->environment(['production', 'staging'])) {
+                throw new \RuntimeException('app.license_secret is not set — cannot sign license keys.');
+            }
+            $secret = 'dev-license-secret';
+        }
+
         $Payload = $slug.'|'.($expiresAt ?? 'lifetime');
-        $hash = substr(sha1($Payload.config('app.license_secret')), 0, 12);
+        $hash = substr(sha1($Payload.$secret), 0, 12);
 
         return 'LIC-'.Str::upper($slug).'-'.Str::upper($hash);
     }

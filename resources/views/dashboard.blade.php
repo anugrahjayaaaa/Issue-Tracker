@@ -25,14 +25,6 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <span class="rounded-circle d-flex align-items-center justify-content-center text-bg-info" style="width:48px;height:48px"><i class="bi bi-hdd-network fs-4"></i></span>
-                <div><div class="text-muted small">{{ ui('database') }}</div><div class="fs-6 fw-semibold">{{ $dbName ?? 'n/a' }}</div></div>
-            </div>
-        </div>
-    </div>
 </div>
 
 {{-- License status badge (REQUIRED, doc §9b) --}}

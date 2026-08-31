@@ -17,6 +17,10 @@ class Setting extends Model
     /** Get a setting value (string|null). */
     public static function get(string $key, ?string $default = null): ?string
     {
+        if ($key === 'license_secret') {
+            throw new \LogicException('Use config("app.license_secret") — Settings is not a secret store.');
+        }
+
         $row = static::find($key);
 
         return $row ? $row->value : $default;
