@@ -20,8 +20,10 @@ class IssueStatusRequest extends FormRequest
     /** @return array<string,mixed> */
     public function rules(): array
     {
+        $project = $this->route('issue')->project;
+
         return [
-            'status' => 'required|in:'.implode(',', [Issue::STATUS_OPEN, Issue::STATUS_IN_PROGRESS, Issue::STATUS_BLOCKED, Issue::STATUS_DONE]),
+            'status' => 'required|exists:statuses,name,project_id,'.$project->id,
             'order' => 'nullable|integer|min:0',
         ];
     }

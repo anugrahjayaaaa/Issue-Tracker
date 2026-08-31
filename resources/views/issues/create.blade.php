@@ -31,7 +31,14 @@
                 <div class="col-md-3">
                     <label class="form-label">{{ ui('type') }}</label>
                     <select name="type" class="form-select">
-                        @foreach ($types as $t)<option value="{{ $t }}" {{ old('type') == $t ? 'selected' : '' }}>{{ ui('issue_type_'.$t) }}</option>@endforeach
+                        @foreach ($project->issueTypes as $t)<option value="{{ $t->name }}" {{ old('type') == $t->name ? 'selected' : '' }}>{{ $t->name }}</option>@endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ ui('status') }}</label>
+                    <select name="status" class="form-select">
+                        <option value="">-</option>
+                        @foreach ($project->statuses as $s)<option value="{{ $s->name }}" {{ old('status') == $s->name ? 'selected' : '' }}>{{ $s->name }}</option>@endforeach
                     </select>
                 </div>
                 <div class="col-md-3">

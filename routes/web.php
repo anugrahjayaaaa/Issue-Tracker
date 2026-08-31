@@ -15,6 +15,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectFieldController;
 use App\Http\Controllers\ProjectImageController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\IssueController;
@@ -132,6 +133,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/{project}/labels', [LabelController::class, 'store'])->name('projects.labels.store');
         Route::put('/{project}/labels/{label}', [LabelController::class, 'update'])->name('projects.labels.update');
         Route::delete('/{project}/labels/{label}', [LabelController::class, 'destroy'])->name('projects.labels.destroy');
+        // dynamic issue types / statuses / workflow transitions (per-project, lead only)
+        Route::get('/{project}/fields', [ProjectFieldController::class, 'index'])->name('projects.fields')->withoutMiddleware('can:project.manage');
+        Route::post('/{project}/types', [ProjectFieldController::class, 'storeType'])->name('projects.types.store')->withoutMiddleware('can:project.manage');
+        Route::put('/{project}/types/{issueType}', [ProjectFieldController::class, 'updateType'])->name('projects.types.update')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/types/{issueType}', [ProjectFieldController::class, 'destroyType'])->name('projects.types.destroy')->withoutMiddleware('can:project.manage');
+        Route::post('/{project}/statuses', [ProjectFieldController::class, 'storeStatus'])->name('projects.statuses.store')->withoutMiddleware('can:project.manage');
+        Route::put('/{project}/statuses/{status}', [ProjectFieldController::class, 'updateStatus'])->name('projects.statuses.update')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/statuses/{status}', [ProjectFieldController::class, 'destroyStatus'])->name('projects.statuses.destroy')->withoutMiddleware('can:project.manage');
+        Route::post('/{project}/transitions', [ProjectFieldController::class, 'storeTransition'])->name('projects.transitions.store')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/transitions/{transition}', [ProjectFieldController::class, 'destroyTransition'])->name('projects.transitions.destroy')->withoutMiddleware('can:project.manage');
 
         // rich-text description image upload (scoped to project folder)
         Route::post('/{project}/image', [ProjectImageController::class, 'store'])->name('projects.image.upload');

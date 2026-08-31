@@ -61,12 +61,8 @@ class CommentController extends Controller
     public function destroy(Comment $comment): RedirectResponse
     {
         $issue = $comment->issue;
-        // owner or lead
-        abort_unless(
-            $comment->user_id === auth()->id()
-            || ProjectMember::isLead(auth()->user(), $issue->project),
-            403
-        );
+        // owner only (leads may not delete others' comments)
+        abort_unless($comment->user_id === auth()->id(), 403);
 
         deleteStorageFolder(
             'projects/'.$issue->project->folder().'/issues/'.$issue->code.'/comments/'.$comment->id

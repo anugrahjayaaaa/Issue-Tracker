@@ -89,6 +89,7 @@ return [
     'comment_updated' => 'Comment updated.',
     'comment_deleted' => 'Comment deleted.',
     'issue_status_changed' => 'Issue status changed.',
+    'status_transition_not_allowed' => 'That status transition is not allowed by the workflow.',
     'issues_deleted_count' => ':count issue(s) deleted.',
 
     // ── auth (login lock / verification) ──

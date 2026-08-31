@@ -28,7 +28,7 @@
     <div class="col-md-3">
         <div class="card shadow-sm h-100">
             <div class="card-header d-flex justify-content-between">
-                <span>{{ ui('issue_status_'.$status) }}</span>
+                <span>{{ $status }}</span>
                 <span class="badge text-bg-secondary">{{ $cards->count() }}</span>
             </div>
             <div class="card-body" data-status="{{ $status }}">

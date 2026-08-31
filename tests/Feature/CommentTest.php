@@ -31,7 +31,7 @@ class CommentTest extends TestCase
 
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
-            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
         ]);
 
         return [$manager, $project, $user, $issue];

@@ -28,8 +28,8 @@ class IssueUpdateRequest extends FormRequest
         return [
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string',
-            'type' => 'sometimes|required|in:'.implode(',', [Issue::TYPE_BUG, Issue::TYPE_FEATURE, Issue::TYPE_TASK, Issue::TYPE_EPIC]),
-            'status' => 'sometimes|nullable|in:'.implode(',', [Issue::STATUS_OPEN, Issue::STATUS_IN_PROGRESS, Issue::STATUS_BLOCKED, Issue::STATUS_DONE]),
+            'type' => 'sometimes|required|exists:issue_types,name,project_id,'.$issue->project->id,
+            'status' => 'sometimes|nullable|exists:statuses,name,project_id,'.$issue->project->id,
             'priority' => 'sometimes|required|in:'.implode(',', [Issue::PRIORITY_LOW, Issue::PRIORITY_MEDIUM, Issue::PRIORITY_HIGH, Issue::PRIORITY_URGENT]),
             'assignee_id' => 'sometimes|nullable|exists:users,id',
             'parent_id' => 'sometimes|nullable|exists:issues,id|not_in:'.$issue->id,

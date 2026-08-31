@@ -21,9 +21,11 @@
     @if ($project)
     @php
         $filters = [
-            'status' => [App\Models\Issue::STATUS_OPEN, App\Models\Issue::STATUS_IN_PROGRESS, App\Models\Issue::STATUS_BLOCKED, App\Models\Issue::STATUS_DONE],
+            'status' => $project->statuses->pluck('name')->all(),
             'priority' => [App\Models\Issue::PRIORITY_LOW, App\Models\Issue::PRIORITY_MEDIUM, App\Models\Issue::PRIORITY_HIGH, App\Models\Issue::PRIORITY_URGENT],
         ];
+        $statusMap = $project->statuses->pluck('color', 'name')->all();
+        $typeMap = $project->issueTypes->pluck('color', 'name')->all();
     @endphp
     <div class="d-flex flex-wrap gap-2 align-items-end">
         <div>
@@ -31,7 +33,7 @@
             <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                 <option value="">{{ ui('all_status') }}</option>
                 @foreach ($filters['status'] as $s)
-                    <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ ui('issue_status_'.$s) }}</option>
+                    <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ $s }}</option>
                 @endforeach
             </select>
         </div>
@@ -92,8 +94,8 @@
                 <tr>
                     <td><span class="badge text-bg-secondary">{{ $issue->code }}</span></td>
                     <td><a href="{{ route('issues.show', $issue) }}" class="text-decoration-none">{{ $issue->title }}</a></td>
-                    <td>{{ ui('issue_type_'.$issue->type) }}</td>
-                    <td><span class="badge text-bg-{{ $issue->status == 'done' ? 'success' : ($issue->status == 'blocked' ? 'danger' : 'warning') }}">{{ ui('issue_status_'.$issue->status) }}</span></td>
+                    <td><span class="badge" style="background:{{ $typeMap[$issue->type] ?? '#6c757d' }};color:#fff">{{ $issue->type }}</span></td>
+                    <td><span class="badge" style="background:{{ $statusMap[$issue->status] ?? '#6c757d' }};color:#fff">{{ $issue->status }}</span></td>
                     <td>{{ ui('issue_priority_'.$issue->priority) }}</td>
                     <td>{{ $issue->assignee->name ?? '-' }}</td>
                     <td>

@@ -19,15 +19,13 @@
                 <div class="col-md-3">
                     <label class="form-label">{{ ui('status') }}</label>
                     <select name="status" class="form-select">
-                        @foreach ([App\Models\Issue::STATUS_OPEN, App\Models\Issue::STATUS_IN_PROGRESS, App\Models\Issue::STATUS_BLOCKED, App\Models\Issue::STATUS_DONE] as $s)
-                            <option value="{{ $s }}" {{ old('status', $issue->status) == $s ? 'selected' : '' }}>{{ ui('issue_status_'.$s) }}</option>
-                        @endforeach
+                        @foreach ($issue->project->statuses as $s)<option value="{{ $s->name }}" {{ old('status', $issue->status) == $s->name ? 'selected' : '' }}>{{ $s->name }}</option>@endforeach
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ ui('type') }}</label>
                     <select name="type" class="form-select">
-                        @foreach ($types as $t)<option value="{{ $t }}" {{ old('type', $issue->type) == $t ? 'selected' : '' }}>{{ ui('issue_type_'.$t) }}</option>@endforeach
+                        @foreach ($issue->project->issueTypes as $t)<option value="{{ $t->name }}" {{ old('type', $issue->type) == $t->name ? 'selected' : '' }}>{{ $t->name }}</option>@endforeach
                     </select>
                 </div>
                 <div class="col-md-3">

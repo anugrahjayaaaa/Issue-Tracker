@@ -67,6 +67,47 @@ class Project extends Model
         return $this->hasMany(Label::class);
     }
 
+    public function issueTypes(): HasMany
+    {
+        return $this->hasMany(IssueType::class)->orderBy('order');
+    }
+
+    public function statuses(): HasMany
+    {
+        return $this->hasMany(Status::class)->orderBy('order');
+    }
+
+    public function statusTransitions(): HasMany
+    {
+        return $this->hasMany(StatusTransition::class);
+    }
+
+    /** Default issue types + statuses copied into a new project (Jira-like start). */
+    public function seedDefaultFields(): void
+    {
+        if ($this->issueTypes()->exists() || $this->statuses()->exists()) {
+            return;
+        }
+        $types = [
+            ['name' => 'Bug', 'color' => '#dc3545', 'icon' => 'bi-bug', 'description' => 'Something is broken.', 'order' => 1],
+            ['name' => 'Feature', 'color' => '#0d6efd', 'icon' => 'bi-star', 'description' => 'New capability.', 'order' => 2],
+            ['name' => 'Task', 'color' => '#6c757d', 'icon' => 'bi-check2-square', 'description' => 'Work to do.', 'order' => 3],
+            ['name' => 'Epic', 'color' => '#6f42c1', 'icon' => 'bi-collection', 'description' => 'Large body of work.', 'order' => 4],
+        ];
+        foreach ($types as $t) {
+            $this->issueTypes()->create($t);
+        }
+        $statuses = [
+            ['name' => 'Open', 'color' => '#0dcaf0', 'is_closed' => false, 'order' => 1],
+            ['name' => 'In Progress', 'color' => '#ffc107', 'is_closed' => false, 'order' => 2],
+            ['name' => 'Blocked', 'color' => '#dc3545', 'is_closed' => false, 'order' => 3],
+            ['name' => 'Done', 'color' => '#198754', 'is_closed' => true, 'order' => 4],
+        ];
+        foreach ($statuses as $s) {
+            $this->statuses()->create($s);
+        }
+    }
+
     public function issues(): HasMany
     {
         return $this->hasMany(Issue::class);

@@ -300,4 +300,17 @@ return [
     'all_labels' => 'Semua label',
     'confirm_delete_label' => 'Hapus label ini? Isu yang menempel padanya akan dilepas.',
     'activity_timeline' => 'Aktivitas',
+
+    // ── issue tracker: dynamic fields (types/statuses/workflow) ──
+    'issue_fields' => 'Field Isu',
+    'issue_types' => 'Tipe Isu',
+    'statuses' => 'Status',
+    'workflow_transitions' => 'Transisi Workflow',
+    'workflow_transitions_hint' => 'Tentukan perubahan status yang diizinkan. Jika tidak ada transisi, semua perubahan status diperbolehkan.',
+    'no_transitions_free' => 'Tidak ada transisi — semua perubahan status diizinkan.',
+    'closed' => 'Tertutup',
+    'add' => 'Tambah',
+    'name' => 'Nama',
+    'invalid_transition' => 'Transisi tidak boleh berawal dan berakhir di status sama.',
+    'saved' => 'Tersimpan.',
 ];

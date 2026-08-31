@@ -300,4 +300,17 @@ return [
     'all_labels' => 'All labels',
     'confirm_delete_label' => 'Delete this label? Issues tagged with it will be untagged.',
     'activity_timeline' => 'Activity',
+
+    // ── issue tracker: dynamic fields (types/statuses/workflow) ──
+    'issue_fields' => 'Issue Fields',
+    'issue_types' => 'Issue Types',
+    'statuses' => 'Statuses',
+    'workflow_transitions' => 'Workflow Transitions',
+    'workflow_transitions_hint' => 'Define allowed status changes. If no transitions are defined, any status change is permitted.',
+    'no_transitions_free' => 'No transitions defined — all status changes allowed.',
+    'closed' => 'Closed',
+    'add' => 'Add',
+    'name' => 'Name',
+    'invalid_transition' => 'A transition cannot start and end on the same status.',
+    'saved' => 'Saved.',
 ];

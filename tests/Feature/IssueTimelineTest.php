@@ -32,7 +32,7 @@ class IssueTimelineTest extends TestCase
 
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'X',
-            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $manager->id,
+            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $manager->id,
         ]);
         $comment = Comment::create(['issue_id' => $issue->id, 'user_id' => $manager->id, 'body' => 'note']);
         $comment->update(['body' => 'edited']);
@@ -53,7 +53,7 @@ class IssueTimelineTest extends TestCase
         [$manager, $project] = $this->seedAndProject();
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'X',
-            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $manager->id,
+            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $manager->id,
         ]);
         // detach any auto activity (none expected here since observer already logged created)
         // Instead assert the collection is iterable and ordered; created is present

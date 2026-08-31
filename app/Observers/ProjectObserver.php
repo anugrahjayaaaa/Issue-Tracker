@@ -9,6 +9,7 @@ class ProjectObserver
 {
     public function created(Project $project): void
     {
+        $project->seedDefaultFields();
         activity()->causedBy(auth()->user())->withProperties([
             'ip' => Request::ip(), 'user_agent' => Request::userAgent(),
         ])->performedOn($project)->log('project_created');

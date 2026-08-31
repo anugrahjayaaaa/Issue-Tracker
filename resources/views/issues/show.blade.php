@@ -38,7 +38,7 @@
                             </div>
                         @endif
                         @can('comment.edit')
-                        @if ($comment->user_id === auth()->id() || App\Models\ProjectMember::isLead(auth()->user(), $issue->project))
+                        @if ($comment->user_id === auth()->id())
                         <div class="mt-1">
                             <button type="button" class="btn btn-sm btn-light border rounded-2" onclick="editComment({{ $comment->id }})"><i class="bi bi-pencil"></i></button>
                             <button type="button" class="btn btn-sm btn-light border rounded-2 text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-action="{{ route('issues.comments.destroy', $comment) }}"><i class="bi bi-trash"></i></button>
@@ -99,8 +99,8 @@
             <div class="card-body">
                 <table class="table table-sm mb-0">
                     <tr><td>{{ ui('project') }}</td><td>{{ $issue->project->key }}</td></tr>
-                    <tr><td>{{ ui('type') }}</td><td>{{ ui('issue_type_'.$issue->type) }}</td></tr>
-                    <tr><td>{{ ui('status') }}</td><td>{{ ui('issue_status_'.$issue->status) }}</td></tr>
+                    <tr><td>{{ ui('type') }}</td><td><span class="badge" style="background:{{ $issue->project->issueTypes->firstWhere('name', $issue->type)?->color ?? '#6c757d' }};color:#fff">{{ $issue->type }}</span></td></tr>
+                    <tr><td>{{ ui('status') }}</td><td><span class="badge" style="background:{{ $issue->project->statuses->firstWhere('name', $issue->status)?->color ?? '#6c757d' }};color:#fff">{{ $issue->status }}</span></td></tr>
                     <tr><td>{{ ui('priority') }}</td><td>{{ ui('issue_priority_'.$issue->priority) }}</td></tr>
                     @php
                         $canEditMeta = App\Models\ProjectMember::hasRole(auth()->user(), $issue->project, [App\Models\ProjectMember::ROLE_LEAD, App\Models\ProjectMember::ROLE_MEMBER]);
