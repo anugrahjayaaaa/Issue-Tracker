@@ -71,7 +71,9 @@ class IssueController extends Controller
                 $columns[$statusKey] = Issue::with('assignee')
                     ->where('project_id', $project->id)
                     ->where('status', $statusKey)
+                    ->orderByRaw('ISNULL(`order`)')
                     ->orderBy('order')
+                    ->orderBy('id')
                     ->get();
             }
         }
