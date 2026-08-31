@@ -72,19 +72,19 @@
 
                 <ul class="list-group list-group-flush">
                     @forelse ($project->members as $m)
-                    <li class="list-group-item d-flex justify-content-between align-items-center gap-2 px-0 py-2">
+                    <li class="list-group-item border-0 d-flex justify-content-between align-items-center gap-2 px-0 py-2">
                         <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
-                            <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:30px;height:30px">{{ strtoupper(substr($m->user->name ?? '?', 0, 1)) }}</span>
+                            <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px;height:28px;font-size:.7rem">{{ strtoupper(substr($m->user->name ?? '?', 0, 1)) }}</span>
                             <div class="min-w-0">
                                 <div class="fw-medium text-truncate">{{ $m->user->name ?? '-' }}</div>
-                                <small class="text-muted text-truncate d-block">{{ $m->user->email ?? '' }}</small>
+                                <small class="text-secondary text-truncate d-block">{{ $m->user->email ?? '' }}</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             @can('project.manage')
                             <form method="POST" action="{{ route('projects.members.update', [$project, $m]) }}" class="d-inline">
                                 @csrf @method('PUT')
-                                <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <select name="role" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
                                     <option value="lead" {{ $m->role == 'lead' ? 'selected' : '' }}>{{ ui('role_lead') }}</option>
                                     <option value="member" {{ $m->role == 'member' ? 'selected' : '' }}>{{ ui('role_member') }}</option>
                                     <option value="viewer" {{ $m->role == 'viewer' ? 'selected' : '' }}>{{ ui('role_viewer') }}</option>
@@ -92,7 +92,7 @@
                             </form>
                             <form method="POST" action="{{ route('projects.members.destroy', [$project, $m]) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_remove_member') }}')">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-light border rounded-2 text-danger" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-sm btn-light border-0 text-secondary p-1" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}" onmouseover="this.classList.add('text-danger')" onmouseout="this.classList.remove('text-danger')"><i class="bi bi-trash"></i></button>
                             </form>
                             @else
                             <span class="badge text-bg-info">{{ ui('role_'.$m->role) }}</span>
@@ -100,7 +100,7 @@
                         </div>
                     </li>
                     @empty
-                    <li class="list-group-item px-0 text-muted">{{ ui('no_members') }}</li>
+                    <li class="list-group-item border-0 px-0 text-muted">{{ ui('no_members') }}</li>
                     @endforelse
                 </ul>
             </div>
