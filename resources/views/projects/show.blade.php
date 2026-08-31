@@ -18,7 +18,7 @@
     <div class="col-lg-8">
         <div class="card shadow-sm mb-3">
             <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-card-text text-secondary"></i> {{ ui('description') }}</div>
-            <div class="card-body">{{ $project->description ? nl2br(e($project->description)) : '-' }}</div>
+            <div class="card-body rich-text">{!! $project->description ?: '-' !!}</div>
         </div>
 
         @if ($project->issues->isNotEmpty())

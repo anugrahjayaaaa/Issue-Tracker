@@ -9,16 +9,40 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Issue;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Project extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['key', 'name', 'description', 'owner_id', 'issue_seq'];
+    protected $fillable = ['key', 'name', 'slug', 'description', 'owner_id', 'issue_seq'];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+        // slug is auto from name unless explicitly provided (mirrors Plan pattern).
+        static::creating(function (Project $p) {
+            if (empty($p->slug)) {
+                $p->slug = Str::slug($p->name);
+            }
+        });
+    }
+
+    /** Folder-safe slug used for scoped upload paths. */
+    public function folder(): string
+    {
+        return $this->slug ?: Str::slug($this->name);
+    }
 
     protected function casts(): array
     {
         return ['issue_seq' => 'integer'];
+    }
+
+    // ponytail: shared sanitizeRichText() single source of truth for all rich-text.
+    public function setDescriptionAttribute($value): void
+    {
+        $this->attributes['description'] = sanitizeRichText($value);
     }
 
     public function owner(): BelongsTo

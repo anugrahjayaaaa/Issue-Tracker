@@ -15,6 +15,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectImageController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\LabelController;
@@ -129,6 +130,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/{project}/labels', [LabelController::class, 'store'])->name('projects.labels.store');
         Route::put('/{project}/labels/{label}', [LabelController::class, 'update'])->name('projects.labels.update');
         Route::delete('/{project}/labels/{label}', [LabelController::class, 'destroy'])->name('projects.labels.destroy');
+
+        // rich-text description image upload (scoped to project folder)
+        Route::post('/{project}/image', [ProjectImageController::class, 'store'])->name('projects.image.upload');
     });
 
     // Issues (project-scoped): read = any member; write = lead/member (enforced in Form Requests)

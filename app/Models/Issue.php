@@ -40,13 +40,9 @@ class Issue extends Model
         return ['due_date' => 'date'];
     }
 
-    // ponytail: minimal allowlist strip for rich-text; add mews/purifier if richer
-    // HTML is needed later. Blocks scripts/events while keeping basic formatting.
     public function setDescriptionAttribute($value): void
     {
-        $allowed = '<p><br><strong><em><u><s><ul><ol><li><a><blockquote><code><pre><h3><h4><span>';
-        $this->attributes['description'] = $value === null ? null
-            : strip_tags($value, $allowed);
+        $this->attributes['description'] = sanitizeRichText($value);
     }
 
     public function project(): BelongsTo

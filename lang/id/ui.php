@@ -226,6 +226,8 @@ return [
     'project' => 'Proyek',
     'new_project' => 'Proyek Baru',
     'edit_project' => 'Edit Proyek',
+    'slug' => 'Slug',
+    'slug_hint' => 'Otomatis dari nama bila kosong. Dipakai untuk folder unggahan.',
     'project_key' => 'Kode',
     'project_key_hint' => 'Kode pendek, mis. HEL (huruf besar, huruf/angka).',
     'owner' => 'Pemilik',

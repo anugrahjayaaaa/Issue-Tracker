@@ -226,6 +226,8 @@ return [
     'project' => 'Project',
     'new_project' => 'New Project',
     'edit_project' => 'Edit Project',
+    'slug' => 'Slug',
+    'slug_hint' => 'Auto from name if left empty. Used for upload folders.',
     'project_key' => 'Key',
     'project_key_hint' => 'Short code, e.g. HEL (uppercase, letters/numbers).',
     'owner' => 'Owner',
