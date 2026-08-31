@@ -5,10 +5,9 @@
 composer install
 cp .env.example .env && php artisan key:generate
 php artisan migrate --seed
-npm install && npm run dev   # or build
 ```
-- PHP 8.3+, Node 20+, MySQL 8.
-- AdminLTE lives in `public/vendor/adminlte/` (from dist zip 4.9.1).
+- PHP 8.3+, MySQL 8.
+- AdminLTE lives in `public/vendor/adminlte/` (from dist zip 4.9.1). No npm/Vite build step — all CSS/JS ships from `public/vendor/*` (committed).
 
 ## Code conventions
 - PHP: PSR-12, `declare(strict_types=1)`, type hints required.
@@ -45,7 +44,7 @@ npm install && npm run dev   # or build
 - [ ] CI green + staging smoke OK
 
 ## Git
-- Branches: `feature/*`, `fix/*`, `chore/*`. PR into `main`.
+- Branches: `feature/<name>`, `fix/<name>`, `chore/<name>` (no `feat/` prefix). PR into `main`.
 - Commits imperative: "Add login lockout", not "fixing".
 - Separate refactor from feature.
 

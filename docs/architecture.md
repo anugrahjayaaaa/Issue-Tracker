@@ -6,7 +6,7 @@
 | Language | PHP 8.3+ |
 | Framework | Laravel 13 (latest) |
 | DB | MySQL 8 (InnoDB, utf8mb4_0900_ai_ci) |
-| Frontend | Bootstrap 5.3 + AdminLTE 4.9.1 (Blade), Vite |
+| Frontend | Bootstrap 5.3 + AdminLTE 4.9.1 (Blade) |
 | Auth | Laravel built-in + spatie/laravel-permission |
 | Audit | spatie/laravel-activitylog |
 | API auth | Laravel Sanctum |

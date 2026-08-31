@@ -61,7 +61,7 @@ controller constructor.
 
 ## 5. Non-functional
 
-- Reuse base stack: Laravel 13, AdminLTE 4.9.1, Bootstrap 5.3, Vite, Pest,
+- Reuse base stack: Laravel 13, AdminLTE 4.9.1, Bootstrap 5.3, Pest (no npm/Vite build — assets from public/vendor/*),
   SQLite for dev (MySQL in prod).
 - Thin controllers, Form Requests, audit observer, i18n en/id.
 - Feature flag `issues` wraps the whole module (sidebar hides + route 404s

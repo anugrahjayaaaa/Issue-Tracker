@@ -30,7 +30,7 @@ following one convention — no per-module bespoke wiring.
 
 ## 4. Non-functional requirements
 - **Stack (locked):** PHP 8.3+, Laravel 13, MySQL 8 (utf8mb4_0900_ai_ci),
-  Bootstrap 5.3 + AdminLTE 4.9.1 (Blade), Vite, Pest.
+  Bootstrap 5.3 + AdminLTE 4.9.1 (Blade), Pest.
 - **Security:** every route/action gated by a permission; every module wrapped
   in its feature flag; CSP/HSTS/X-Frame-Options headers; no secrets in repo.
 - **Consistency:** one authorization pattern repo-wide (see §5). The
