@@ -2,20 +2,15 @@
 @section('content')
 @include('partials.flash-message')
 <div class="d-flex align-items-center justify-content-between mb-3">
-    <div class="d-flex align-items-center">
-        <a href="{{ route('projects.index') }}" class="btn btn-sm btn-light border rounded-2 me-3" data-bs-toggle="tooltip" data-bs-title="{{ ui('back') }}" aria-label="{{ ui('back') }}"><i class="bi bi-arrow-left"></i></a>
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ route('projects.index') }}" class="btn btn-sm btn-light border rounded-2" data-bs-toggle="tooltip" data-bs-title="{{ ui('back') }}" aria-label="{{ ui('back') }}"><i class="bi bi-arrow-left"></i></a>
         <div>
-            <h3 class="mb-1"><span class="badge text-bg-secondary me-1">{{ $project->key }}</span> {{ $project->name }}</h3>
-            <div class="text-muted small d-flex align-items-center gap-2">
-                <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:22px;height:22px;font-size:.7rem">{{ strtoupper(substr($project->owner->name ?? '?', 0, 1)) }}</span>
-                {{ $project->owner->name ?? '-' }}
-                <span class="text-secondary">·</span>
-                {{ ui('created') }}: {{ $project->created_at->format('d M Y') }}
-            </div>
+            <h3 class="mb-0 d-flex align-items-center gap-2">{{ $project->name }} <span class="badge text-bg-secondary fs-6">{{ $project->key }}</span></h3>
+            <div class="text-muted small mt-0">{{ ui('owner') }}: {{ $project->owner->name ?? '-' }} <span class="text-secondary">·</span> {{ ui('created') }}: {{ $project->created_at->format('d M Y') }}</div>
         </div>
     </div>
     @can('project.manage')
-    <a href="{{ route('projects.edit', $project) }}" class="btn btn-light border rounded-2"><i class="bi bi-pencil me-1"></i> {{ ui('edit') }}</a>
+    <a href="{{ route('projects.edit', $project) }}" class="btn btn-light border rounded-2 align-self-center"><i class="bi bi-pencil me-1"></i> {{ ui('edit') }}</a>
     @endcan
 </div>
 
@@ -50,33 +45,27 @@
 
     <div class="col-lg-4">
         <div class="card shadow-sm mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="d-flex align-items-center gap-2"><i class="bi bi-people text-secondary"></i> {{ ui('members') }} <span class="badge rounded-pill text-bg-secondary ms-1">{{ $project->members->count() }}</span></span>
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-people text-secondary"></i> {{ ui('members') }} <span class="badge rounded-pill text-bg-secondary ms-1">{{ $project->members->count() }}</span>
             </div>
             <div class="card-body">
                 @can('project.manage')
                 <form method="POST" action="{{ route('projects.members.store', $project) }}" class="mb-3">
                     @csrf
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <select name="user_id" class="form-select form-select-sm @error('user_id') is-invalid @enderror">
-                                <option value="">{{ ui('select_user') }}</option>
-                                @foreach ($users as $u)
-                                    <option value="{{ $u->id }}" {{ old('user_id') == $u->id ? 'selected' : '' }}>{{ $u->name }} ({{ $u->email }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-4">
-                            <select name="role" class="form-select form-select-sm">
-                                <option value="lead">{{ ui('role_lead') }}</option>
-                                <option value="member" selected>{{ ui('role_member') }}</option>
-                                <option value="viewer">{{ ui('role_viewer') }}</option>
-                            </select>
-                        </div>
-                        <div class="col-2">
-                            <button class="btn btn-primary btn-sm w-100" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('add') }}" aria-label="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
-                        </div>
+                    <div class="input-group input-group-sm mb-2">
+                        <select name="user_id" class="form-select @error('user_id') is-invalid @enderror">
+                            <option value="">{{ ui('select_user') }}</option>
+                            @foreach ($users as $u)
+                                <option value="{{ $u->id }}" {{ old('user_id') == $u->id ? 'selected' : '' }}>{{ $u->name }} ({{ $u->email }})</option>
+                            @endforeach
+                        </select>
+                        <button class="btn btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('add') }}" aria-label="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
                     </div>
+                    <select name="role" class="form-select form-select-sm" aria-label="{{ ui('role') }}">
+                        <option value="lead">{{ ui('role_lead') }}</option>
+                        <option value="member" selected>{{ ui('role_member') }}</option>
+                        <option value="viewer">{{ ui('role_viewer') }}</option>
+                    </select>
                     @error('user_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </form>
                 @endcan
