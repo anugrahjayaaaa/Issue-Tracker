@@ -158,6 +158,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/{issue}/edit', [IssueController::class, 'edit'])->name('issues.edit')->middleware('can:issue.edit');
         Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update');
         Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
+        Route::post('/{issue}/watch', [IssueController::class, 'watch'])->name('issues.watch')->middleware('can:issue.view');
+        Route::post('/{issue}/unwatch', [IssueController::class, 'unwatch'])->name('issues.unwatch')->middleware('can:issue.view');
+        Route::delete('/{issue}/attachments/{attachmentId}', [IssueController::class, 'destroyAttachment'])->name('issues.attachments.destroy')->middleware('can:issue.edit');
         Route::delete('/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->middleware('can:issue.delete');
         Route::post('/bulk', [IssueController::class, 'bulk'])->name('issues.bulk')->middleware('can:issue.delete');
         // rich-text description image upload (scoped to issue folder)

@@ -10,6 +10,7 @@ use App\Models\Issue;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\User;
+use App\Models\Attachment;
 use App\Notifications\IssueAssigned;
 use App\Notifications\IssueStatusChanged;
 use App\Http\Controllers\Concerns\Sortable;
@@ -95,6 +96,11 @@ class IssueController extends Controller
     public function store(IssueStoreRequest $request): RedirectResponse
     {
         $project = Project::findOrFail($request->input('project_id'));
+        // Cycle guard on create too.
+        if ($request->filled('parent_id') && (new Issue())->wouldCreateCycle($request->input('parent_id'))) {
+            return redirect()->route('issues.create', ['project_id' => $project->id])
+                ->with('error', __('messages.invalid_parent'));
+        }
         $issue = new Issue($request->validated());
         $issue->code = $project->nextIssueCode();
         $issue->reporter_id = $request->user()->id;
@@ -114,7 +120,7 @@ class IssueController extends Controller
     public function show(Issue $issue): View
     {
         $this->abortIfNotReader($issue->project);
-        $issue->load('assignee', 'reporter', 'parent', 'comments.user', 'comments.attachments', 'labels', 'attachments');
+        $issue->load('assignee', 'reporter', 'parent', 'children.statusLink', 'comments.user', 'comments.attachments', 'labels', 'attachments', 'watchers');
 
         return view('issues.show', compact('issue'));
     }
@@ -136,16 +142,49 @@ class IssueController extends Controller
             return redirect()->route('issues.show', $issue)
                 ->with('error', __('messages.status_transition_not_allowed'));
         }
+        // Cycle guard: cannot make this issue a child of its own descendant.
+        if ($request->filled('parent_id') && $issue->wouldCreateCycle($request->input('parent_id'))) {
+            return redirect()->route('issues.show', $issue)
+                ->with('error', __('messages.invalid_parent'));
+        }
         $oldAssignee = $issue->assignee_id;
         $issue->update($request->validated());
         $issue->labels()->sync($request->input('labels', []));
-
-        if ($issue->assignee_id && $issue->assignee_id !== $oldAssignee && $issue->assignee_id !== $request->user()->id) {
-            $issue->assignee->notify(new IssueAssigned($issue));
+        // Auto-subscribe new assignee (decision #3).
+        if ($issue->assignee_id && $issue->assignee_id !== $oldAssignee) {
+            $issue->syncWatchers([$issue->assignee_id]);
+            if ($issue->assignee_id !== $request->user()->id) {
+                $issue->assignee->notify(new IssueAssigned($issue));
+            }
         }
 
         return redirect()->route('issues.show', $issue)
             ->with('success', __('messages.issue_updated'));
+    }
+
+    public function watch(Issue $issue): RedirectResponse
+    {
+        $this->abortIfNotReader($issue->project);
+        $issue->syncWatchers([auth()->id()]);
+
+        return redirect()->route('issues.show', $issue)->with('success', __('messages.watched'));
+    }
+
+    public function unwatch(Issue $issue): RedirectResponse
+    {
+        $this->abortIfNotReader($issue->project);
+        $issue->watchers()->detach(auth()->id());
+
+        return redirect()->route('issues.show', $issue)->with('success', __('messages.unwatched'));
+    }
+
+    public function destroyAttachment(Issue $issue, int $attachmentId): RedirectResponse
+    {
+        $attachment = Attachment::findOrFail($attachmentId);
+        abort_unless($attachment->issue_id === $issue->id, 404);
+        $attachment->delete(); // AttachmentObserver removes the file
+
+        return redirect()->route('issues.show', $issue)->with('success', __('messages.attachment_deleted'));
     }
 
     public function changeStatus(IssueStatusRequest $request, Issue $issue): RedirectResponse
@@ -163,7 +202,10 @@ class IssueController extends Controller
         $issue->save();
 
         if ($old !== $issue->status) {
-            $recipients = collect([$issue->reporter, $issue->assignee])->filter();
+            $recipients = collect([$issue->reporter, $issue->assignee])
+                ->merge($issue->watchers) // decision #3: fan-out to watchers
+                ->filter()
+                ->unique('id');
             foreach ($recipients as $recipient) {
                 if ($recipient->id !== $request->user()->id) {
                     $recipient->notify(new IssueStatusChanged($issue, $old, $issue->status));

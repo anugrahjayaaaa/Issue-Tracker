@@ -9,9 +9,31 @@ class IssueObserver
 {
     public function created(Issue $issue): void
     {
+        // Decision #3: auto-subscribe reporter + assignee (commenter added on comment).
+        $issue->syncWatchers([$issue->reporter_id, $issue->assignee_id]);
         activity()->causedBy(auth()->user())->withProperties([
             'ip' => Request::ip(), 'user_agent' => Request::userAgent(),
         ])->performedOn($issue)->log('issue_created');
+    }
+
+    public function saved(Issue $issue): void
+    {
+        // Opt-in sub-task rollup (decision #2): when a child reaches a closed status,
+        // flip the parent to a closed status once ALL its children are closed.
+        if ($issue->project->subtask_rollup && $issue->parent_id) {
+            $parent = $issue->parent;
+            if ($parent && $parent->children()->count() > 0) {
+                $allClosed = $parent->children()
+                    ->whereHas('statusLink', fn ($q) => $q->where('is_closed', true))
+                    ->count() === $parent->children()->count();
+                if ($allClosed) {
+                    $closed = $parent->project->statuses()->where('is_closed', true)->orderBy('order')->first();
+                    if ($closed && $parent->status !== $closed->key) {
+                        $parent->update(['status' => $closed->key]);
+                    }
+                }
+            }
+        }
     }
 
     public function updated(Issue $issue): void

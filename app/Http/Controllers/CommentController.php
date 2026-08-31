@@ -34,6 +34,9 @@ class CommentController extends Controller
             'body' => $request->input('body'),
         ]);
 
+        // Decision #3: commenter auto-subscribes to the issue.
+        $issue->syncWatchers([$request->user()->id]);
+
         // notify mentioned users (by @username)
         $mentioned = User::whereIn('username', parseMentions($request->input('body')))->get();
         foreach ($mentioned as $mentionedUser) {

@@ -15,7 +15,7 @@ class Project extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['key', 'name', 'slug', 'description', 'owner_id', 'issue_seq'];
+    protected $fillable = ['key', 'name', 'slug', 'description', 'owner_id', 'issue_seq', 'subtask_rollup'];
 
     protected static function boot(): void
     {
@@ -36,7 +36,7 @@ class Project extends Model
 
     protected function casts(): array
     {
-        return ['issue_seq' => 'integer'];
+        return ['issue_seq' => 'integer', 'subtask_rollup' => 'boolean'];
     }
 
     // ponytail: shared sanitizeRichText() single source of truth for all rich-text.

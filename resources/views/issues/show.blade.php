@@ -4,7 +4,14 @@
 <div class="d-flex align-items-center justify-content-between mb-3">
     <div class="d-flex align-items-center">
         <a href="{{ route('issues.index', ['project_id' => $issue->project_id]) }}" class="btn btn-sm btn-light border rounded-2 me-2"><i class="bi bi-arrow-left"></i></a>
-        <h3 class="mb-0"><span class="badge text-bg-secondary me-1">{{ $issue->code }}</span> {{ $issue->title }}</h3>
+        <div>
+            @if ($issue->parent)
+                <div class="small text-muted mb-1">
+                    <i class="bi bi-arrow-return-right"></i> <a href="{{ route('issues.show', $issue->parent) }}" class="text-decoration-none">{{ $issue->parent->code }} · {{ $issue->parent->title }}</a>
+                </div>
+            @endif
+            <h3 class="mb-0"><span class="badge text-bg-secondary me-1">{{ $issue->code }}</span> {{ $issue->title }}</h3>
+        </div>
     </div>
     @can('issue.edit')
     <a href="{{ route('issues.edit', $issue) }}" class="btn btn-light border rounded-2"><i class="bi bi-pencil me-1"></i> {{ ui('edit') }}</a>
@@ -15,6 +22,38 @@
         <div class="card shadow-sm mb-3">
             <div class="card-header">{{ ui('description') }}</div>
             <div class="card-body">{!! $issue->description ?: '-' !!}</div>
+        </div>
+
+        {{-- Sub-tasks (Phase B) --}}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>{{ ui('subtasks') }}
+                    @php $prog = $issue->subtaskProgress(); @endphp
+                    @if ($prog['total'] > 0)
+                        <span class="badge text-bg-light border ms-1">{{ $prog['done'] }}/{{ $prog['total'] }}</span>
+                    @endif
+                </span>
+                @can('issue.create')
+                <a href="{{ route('issues.create', ['project_id' => $issue->project_id, 'parent_id' => $issue->id]) }}" class="btn btn-sm btn-light border rounded-2"><i class="bi bi-plus-lg"></i> {{ ui('add_subtask') }}</a>
+                @endcan
+            </div>
+            <div class="card-body">
+                @if ($issue->children->isNotEmpty())
+                    <ul class="list-unstyled mb-0">
+                        @foreach ($issue->children as $child)
+                            <li class="d-flex justify-content-between align-items-center py-1 @if(!$loop->last) border-bottom @endif">
+                                <a href="{{ route('issues.show', $child) }}" class="text-decoration-none">
+                                    <span class="badge text-bg-secondary me-1">{{ $child->code }}</span>
+                                    {{ $child->title }}
+                                </a>
+                                <x-issue-badge :issue="$child" field="status" />
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <div class="text-muted small">{{ ui('no_subtasks') }}</div>
+                @endif
+            </div>
         </div>
 
         {{-- Comments --}}
@@ -79,9 +118,17 @@
                 @if ($issue->attachments->isNotEmpty())
                 <div class="d-flex flex-wrap gap-2 mb-2">
                     @foreach ($issue->attachments as $att)
-                        <a href="{{ $att->url() }}" target="_blank" class="text-decoration-none">
-                            <span class="badge text-bg-light border">{{ basename($att->path) }}</span>
-                        </a>
+                        <span class="d-inline-flex align-items-center gap-1">
+                            <a href="{{ $att->url() }}" target="_blank" class="text-decoration-none">
+                                <span class="badge text-bg-light border">{{ basename($att->path) }}</span>
+                            </a>
+                            @can('issue.edit')
+                            <form method="POST" action="{{ route('issues.attachments.destroy', [$issue, $att]) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_delete') }}')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-link text-danger p-0"><i class="bi bi-x-circle"></i></button>
+                            </form>
+                            @endcan
+                        </span>
                     @endforeach
                 </div>
                 @else
@@ -166,14 +213,58 @@
                             @endif
                         </td>
                     </tr>
-                    <tr><td>{{ ui('labels') }}</td><td>
-                        @forelse ($issue->labels as $l)
-                            <span class="badge" style="background:{{ $l->color }}">{{ $l->name }}</span>
-                        @empty
-                            -
-                        @endforelse
-                    </td></tr>
+                    <tr>
+        <td>{{ ui('labels') }}</td>
+        <td>
+            @if ($canEditMeta)
+            <form method="POST" action="{{ route('issues.update', $issue) }}">
+                @csrf @method('PUT')
+                <select name="labels[]" class="form-select form-select-sm" multiple size="3">
+                    @foreach ($issue->project->labels as $l)
+                        <option value="{{ $l->id }}" @selected($issue->labels->contains($l->id))>{{ $l->name }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="btn btn-sm btn-light border rounded-2 mt-1"><i class="bi bi-check-lg"></i></button>
+            </form>
+            @else
+                @forelse ($issue->labels as $l)
+                    <span class="badge" style="background:{{ $l->color }}">{{ $l->name }}</span>
+                @empty
+                    -
+                @endforelse
+            @endif
+        </td>
+    </tr>
                 </table>
+            </div>
+        </div>
+
+        {{-- Watchers (Phase B) --}}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>{{ ui('watchers') }} <span class="badge text-bg-light border ms-1">{{ $issue->watchers->count() }}</span></span>
+                @if ($issue->watchers->contains(auth()->id()))
+                    <form method="POST" action="{{ route('issues.unwatch', $issue) }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-light border rounded-2"><i class="bi bi-eye-slash"></i> {{ ui('unwatch') }}</button>
+                    </form>
+                @else
+                    <form method="POST" action="{{ route('issues.watch', $issue) }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-light border rounded-2"><i class="bi bi-eye"></i> {{ ui('watch') }}</button>
+                    </form>
+                @endif
+            </div>
+            <div class="card-body">
+                @if ($issue->watchers->isNotEmpty())
+                    <div class="d-flex flex-wrap gap-1">
+                        @foreach ($issue->watchers as $w)
+                            <span class="badge text-bg-light border">{{ $w->name }}</span>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-muted small">{{ ui('no_watchers') }}</div>
+                @endif
             </div>
         </div>
     </div>

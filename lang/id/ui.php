@@ -294,6 +294,15 @@ return [
 
     // ── issue tracker: labels ──
     'labels' => 'Label',
+    'watchers' => 'Pengikut',
+    'no_watchers' => 'Belum ada pengikut.',
+    'watch' => 'Ikuti',
+    'unwatch' => 'Berhenti ikuti',
+    'subtasks' => 'Sub-tugas',
+    'add_subtask' => 'Tambah sub-tugas',
+    'no_subtasks' => 'Belum ada sub-tugas.',
+    'confirm_delete' => 'Hapus item ini?',
+    'parent' => 'Induk',
     'label_name' => 'Nama label',
     'color' => 'Warna',
     'labels_hint' => 'Tandai isu dalam proyek ini berdasarkan topik, prioritas, atau tipe. Muncul saat membuat/mengubah isu.',

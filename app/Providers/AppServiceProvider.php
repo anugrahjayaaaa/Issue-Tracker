@@ -8,8 +8,10 @@ use App\Models\Issue;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Attachment;
 use App\Observers\CommentObserver;
 use App\Observers\IssueObserver;
+use App\Observers\AttachmentObserver;
 use App\Observers\PermissionObserver;
 use App\Observers\ProjectObserver;
 use App\Observers\RoleObserver;
@@ -55,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
         Project::observe(ProjectObserver::class);
         Issue::observe(IssueObserver::class);
         Comment::observe(CommentObserver::class);
+        Attachment::observe(AttachmentObserver::class);
 
         // ponytail: Sentry DSN-gated; no-op locally when DSN empty
         if (class_exists(Sentry::class) && config('sentry.dsn')) {

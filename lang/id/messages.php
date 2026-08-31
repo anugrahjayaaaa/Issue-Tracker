@@ -93,6 +93,10 @@ return [
     'issues_deleted_count' => ':count isu dihapus.',
     'status_in_use' => 'Tidak bisa menghapus status yang masih dipakai oleh isu.',
     'issue_type_in_use' => 'Tidak bisa menghapus tipe isu yang masih dipakai oleh isu.',
+    'watched' => 'Anda sekarang mengikuti isu ini.',
+    'unwatched' => 'Anda berhenti mengikuti isu ini.',
+    'attachment_deleted' => 'Lampiran dihapus.',
+    'invalid_parent' => 'Parent tidak valid: isu tidak bisa dibuat di bawah sub-tugasnya sendiri.',
 
     // ── auth (login lock / verification) ──
     'too_many_attempts' => 'Terlalu banyak percobaan. Coba lagi dalam :seconds detik.',
