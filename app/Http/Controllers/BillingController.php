@@ -72,9 +72,10 @@ class BillingController extends Controller
      */
     public function webhook(Request $request): JsonResponse
     {
-        $secret = config('billing.webhook_secret', 'dummy-webhook-secret');
+        $secret = config('billing.webhook_secret');
 
-        if ($secret !== ($request->header('X-Billing-Signature') ?? '')) {
+        // ponytail: hash_equals = constant-time; null secret (unset env) fails closed via abort.
+        if (! is_string($secret) || ! hash_equals($secret, (string) ($request->header('X-Billing-Signature') ?? ''))) {
             abort(403, 'Invalid webhook signature');
         }
 

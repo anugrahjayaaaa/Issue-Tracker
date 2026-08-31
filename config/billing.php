@@ -7,5 +7,6 @@ return [
 
     'gateway' => env('BILLING_GATEWAY', 'dummy'),
     'gateway_url' => env('BILLING_GATEWAY_URL'),
-    'webhook_secret' => env('BILLING_WEBHOOK_SECRET', 'dummy-webhook-secret'),
+    // ponytail: no fallback — an unset secret must fail closed, not default to a public value.
+    'webhook_secret' => env('BILLING_WEBHOOK_SECRET'),
 ];
