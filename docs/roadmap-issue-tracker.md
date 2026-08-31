@@ -232,15 +232,19 @@ Every phase reuses existing patterns (FormRequest, observers, `ProjectMember::ha
 
 ---
 
-## 5. Open decisions (discuss before Phase D)
+## 5. Decisions (taken — follow these when building)
 
-1. Strict workflow (required transitions + per-role) — Phase A/B keep free; add in D only if needed.
-2. Sub-task rollup — parent status derive from children? (recommended opt-in).
-3. Watcher default — reporter + assignee auto-subscribe (recommended yes).
-4. Attachment model — unify image + non-image into one table (recommended).
-5. Search scope — MySQL FULLTEXT now; external engine only at scale.
-6. Bulk actions — add assign + label in bulk (Phase B/C).
-7. Components / roadmaps / automation — scope per actual demand; defer if not wanted.
+Agreed 2026-08-31; defaults follow the Senior-Dev/Architect recommendations (no over-build).
+
+1. **Strict workflow** — keep **free transitions** through Phase A/B/C; add required + per-role transitions only in **Phase D**, and only if a project opts in. No premature workflow-scheme engine.
+2. **Sub-task rollup** — parent auto-flips to `is_closed` status at 100% children done, **opt-in per project** (flag on `projects`). Default off.
+3. **Watcher default** — **YES**: auto-subscribe reporter + assignee (and commenter) on create/assign/comment. Pivot `issue_watchers`; notify scope = watchers ∩ `ProjectMember::hasRole()`.
+4. **Attachment model** — **unify** image + non-image into one `attachments` table (extend with `name` + `is_image`); merge `IssueImageController`/`CommentImageController` into one `AttachmentController`; `AttachmentObserver` deletes files on delete.
+5. **Search scope** — **MySQL 8 FULLTEXT** on `issues.title`+`description` now; external engine (Meilisearch/Elastic) only if row counts make FULLTEXT slow. Cmd+K reuses the list endpoint.
+6. **Bulk actions** — **add bulk assign + bulk label** in Phase B/C (extend existing bulk pathway). Bulk delete/re-status already exist.
+7. **Components / roadmaps / automation** — **DEFER**. Build only on real demand. Comment threading + sprints/cycles are Phase D (deferred); automation rules Phase D-last.
+
+These decisions are reflected in the phase files/acceptance above (Phase B: watchers + attachments + bulk; Phase C: search FULLTEXT + API; Phase D: strict workflow opt-in + rollup flag + deferred items).
 
 ## 6. References
 - Jira: issue types, workflows, components, watchers, subtasks, sprints, roadmaps, automation.
