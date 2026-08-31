@@ -1,9 +1,9 @@
 @extends('layouts.app')
 @section('content')
 @include('partials.flash-message')
-<div class="d-flex align-items-start justify-content-between mb-3">
+<div class="d-flex align-items-center justify-content-between mb-3">
     <div class="d-flex align-items-center">
-        <a href="{{ route('projects.index') }}" class="btn btn-sm btn-light border rounded-2 me-3 mt-1" data-bs-toggle="tooltip" data-bs-title="{{ ui('back') }}" aria-label="{{ ui('back') }}"><i class="bi bi-arrow-left"></i></a>
+        <a href="{{ route('projects.index') }}" class="btn btn-sm btn-light border rounded-2 me-3" data-bs-toggle="tooltip" data-bs-title="{{ ui('back') }}" aria-label="{{ ui('back') }}"><i class="bi bi-arrow-left"></i></a>
         <div>
             <h3 class="mb-1"><span class="badge text-bg-secondary me-1">{{ $project->key }}</span> {{ $project->name }}</h3>
             <div class="text-muted small d-flex align-items-center gap-2">
@@ -51,8 +51,7 @@
     <div class="col-lg-4">
         <div class="card shadow-sm mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="d-flex align-items-center gap-2"><i class="bi bi-people text-secondary"></i> {{ ui('members') }}</span>
-                <span class="badge text-bg-secondary">{{ $project->members->count() }}</span>
+                <span class="d-flex align-items-center gap-2"><i class="bi bi-people text-secondary"></i> {{ ui('members') }} <span class="badge rounded-pill text-bg-secondary ms-1">{{ $project->members->count() }}</span></span>
             </div>
             <div class="card-body">
                 @can('project.manage')
@@ -84,15 +83,15 @@
 
                 <ul class="list-group list-group-flush">
                     @forelse ($project->members as $m)
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:30px;height:30px">{{ strtoupper(substr($m->user->name ?? '?', 0, 1)) }}</span>
-                            <div>
-                                <div class="fw-medium">{{ $m->user->name ?? '-' }}</div>
-                                <small class="text-muted">{{ $m->user->email ?? '' }}</small>
+                    <li class="list-group-item d-flex justify-content-between align-items-center gap-2 px-0 py-2">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                            <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:30px;height:30px">{{ strtoupper(substr($m->user->name ?? '?', 0, 1)) }}</span>
+                            <div class="min-w-0">
+                                <div class="fw-medium text-truncate">{{ $m->user->name ?? '-' }}</div>
+                                <small class="text-muted text-truncate d-block">{{ $m->user->email ?? '' }}</small>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             @can('project.manage')
                             <form method="POST" action="{{ route('projects.members.update', [$project, $m]) }}" class="d-inline">
                                 @csrf @method('PUT')

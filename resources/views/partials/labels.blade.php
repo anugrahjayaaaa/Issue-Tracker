@@ -10,11 +10,11 @@
         <form method="POST" action="{{ route('projects.labels.store', $project) }}" class="mb-3">
             @csrf
             <div class="row g-2">
-                <div class="col-5">
+                <div class="col-6">
                     <input type="text" name="name" class="form-control form-control-sm @error('name') is-invalid @enderror" placeholder="{{ ui('label_name') }}">
                 </div>
-                <div class="col-3">
-                    <input type="color" name="color" class="form-control form-control-sm form-control-color" value="#3b82f6" title="{{ ui('color') }}">
+                <div class="col-4">
+                    <input type="color" name="color" class="form-control form-control-sm form-control-color" value="#3b82f6" data-bs-toggle="tooltip" data-bs-title="{{ ui('color') }}">
                 </div>
                 <div class="col-2">
                     <button class="btn btn-primary btn-sm w-100" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('add') }}" aria-label="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
@@ -25,16 +25,16 @@
 
         <ul class="list-group list-group-flush">
             @forelse ($project->labels as $label)
-            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge" style="background:{{ $label->color }};width:14px;height:14px;padding:0;border-radius:4px">&nbsp;</span>
-                    <span>{{ $label->name }}</span>
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-2 px-0 py-2">
+                <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                    <span class="badge flex-shrink-0" style="background:{{ $label->color }};width:14px;height:14px;padding:0;border-radius:4px">&nbsp;</span>
+                    <span class="text-truncate">{{ $label->name }}</span>
                 </div>
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 flex-shrink-0">
                     <form method="POST" action="{{ route('projects.labels.update', [$project, $label]) }}" class="d-inline">
                         @csrf @method('PUT')
-                        <div class="row g-1 align-items-center">
-                            <div class="col-auto"><input type="text" name="name" value="{{ $label->name }}" class="form-control form-control-sm" style="width:110px"></div>
+                        <div class="row g-1 align-items-center flex-nowrap">
+                            <div class="col-auto"><input type="text" name="name" value="{{ $label->name }}" class="form-control form-control-sm" style="width:96px"></div>
                             <div class="col-auto"><input type="color" name="color" value="{{ $label->color }}" class="form-control form-control-sm form-control-color"></div>
                             <div class="col-auto">
                                 <button class="btn btn-sm btn-light border rounded-2" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('save') }}" aria-label="{{ ui('save') }}"><i class="bi bi-check-lg"></i></button>
