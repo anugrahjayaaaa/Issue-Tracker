@@ -145,7 +145,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [IssueController::class, 'store'])->name('issues.store')->middleware('can:issue.create');
         Route::get('/{issue}', [IssueController::class, 'show'])->name('issues.show');
         Route::get('/{issue}/edit', [IssueController::class, 'edit'])->name('issues.edit')->middleware('can:issue.edit');
-        Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update')->middleware('can:issue.edit');
+        Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update');
         Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
         Route::delete('/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->middleware('can:issue.delete');
         // rich-text description image upload (scoped to issue folder)

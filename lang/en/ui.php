@@ -284,6 +284,7 @@ return [
     'post_comment' => 'Post comment',
     'attach_image' => 'Attach image',
     'confirm_delete_comment' => 'Delete this comment?',
+    'comment' => 'Comment',
     'comment_added' => 'Comment added.',
     'comment_updated' => 'Comment updated.',
     'comment_deleted' => 'Comment deleted.',

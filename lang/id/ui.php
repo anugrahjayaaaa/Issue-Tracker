@@ -284,6 +284,7 @@ return [
     'post_comment' => 'Kirim komentar',
     'attach_image' => 'Lampirkan gambar',
     'confirm_delete_comment' => 'Hapus komentar ini?',
+    'comment' => 'Komentar',
     'comment_added' => 'Komentar ditambahkan.',
     'comment_updated' => 'Komentar diperbarui.',
     'comment_deleted' => 'Komentar dihapus.',

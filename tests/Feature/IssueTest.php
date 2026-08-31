@@ -204,6 +204,27 @@ class IssueTest extends TestCase
             ->assertInvalid('file');
     }
 
+    public function test_member_can_patch_assignee_and_due_date(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        // member (no issue.edit permission) patches only meta fields
+        $user->revokePermissionTo('issue.edit');
+        $this->assertFalse($user->can('issue.edit'));
+
+        $this->actingAs($user)
+            ->put(route('issues.update', $issue), ['assignee_id' => $manager->id, 'due_date' => '2026-09-15'])
+            ->assertRedirect(route('issues.show', $issue));
+
+        $issue->refresh();
+        $this->assertEquals($manager->id, $issue->assignee_id);
+        $this->assertEquals('2026-09-15', $issue->due_date->format('Y-m-d'));
+    }
+
     private function filenameFrom($response): string
     {
         return basename(json_decode($response->getContent())->location);

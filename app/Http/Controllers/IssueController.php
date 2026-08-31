@@ -131,7 +131,7 @@ class IssueController extends Controller
             $issue->assignee->notify(new IssueAssigned($issue));
         }
 
-        return redirect()->route('issues.index', ['project_id' => $issue->project_id])
+        return redirect()->route('issues.show', $issue)
             ->with('success', __('messages.issue_updated'));
     }
 
