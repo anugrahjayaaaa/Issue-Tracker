@@ -17,6 +17,7 @@ class ProjectStoreRequest extends FormRequest
         return [
             'key' => 'required|string|max:10|unique:projects,key|regex:/^[A-Z0-9]+$/',
             'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|alpha_dash|unique:projects,slug',
             'description' => 'nullable|string|max:2000',
         ];
     }

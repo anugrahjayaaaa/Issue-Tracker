@@ -72,6 +72,7 @@ return [
     'project_created' => 'Project created.',
     'project_updated' => 'Project updated.',
     'project_deleted' => 'Project deleted.',
+    'project_image_quota_exceeded' => 'Storage quota exceeded. Remove some images or upgrade your plan.',
     'member_added' => 'Member added.',
     'member_role_updated' => 'Member role updated.',
     'member_removed' => 'Member removed.',

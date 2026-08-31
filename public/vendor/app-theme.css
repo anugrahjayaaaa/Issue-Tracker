@@ -156,6 +156,16 @@ body {
 /* Page title */
 .app-content-header h3 { font-weight: 600; font-size: 1.35rem; }
 
+/* Rich-text rendered output (Quill HTML) — keep it readable on dark surface */
+.rich-text { color: var(--lbp-text); line-height: 1.6; word-break: break-word; }
+.rich-text p { margin: 0 0 .6rem; }
+.rich-text :last-child { margin-bottom: 0; }
+.rich-text ul, .rich-text ol { padding-left: 1.25rem; margin: 0 0 .6rem; }
+.rich-text blockquote { border-left: 3px solid var(--lbp-border); margin: 0 0 .6rem; padding: .25rem 0 .25rem .75rem; color: var(--lbp-muted); }
+.rich-text pre, .rich-text code { background: var(--lbp-surface-2); border-radius: 6px; padding: .1rem .35rem; font-size: 90%; }
+.rich-text pre { padding: .6rem .75rem; overflow-x: auto; }
+.rich-text a { color: var(--lbp-primary); }
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }

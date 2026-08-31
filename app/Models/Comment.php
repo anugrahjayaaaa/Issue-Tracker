@@ -14,12 +14,10 @@ class Comment extends Model
 
     protected $fillable = ['issue_id', 'user_id', 'body'];
 
-    // ponytail: minimal allowlist strip for rich-text; add mews/purifier if richer
-    // HTML is needed later. Blocks scripts/events while keeping basic formatting.
+    // ponytail: shared sanitizeRichText() single source of truth for all rich-text.
     public function setBodyAttribute($value): void
     {
-        $allowed = '<p><br><strong><em><u><s><ul><ol><li><a><blockquote><code><pre><h3><h4><span><img>';
-        $this->attributes['body'] = $value === null ? null : strip_tags($value, $allowed);
+        $this->attributes['body'] = sanitizeRichText($value);
     }
 
     public function issue(): BelongsTo

@@ -1,49 +1,47 @@
 @can('project.manage')
 <div class="card shadow-sm mb-3">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span>{{ ui('labels') }}</span>
+    <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-tags text-secondary"></i> {{ ui('labels') }}
+        <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-title="{{ ui('labels_hint') }}"></i>
     </div>
     <div class="card-body">
         <form method="POST" action="{{ route('projects.labels.store', $project) }}" class="mb-3">
             @csrf
-            <div class="row g-2">
-                <div class="col-5">
-                    <input type="text" name="name" class="form-control form-control-sm @error('name') is-invalid @enderror" placeholder="{{ ui('label_name') }}">
-                </div>
-                <div class="col-3">
-                    <input type="color" name="color" class="form-control form-control-sm form-control-color" value="#3b82f6">
-                </div>
-                <div class="col-2">
-                    <button class="btn btn-primary btn-sm w-100" title="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
-                </div>
+            <div class="input-group input-group-sm">
+                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" placeholder="{{ ui('label_name') }}">
+                <input type="color" name="color" class="form-control form-control-color p-1" style="width:34px;flex:0 0 34px" value="#3b82f6" data-bs-toggle="tooltip" data-bs-title="{{ ui('color') }}">
+                <button class="btn btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('add') }}" aria-label="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
             </div>
             @error('name')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
         </form>
 
         <ul class="list-group list-group-flush">
             @forelse ($project->labels as $label)
-            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge" style="background:{{ $label->color }}">&nbsp;</span>
-                    <span>{{ $label->name }}</span>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <form method="POST" action="{{ route('projects.labels.update', [$project, $label]) }}" class="d-inline">
-                        @csrf @method('PUT')
-                        <div class="row g-1 align-items-center">
-                            <div class="col-auto"><input type="text" name="name" value="{{ $label->name }}" class="form-control form-control-sm" style="width:120px"></div>
-                            <div class="col-auto"><input type="color" name="color" value="{{ $label->color }}" class="form-control form-control-sm form-control-color"></div>
-                            <div class="col-auto"><button class="btn btn-sm btn-light border rounded-2" title="{{ ui('save') }}"><i class="bi bi-check-lg"></i></button></div>
+            <li class="list-group-item border-0 px-3 py-2">
+                <details class="label-row">
+                    <summary class="d-flex justify-content-between align-items-center gap-2" style="cursor:pointer;list-style:none">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                            <span class="flex-shrink-0 rounded" style="width:12px;height:12px;background:{{ $label->color }}"></span>
+                            <span class="text-truncate">{{ $label->name }}</span>
                         </div>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <i class="bi bi-pencil text-secondary" data-bs-toggle="tooltip" data-bs-title="{{ ui('edit') }}"></i>
+                            <form method="POST" action="{{ route('projects.labels.destroy', [$project, $label]) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_delete_label') }}')">
+                                @csrf @method('DELETE')
+                                <button class="btn btn-sm btn-light border-0 text-danger p-0" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </summary>
+                    <form method="POST" action="{{ route('projects.labels.update', [$project, $label]) }}" class="d-flex gap-2 mt-2">
+                        @csrf @method('PUT')
+                        <input type="text" name="name" value="{{ $label->name }}" class="form-control form-control-sm flex-grow-1">
+                        <input type="color" name="color" value="{{ $label->color }}" class="form-control form-control-sm form-control-color p-1" style="width:34px;flex:0 0 34px">
+                        <button class="btn btn-sm btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('save') }}" aria-label="{{ ui('save') }}"><i class="bi bi-check-lg"></i></button>
                     </form>
-                    <form method="POST" action="{{ route('projects.labels.destroy', [$project, $label]) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_delete_label') }}')">
-                        @csrf @method('DELETE')
-                        <button class="btn btn-sm btn-light border rounded-2 text-danger"><i class="bi bi-trash"></i></button>
-                    </form>
-                </div>
+                </details>
             </li>
             @empty
-            <li class="list-group-item px-0 text-muted">{{ ui('no_labels') }}</li>
+            <li class="list-group-item border-0 px-0 text-muted">{{ ui('no_labels') }}</li>
             @endforelse
         </ul>
     </div>

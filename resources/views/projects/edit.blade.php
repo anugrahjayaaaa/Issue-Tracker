@@ -11,20 +11,25 @@
         <form method="POST" action="{{ route('projects.update', $project) }}">
             @csrf @method('PUT')
             <div class="mb-3">
-                <label class="form-label">{{ ui('project_key') }}</label>
-                <input type="text" name="key" class="form-control @error('key') is-invalid @enderror" value="{{ old('key', $project->key) }}" maxlength="10" style="text-transform:uppercase">
-                @error('key')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            </div>
-            <div class="mb-3">
                 <label class="form-label">{{ ui('project') }}</label>
                 <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $project->name) }}">
                 @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="mb-3">
-                <label class="form-label">{{ ui('description') }}</label>
-                <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="4">{{ old('description', $project->description) }}</textarea>
-                @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                <label class="form-label">{{ ui('slug') }}</label>
+                <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug', $project->slug) }}">
+                <div class="form-text">{{ ui('slug_hint') }}</div>
+                @error('slug')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
+            <div class="mb-3">
+                <label class="form-label">{{ ui('project_key') }}</label>
+                <input type="text" name="key" class="form-control @error('key') is-invalid @enderror" value="{{ old('key', $project->key) }}" maxlength="10" style="text-transform:uppercase">
+                @error('key')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            @include('partials.rich-text-field', [
+                'value' => old('description', $project->description),
+                'uploadUrl' => route('projects.image.upload', $project),
+            ])
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
         </form>
     </div>
