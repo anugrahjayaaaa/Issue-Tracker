@@ -1,11 +1,11 @@
 @extends('layouts.app')
 @section('content')
 @include('partials.flash-message')
-<div class="d-flex align-items-center justify-content-between mb-3">
+<div class="d-flex align-items-start justify-content-between mb-3">
     <div class="d-flex align-items-center">
-        <a href="{{ route('projects.index') }}" class="btn btn-sm btn-light border rounded-2 me-2" data-bs-toggle="tooltip" data-bs-title="{{ ui('back') }}" aria-label="{{ ui('back') }}"><i class="bi bi-arrow-left"></i></a>
+        <a href="{{ route('projects.index') }}" class="btn btn-sm btn-light border rounded-2 me-3 mt-1" data-bs-toggle="tooltip" data-bs-title="{{ ui('back') }}" aria-label="{{ ui('back') }}"><i class="bi bi-arrow-left"></i></a>
         <div>
-            <h3 class="mb-0"><span class="badge text-bg-secondary me-1">{{ $project->key }}</span> {{ $project->name }}</h3>
+            <h3 class="mb-1"><span class="badge text-bg-secondary me-1">{{ $project->key }}</span> {{ $project->name }}</h3>
             <div class="text-muted small d-flex align-items-center gap-2">
                 <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:22px;height:22px;font-size:.7rem">{{ strtoupper(substr($project->owner->name ?? '?', 0, 1)) }}</span>
                 {{ $project->owner->name ?? '-' }}
@@ -52,14 +52,14 @@
         <div class="card shadow-sm mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="d-flex align-items-center gap-2"><i class="bi bi-people text-secondary"></i> {{ ui('members') }}</span>
-                <span class="badge text-bg-light">{{ $project->members->count() }}</span>
+                <span class="badge text-bg-secondary">{{ $project->members->count() }}</span>
             </div>
             <div class="card-body">
                 @can('project.manage')
                 <form method="POST" action="{{ route('projects.members.store', $project) }}" class="mb-3">
                     @csrf
                     <div class="row g-2">
-                        <div class="col-7">
+                        <div class="col-6">
                             <select name="user_id" class="form-select form-select-sm @error('user_id') is-invalid @enderror">
                                 <option value="">{{ ui('select_user') }}</option>
                                 @foreach ($users as $u)
@@ -67,7 +67,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <select name="role" class="form-select form-select-sm">
                                 <option value="lead">{{ ui('role_lead') }}</option>
                                 <option value="member" selected>{{ ui('role_member') }}</option>
@@ -75,7 +75,7 @@
                             </select>
                         </div>
                         <div class="col-2">
-                            <button class="btn btn-primary btn-sm w-100"><i class="bi bi-plus-lg"></i></button>
+                            <button class="btn btn-primary btn-sm w-100" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('add') }}" aria-label="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
                         </div>
                     </div>
                     @error('user_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -84,7 +84,7 @@
 
                 <ul class="list-group list-group-flush">
                     @forelse ($project->members as $m)
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                         <div class="d-flex align-items-center gap-2">
                             <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:30px;height:30px">{{ strtoupper(substr($m->user->name ?? '?', 0, 1)) }}</span>
                             <div>
@@ -104,7 +104,7 @@
                             </form>
                             <form method="POST" action="{{ route('projects.members.destroy', [$project, $m]) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_remove_member') }}')">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-light border rounded-2 text-danger" title="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-sm btn-light border rounded-2 text-danger" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
                             </form>
                             @else
                             <span class="badge text-bg-info">{{ ui('role_'.$m->role) }}</span>

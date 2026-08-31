@@ -290,6 +290,8 @@ return [
     // ── issue tracker: labels ──
     'labels' => 'Label',
     'label_name' => 'Nama label',
+    'color' => 'Warna',
+    'labels_hint' => 'Tandai isu dalam proyek ini berdasarkan topik, prioritas, atau tipe. Muncul saat membuat/mengubah isu.',
     'no_labels' => 'Belum ada label.',
     'no_labels_hint' => 'Buat label di halaman proyek dulu.',
     'all_labels' => 'Semua label',

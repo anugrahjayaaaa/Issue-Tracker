@@ -290,6 +290,8 @@ return [
     // ── issue tracker: labels ──
     'labels' => 'Labels',
     'label_name' => 'Label name',
+    'color' => 'Color',
+    'labels_hint' => 'Tag issues within this project by topic, priority, or type. Visible when creating/editing issues.',
     'no_labels' => 'No labels yet.',
     'no_labels_hint' => 'Create labels on the project page first.',
     'all_labels' => 'All labels',
