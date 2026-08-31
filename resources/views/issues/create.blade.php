@@ -5,6 +5,7 @@
     <a href="{{ route('issues.index') }}" class="btn btn-sm btn-light border rounded-2 me-2"><i class="bi bi-arrow-left"></i></a>
     <h3 class="mb-0">{{ ui('new_issue') }}</h3>
 </div>
+
 <div class="card shadow-sm">
     <div class="card-body">
         <form method="POST" action="{{ route('issues.store') }}" id="issue-form">
@@ -53,8 +54,7 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">{{ ui('description') }}</label>
-                <div id="issue-description-editor" class="form-control" style="min-height:140px">{{ old('description') }}</div>
-                <input type="hidden" name="description" id="issue-description" value="{{ old('description') }}">
+                @include('partials.rich-text-field', ['uploadUrl' => ''])
             </div>
             @include('partials.labels-field')
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
@@ -63,17 +63,6 @@
     </div>
 </div>
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const editor = document.getElementById('issue-description-editor');
-    const hidden = document.getElementById('issue-description');
-    if (!editor) return;
-    // ponytail: contenteditable + hidden-input sync; reuse Issue::setDescriptionAttribute sanitize
-    editor.setAttribute('contenteditable', 'true');
-    const sync = () => { hidden.value = editor.innerHTML; };
-    editor.addEventListener('input', sync);
-    document.getElementById('issue-form')?.addEventListener('submit', sync);
-});
-</script>
+{{-- ponytail: rich-text-field (TinyMCE) owns the description editor + submit sync. --}}
 @endpush
 @endsection

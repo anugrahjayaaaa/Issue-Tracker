@@ -18,6 +18,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectImageController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\IssueController;
+use App\Http\Controllers\IssueImageController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RoleController;
@@ -146,7 +147,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update')->middleware('can:issue.edit');
         Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
         Route::delete('/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->middleware('can:issue.delete');
-        Route::post('/bulk', [IssueController::class, 'bulk'])->name('issues.bulk')->middleware('can:issue.delete');
+        // rich-text description image upload (scoped to issue folder)
+        Route::post('/{issue}/image', [IssueImageController::class, 'store'])->name('issues.image.upload');
 
         // Comments (project-scoped, same gate as issues)
         Route::post('/{issue}/comments', [CommentController::class, 'store'])->name('issues.comments.store')->middleware('can:comment.create');

@@ -8,6 +8,8 @@ use App\Models\ProjectMember;
 use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class IssueTest extends TestCase
@@ -156,5 +158,54 @@ class IssueTest extends TestCase
         $issue = Issue::where('code', 'HEL-1')->first();
         $this->assertNotNull($issue);
         $this->assertSame(Issue::STATUS_OPEN, $issue->status);
+    }
+
+    public function test_image_upload_is_scoped_to_issue_folder_and_returns_url(): void
+    {
+        Storage::fake('public');
+        [$manager, $project, $user] = $this->seedAndProject();
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('issues.image.upload', $issue), [
+                'file' => UploadedFile::fake()->image('pic.png', 10, 10),
+            ]);
+
+        $response->assertOk()->assertJsonStructure(['location']);
+        Storage::disk('public')->assertExists(
+            'projects/'.$project->folder().'/issues/'.$issue->code.'/description/'.$this->filenameFrom($response)
+        );
+    }
+
+    public function test_image_upload_blocked_when_quota_exceeded(): void
+    {
+        Storage::fake('public');
+        [$manager, $project, $user] = $this->seedAndProject(ProjectMember::ROLE_LEAD);
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        $free = \App\Models\Plan::where('slug', 'free')->first();
+        $limits = array_merge($free->limits ?? [], ['max_storage_mb' => 1]); // 1 MB cap
+        \App\Models\Plan::where('slug', 'free')->update(['limits' => $limits]);
+
+        // Pre-fill the issue folder with ~1.5 MB so a new upload exceeds the 1 MB cap.
+        Storage::disk('public')->put(
+            'projects/'.$project->folder().'/issues/'.$issue->code.'/description/seed.bin',
+            str_repeat('x', 1536 * 1024)
+        );
+
+        $this->actingAs($user)
+            ->post(route('issues.image.upload', $issue), ['file' => UploadedFile::fake()->image('pic.png', 10, 10)])
+            ->assertInvalid('file');
+    }
+
+    private function filenameFrom($response): string
+    {
+        return basename(json_decode($response->getContent())->location);
     }
 }
