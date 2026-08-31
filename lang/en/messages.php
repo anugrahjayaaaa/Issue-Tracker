@@ -22,6 +22,7 @@ return [
     'main_menu' => 'Main Menu',
     'access_management' => 'Access Management',
     'monitoring' => 'Monitoring',
+    'periscope' => 'Periscope',
     'template' => 'Template',
     'login' => 'Login',
     'translations' => 'Translations',

@@ -22,6 +22,7 @@ return [
     'main_menu' => 'Menu Utama',
     'access_management' => 'Manajemen Akses',
     'monitoring' => 'Pemantauan',
+    'periscope' => 'Periscope',
     'template' => 'Template',
     'login' => 'Masuk',
     'translations' => 'Terjemahan',
