@@ -26,25 +26,28 @@ class ProjectImageRequest extends FormRequest
      * Reject if the upload would exceed the active plan's storage quota.
      * ponytail: quota is computed live from bytes on disk under the
      * project's scoped folder — no separate accounting table to drift.
+     * (Laravel 13 uses after() instead of passedValidation().)
      */
-    protected function passedValidation(): void
+    public function after(): array
     {
-        /** @var Project $project */
-        $project = $this->route('project');
-        $quotaMb = PlanService::for()->storageQuotaMb();
+        return [
+            function (/* Validator $validator */) {
+                /** @var Project $project */
+                $project = $this->route('project');
+                $quotaMb = PlanService::for()->storageQuotaMb();
 
-        if ($quotaMb <= 0) {
-            return; // unlimited
-        }
+                if ($quotaMb <= 0) {
+                    return; // unlimited
+                }
 
-        $used = $this->bytesUnder('projects/'.$project->folder());
-        $incoming = $this->file('file')->getSize();
+                $used = $this->bytesUnder('projects/'.$project->folder());
+                $incoming = $this->file('file')->getSize();
 
-        if ($used + $incoming > $quotaMb * 1024 * 1024) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'file' => __('messages.project_image_quota_exceeded'),
-            ]);
-        }
+                if ($used + $incoming > $quotaMb * 1024 * 1024) {
+                    $this->validator->errors()->add('file', __('messages.project_image_quota_exceeded'));
+                }
+            },
+        ];
     }
 
     private function bytesUnder(string $prefix): int

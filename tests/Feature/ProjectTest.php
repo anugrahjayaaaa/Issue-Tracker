@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Plan;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\User;
@@ -130,6 +131,36 @@ class ProjectTest extends TestCase
         $this->assertFalse(ProjectMember::hasRole($member, $project, ['lead']));
     }
 
+    public function test_image_quota_unlimited_when_plan_storage_is_zero(): void
+    {
+        Storage::fake('public');
+        $user = $this->projectManager();
+        Plan::where('slug', 'free')->update(['limits' => array_merge(
+            Plan::where('slug', 'free')->first()->limits ?? [], ['max_storage_mb' => 0],
+        )]);
+        $project = Project::create(['key' => 'HEL', 'name' => 'Helpdesk', 'owner_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->post(route('projects.image.upload', $project), ['file' => UploadedFile::fake()->image('pic.png', 10, 10)])
+            ->assertOk();
+    }
+
+    public function test_image_upload_blocked_when_quota_exceeded(): void
+    {
+        Storage::fake('public');
+        $user = $this->projectManager();
+        $free = Plan::where('slug', 'free')->first();
+        $limits = array_merge($free->limits ?? [], ['max_storage_mb' => 1]); // 1 MB cap (array_merge overwrites)
+        Plan::where('slug', 'free')->update(['limits' => $limits]);
+        $project = Project::create(['key' => 'HEL', 'name' => 'Helpdesk', 'owner_id' => $user->id]);
+
+        // Pre-fill the project folder with ~1.5 MB so a new upload exceeds the 1 MB cap.
+        Storage::disk('public')->put('projects/'.$project->folder().'/description/seed.bin', str_repeat('x', 1536 * 1024));
+
+        $this->actingAs($user)
+            ->post(route('projects.image.upload', $project), ['file' => UploadedFile::fake()->image('pic.png', 10, 10)])
+            ->assertInvalid('file');
+    }
     public function test_non_manager_cannot_view_create_form(): void
     {
         $this->seed();
