@@ -72,7 +72,7 @@
 
                 <ul class="list-group list-group-flush">
                     @forelse ($project->members as $m)
-                    <li class="list-group-item border-0 d-flex justify-content-between align-items-center gap-2 px-0 py-2">
+                    <li class="list-group-item border-0 d-flex justify-content-between align-items-center gap-2 px-3 py-2">
                         <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
                             <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px;height:28px;font-size:.7rem">{{ strtoupper(substr($m->user->name ?? '?', 0, 1)) }}</span>
                             <div class="min-w-0">
@@ -92,7 +92,7 @@
                             </form>
                             <form method="POST" action="{{ route('projects.members.destroy', [$project, $m]) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_remove_member') }}')">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-light border-0 text-secondary p-1" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}" onmouseover="this.classList.add('text-danger')" onmouseout="this.classList.remove('text-danger')"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-sm btn-light border-0 text-danger p-1" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
                             </form>
                             @else
                             <span class="badge text-bg-info">{{ ui('role_'.$m->role) }}</span>

@@ -17,7 +17,7 @@
 
         <ul class="list-group list-group-flush">
             @forelse ($project->labels as $label)
-            <li class="list-group-item border-0 px-0 py-2">
+            <li class="list-group-item border-0 px-3 py-2">
                 <details class="label-row">
                     <summary class="d-flex justify-content-between align-items-center gap-2" style="cursor:pointer;list-style:none">
                         <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
