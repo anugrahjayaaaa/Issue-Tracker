@@ -19,15 +19,12 @@
         </select>
     </div>
     @if ($project)
-    @php
-        $filters = [
-            'status' => $project->statuses->pluck('key')->all(),
-            'priority' => [App\Models\Issue::PRIORITY_LOW, App\Models\Issue::PRIORITY_MEDIUM, App\Models\Issue::PRIORITY_HIGH, App\Models\Issue::PRIORITY_URGENT],
-        ];
-        $statusMap = $project->statuses->pluck('color', 'key')->all();
-        $typeMap = $project->issueTypes->pluck('color', 'key')->all();
-    @endphp
     <div class="d-flex flex-wrap gap-2 align-items-end">
+        <div>
+            <label class="form-label small mb-1">{{ __('Search') }}</label>
+            <input type="search" name="q" class="form-control form-control-sm" style="width:220px" value="{{ request('q') }}" placeholder="{{ __('Search issues...') }}" id="issue-search-input">
+            <div class="form-text small">Press <kbd>Cmd</kbd>+<kbd>K</kbd> / <kbd>Ctrl</kbd>+<kbd>K</kbd></div>
+        </div>
         <div>
             <label class="form-label small mb-1">{{ ui('all_status') }}</label>
             <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
@@ -64,7 +61,7 @@
                 @endforeach
             </select>
         </div>
-        @if (request()->anyFilled(['status','priority','assignee_id','label_id']))
+        @if (request()->anyFilled(['q','status','priority','assignee_id','label_id']))
             <a href="{{ route('issues.index', ['project_id' => $project->id]) }}" class="btn btn-sm btn-outline-secondary mb-1">{{ ui('reset') }}</a>
         @endif
     </div>
@@ -74,6 +71,16 @@
 @if (!$project)
 <div class="alert alert-info">{{ ui('pick_project_first') }}</div>
 @else
+<script>
+document.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        var el = document.getElementById('issue-search-input');
+        if (el) { el.focus(); el.select(); }
+    }
+});
+</script>
+
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">

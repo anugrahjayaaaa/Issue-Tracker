@@ -44,16 +44,28 @@ class IssueController extends Controller
             $this->abortIfNotReader($project);
             $issues = Issue::with(['assignee', 'labels'])
                 ->where('project_id', $project->id)
-                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status)) // status = key slug
+                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
                 ->when($request->filled('assignee_id'), fn ($q) => $q->where('assignee_id', $request->assignee_id))
                 ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
                 ->when($request->filled('label_id'), fn ($q) => $q->whereHas('labels', fn ($l) => $l->where('labels.id', $request->label_id)))
+                ->when($request->filled('q'), function ($q) use ($request) {
+                    $term = $request->query('q');
+                    $q->where(function ($q2) use ($term) {
+                        $q2->where('title', 'like', '%'.$term.'%')
+                            ->orWhere('code', 'like', '%'.$term.'%')
+                            ->orWhere('description', 'like', '%'.$term.'%');
+                    });
+                })
                 ->when(true, fn ($q) => $this->sortIndex($q, $request, 'order', ['code', 'title', 'type', 'status', 'priority', 'assignee_id', 'due_date']))
                 ->paginate(20)
                 ->withQueryString();
         }
 
-        return view('issues.index', compact('projects', 'project', 'issues'));
+        return view('issues.index', compact('projects', 'project', 'issues'))
+            ->with('filters', [
+                'status' => $project?->statuses->pluck('key')->all() ?? [],
+                'priority' => [Issue::PRIORITY_LOW, Issue::PRIORITY_MEDIUM, Issue::PRIORITY_HIGH, Issue::PRIORITY_URGENT],
+            ]);
     }
 
     public function board(Request $request): View
