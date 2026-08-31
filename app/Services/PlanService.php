@@ -84,6 +84,12 @@ final class PlanService
         return max(0, $max - 0);
     }
 
+    /** Storage quota in MB for the active plan (0 = unlimited). Tamper-aware (§10.1). */
+    public function storageQuotaMb(): int
+    {
+        return $this->limit('max_storage_mb', 0);
+    }
+
     private function limit(string $key, int $default): int
     {
         // paid plan without a valid license => no headroom (tamper-safe, §10.1)

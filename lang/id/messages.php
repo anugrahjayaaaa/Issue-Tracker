@@ -72,6 +72,7 @@ return [
     'project_created' => 'Proyek dibuat.',
     'project_updated' => 'Proyek diperbarui.',
     'project_deleted' => 'Proyek dihapus.',
+    'project_image_quota_exceeded' => 'Kuota storage habis. Hapus beberapa gambar atau upgrade paket Anda.',
     'member_added' => 'Anggota ditambahkan.',
     'member_role_updated' => 'Peran anggota diperbarui.',
     'member_removed' => 'Anggota dihapus.',
