@@ -1,4 +1,5 @@
 @props([
+    'view' => null,
     'edit' => null,
     'delete' => null,
     'restore' => null,
@@ -8,6 +9,12 @@
 ])
 
 <div class="btn-group" role="group" aria-label="Actions">
+    @if ($view)
+        <a href="{{ $view }}" class="btn btn-sm btn-light border rounded-2" data-bs-toggle="tooltip" data-bs-title="{{ ui('view') }}" aria-label="{{ ui('view') }}" style="min-width:38px">
+            <i class="bi bi-eye"></i>
+        </a>
+    @endif
+
     @if ($edit)
         <a href="{{ $edit }}" class="btn btn-sm btn-light border rounded-2" data-bs-toggle="tooltip" data-bs-title="Edit" aria-label="Edit" style="min-width:38px">
             <i class="bi bi-pencil"></i>

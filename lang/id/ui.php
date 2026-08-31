@@ -226,6 +226,8 @@ return [
     'edit_project' => 'Edit Proyek',
     'project_key' => 'Kode',
     'project_key_hint' => 'Kode pendek, mis. HEL (huruf besar, huruf/angka).',
+    'owner' => 'Pemilik',
+    'view' => 'Lihat',
     'search_project' => 'Cari nama atau kode proyek…',
     'no_projects_found' => 'Tidak ada proyek ditemukan.',
     'members' => 'Anggota',

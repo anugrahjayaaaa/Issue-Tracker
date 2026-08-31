@@ -21,12 +21,12 @@
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">
-        <table class="table table-hover align-middle m-0">
-            <thead>
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
                 <tr>
                     <th style="width:60px">#</th>
-                    <th>{{ ui('project_key') }}</th>
                     <th>{{ ui('project') }}</th>
+                    <th>{{ ui('project_key') }}</th>
                     <th>{{ ui('owner') }}</th>
                     <th class="text-end">{{ ui('action') }}</th>
                 </tr>
@@ -35,17 +35,16 @@
                 @forelse ($projects as $project)
                 <tr>
                     <td class="text-muted">{{ $projects->firstItem() + $loop->index }}</td>
-                    <td><span class="badge text-bg-secondary">{{ $project->key }}</span></td>
                     <td>
                         <a href="{{ route('projects.show', $project) }}" class="fw-medium text-decoration-none">{{ $project->name }}</a>
                     </td>
+                    <td><span class="badge text-bg-secondary">{{ $project->key }}</span></td>
                     <td>{{ $project->owner->name ?? '-' }}</td>
                     <td class="text-end">
-                        <div class="d-flex justify-content-end gap-1">
-                            <x-action-buttons
-                                :edit="auth()->user()->can('project.manage') ? route('projects.edit', $project) : null"
-                                :delete="auth()->user()->can('project.manage') ? route('projects.destroy', $project) : null" />
-                        </div>
+                        <x-action-buttons
+                            :view="route('projects.show', $project)"
+                            :edit="auth()->user()->can('project.manage') ? route('projects.edit', $project) : null"
+                            :delete="auth()->user()->can('project.manage') ? route('projects.destroy', $project) : null" />
                     </td>
                 </tr>
                 @empty

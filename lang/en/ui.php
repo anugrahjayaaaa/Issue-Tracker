@@ -226,6 +226,8 @@ return [
     'edit_project' => 'Edit Project',
     'project_key' => 'Key',
     'project_key_hint' => 'Short code, e.g. HEL (uppercase, letters/numbers).',
+    'owner' => 'Owner',
+    'view' => 'View',
     'search_project' => 'Search project name or key…',
     'no_projects_found' => 'No projects found.',
     'members' => 'Members',
