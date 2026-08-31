@@ -4,7 +4,7 @@
 @php
     $name = $name ?? 'description';
     $id = $id ?? $name.'-editor';
-    $inputId = $name.'_input';
+    $inputId = $id.'_input';
     $value = $value ?? old($name);
     $uploadUrl = $uploadUrl ?? null; // route accepting multipart `file`, returns {location}
     $uploadUrl = $uploadUrl ?: '';   // empty = no upload (e.g. create form, project not saved yet)
@@ -12,7 +12,7 @@
 
 <div class="mb-3">
     <label class="form-label">{{ $label ?? ui('description') }}</label>
-    <textarea name="{{ $name }}" id="{{ $inputId }}" class="@error($name) is-invalid @enderror">{{ $value }}</textarea>
+    <textarea name="{{ $name }}" id="{{ $inputId }}" data-upload-url="{{ $uploadUrl }}" class="@error($name) is-invalid @enderror">{{ $value }}</textarea>
     @error($name)<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
 </div>
 
@@ -22,15 +22,13 @@
 (function () {
     if (typeof tinymce === 'undefined') return;
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
-    const selector = '#{{ $inputId }}';
-    const uploadUrl = @json($uploadUrl);
 
-    const isLight = () => document.documentElement.getAttribute('data-bs-theme') === 'light';
-
-    function initEditor() {
-        const light = isLight();
+    // Exposed so hidden edit forms can be initialized on demand (after they're shown).
+    window.initTinyMCE = function (inputId, uploadUrl) {
+        if (tinymce.get(inputId)) return; // already initialized
+        const light = document.documentElement.getAttribute('data-bs-theme') === 'light';
         tinymce.init({
-            selector,
+            selector: '#' + inputId,
             base_url: '{{ asset('vendor/tinymce') }}',
             skin: light ? 'oxide' : 'oxide-dark',
             content_css: light ? 'default' : 'dark',
@@ -57,23 +55,23 @@
                     .catch(() => Promise.reject('upload failed'));
             },
         });
-    }
+    };
 
-    initEditor();
-
-    // Follow the app's theme live: TinyMCE 7 has no runtime setSkin/setTheme,
-    // so re-init with the correct skin. Content is flushed to the <textarea>
-    // on destroy, so re-init restores it. ponytail: single global observer —
-    // covers the layout toggle and any future switch, no per-button wiring.
-    let theme = isLight() ? 'light' : 'dark';
+    // Lazy init when the app's theme toggles (TinyMCE 7 has no runtime setSkin/setTheme).
+    let theme = document.documentElement.getAttribute('data-bs-theme') === 'light' ? 'light' : 'dark';
     new MutationObserver(() => {
-        const next = isLight() ? 'light' : 'dark';
+        const next = document.documentElement.getAttribute('data-bs-theme') === 'light' ? 'light' : 'dark';
         if (next === theme) return;
         theme = next;
-        const inst = tinymce.get(selector.replace('#', ''));
-        if (inst) inst.remove();
-        initEditor();
+        tinymce.get().forEach(inst => inst.remove());
+        document.querySelectorAll('textarea[data-upload-url]').forEach(t => window.initTinyMCE(t.id, t.dataset.uploadUrl));
     }).observe(document.documentElement, {attributes: true, attributeFilter: ['data-bs-theme']});
+
+    // Auto-init visible editors now; hidden ones (inline comment edit) init on show.
+    const el = document.getElementById('{{ $inputId }}');
+    if (el && el.offsetParent !== null) {
+        window.initTinyMCE('{{ $inputId }}', @json($uploadUrl));
+    }
 })();
 </script>
 @endpush

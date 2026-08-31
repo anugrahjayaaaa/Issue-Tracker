@@ -48,7 +48,11 @@ class CommentController extends Controller
 
     public function update(CommentUpdateRequest $request, Comment $comment): RedirectResponse
     {
-        $comment->update(['body' => $request->input('body')]);
+        $oldBody = $comment->body;
+        $newBody = $request->input('body');
+
+        pruneUnusedImages($oldBody, $newBody); // delete images dropped from the comment
+        $comment->update(['body' => $newBody]);
 
         return redirect()->route('issues.show', $comment->issue)
             ->with('success', __('messages.comment_updated'));
@@ -62,6 +66,10 @@ class CommentController extends Controller
             $comment->user_id === auth()->id()
             || ProjectMember::isLead(auth()->user(), $issue->project),
             403
+        );
+
+        deleteStorageFolder(
+            'projects/'.$issue->project->folder().'/issues/'.$issue->code.'/comments/'.$comment->id
         );
         $comment->delete();
 

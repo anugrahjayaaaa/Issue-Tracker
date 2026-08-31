@@ -22,14 +22,14 @@
             <div class="card-header">{{ ui('comments') }} ({{ $issue->comments->count() }})</div>
             <div class="card-body">
                 @foreach ($issue->comments as $comment)
-                <div class="d-flex gap-2 mb-3 @if(!$loop->last) border-bottom pb-3 @endif">
+                <div class="d-flex gap-2 mb-3 @if(!$loop->last) border-bottom pb-3 @endif" id="comment-row-{{ $comment->id }}">
                     <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:32px;height:32px">{{ strtoupper(substr($comment->user->name,0,1)) }}</span>
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between">
                             <strong class="small">{{ $comment->user->name }}</strong>
                             <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
                         </div>
-                        <div class="small mb-1">{!! $comment->body !!}</div>
+                        <div class="small mb-1 comment-body" id="comment-body-{{ $comment->id }}">{!! $comment->body !!}</div>
                         @if ($comment->attachments->isNotEmpty())
                             <div class="d-flex flex-wrap gap-2">
                             @foreach ($comment->attachments as $att)
@@ -40,12 +40,19 @@
                         @can('comment.edit')
                         @if ($comment->user_id === auth()->id() || App\Models\ProjectMember::isLead(auth()->user(), $issue->project))
                         <div class="mt-1">
-                            <button class="btn btn-sm btn-light border rounded-2" onclick="editComment({{ $comment->id }}, {{ json_encode($comment->body) }})"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-light border rounded-2" onclick="editComment({{ $comment->id }})"><i class="bi bi-pencil"></i></button>
                             <form method="POST" action="{{ route('issues.comments.destroy', $comment) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_delete_comment') }}')">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-sm btn-light border rounded-2 text-danger"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>
+                        {{-- inline edit form (toggled) --}}
+                        <form method="POST" action="{{ route('issues.comments.update', $comment) }}" class="mt-2 d-none" id="comment-edit-form-{{ $comment->id }}">
+                            @csrf @method('PUT')
+                            @include('partials.rich-text-field', ['name' => 'body', 'id' => 'comment-edit-'.$comment->id, 'value' => $comment->body, 'uploadUrl' => route('comments.image.upload', $comment)])
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">{{ ui('save') }}</button>
+                            <button type="button" class="btn btn-light btn-sm mt-2" onclick="cancelEditComment({{ $comment->id }})">{{ ui('cancel') }}</button>
+                        </form>
                         @endif
                         @endcan
                     </div>
@@ -58,14 +65,9 @@
                 @can('comment.create')
                 <form method="POST" action="{{ route('issues.comments.store', $issue) }}" class="mt-3" id="comment-form">
                     @csrf
-                    <input type="hidden" name="body" id="comment-body">
-                    <div id="comment-editor" style="min-height:120px" class="border rounded p-2"></div>
+                    @include('partials.rich-text-field', ['name' => 'body', 'id' => 'comment-new', 'uploadUrl' => ''])
                     <div class="d-flex gap-2 mt-2">
                         <button type="submit" class="btn btn-primary btn-sm" id="comment-submit">{{ ui('post_comment') }}</button>
-                        <form method="POST" action="{{ route('issues.attachments.store', $issue) }}" enctype="multipart/form-data" class="d-inline">
-                            @csrf
-                            <input type="file" name="file" accept="image/*" class="form-control form-control-sm" onchange="this.form.submit()" title="{{ ui('attach_image') }}">
-                        </form>
                     </div>
                 </form>
                 @endcan
@@ -122,22 +124,17 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const editorEl = document.getElementById('comment-editor');
-    const hidden = document.getElementById('comment-body');
-    const form = document.getElementById('comment-form');
-    if (!editorEl) return;
-    // ponytail: contenteditable + hidden-input sync for MVP; swap to TipTap later
-    editorEl.setAttribute('contenteditable', 'true');
-    editorEl.addEventListener('input', () => { hidden.value = editorEl.innerHTML; });
-    form.addEventListener('submit', () => { hidden.value = editorEl.innerHTML; });
-    window._editComment = function (id, body) {
-        editorEl.innerHTML = body;
-        hidden.value = body;
-        form.action = '/issues/comments/' + id;
-        const m = document.createElement('input'); m.type = 'hidden'; m.name = '_method'; m.value = 'PUT';
-        form.appendChild(m);
-        document.getElementById('comment-submit').textContent = '{{ ui('save') }}';
-        editorEl.scrollIntoView({ behavior: 'smooth' });
+    window._editComment = function (id) {
+        const body = document.getElementById('comment-body-' + id);
+        const form = document.getElementById('comment-edit-form-' + id);
+        body.classList.add('d-none');
+        form.classList.remove('d-none');
+        const ta = form.querySelector('textarea[data-upload-url]');
+        if (ta) window.initTinyMCE(ta.id, ta.dataset.uploadUrl);
+    };
+    window._cancelEditComment = function (id) {
+        document.getElementById('comment-edit-form-' + id).classList.add('d-none');
+        document.getElementById('comment-body-' + id).classList.remove('d-none');
     };
 });
 </script>

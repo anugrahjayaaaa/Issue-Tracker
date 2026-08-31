@@ -103,4 +103,45 @@ class CommentTest extends TestCase
         $this->assertDatabaseHas('attachments', ['issue_id' => $issue->id]);
         Storage::disk('public')->assertExists(Attachment::first()->path);
     }
+
+    public function test_comment_image_upload_scoped_to_comment_folder(): void
+    {
+        Storage::fake('public');
+        [$manager, $project, $user, $issue] = $this->setupProject();
+        $comment = Comment::create(['issue_id' => $issue->id, 'user_id' => $user->id, 'body' => '<p>hi</p>']);
+
+        $resp = $this->actingAs($user)->post(route('comments.image.upload', $comment), [
+            'file' => UploadedFile::fake()->image('c.png', 10, 10),
+        ]);
+
+        $resp->assertOk();
+        $loc = $resp->json('location');
+        $this->assertStringContainsString(
+            "projects/{$project->folder()}/issues/{$issue->code}/comments/{$comment->id}/description/",
+            $loc
+        );
+    }
+
+    public function test_dropped_image_deleted_on_comment_update(): void
+    {
+        Storage::fake('public');
+        [$manager, $project, $user, $issue] = $this->setupProject();
+        $keep = 'projects/'.$project->folder().'/issues/'.$issue->code.'/comments/x/description/keep.png';
+        $gone = 'projects/'.$project->folder().'/issues/'.$issue->code.'/comments/x/description/gone.png';
+        Storage::disk('public')->put($keep, 'k');
+        Storage::disk('public')->put($gone, 'g');
+
+        $comment = Comment::create([
+            'issue_id' => $issue->id,
+            'user_id' => $user->id,
+            'body' => '<p><img src="/storage/'.$gone.'"><img src="/storage/'.$keep.'"></p>',
+        ]);
+
+        $this->actingAs($user)->put(route('issues.comments.update', $comment), [
+            'body' => '<p><img src="/storage/'.$keep.'"></p>',
+        ])->assertRedirect();
+
+        Storage::disk('public')->assertMissing($gone);
+        Storage::disk('public')->assertExists($keep);
+    }
 }
