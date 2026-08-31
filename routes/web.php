@@ -23,6 +23,7 @@ use App\Http\Controllers\IssueImageController;
 use App\Http\Controllers\CommentImageController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\SavedFilterController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TranslationController;
@@ -146,6 +147,10 @@ Route::middleware('auth')->group(function () {
 
         // rich-text description image upload (scoped to project folder)
         Route::post('/{project}/image', [ProjectImageController::class, 'store'])->name('projects.image.upload');
+
+        Route::get('/{project}/saved-filters', [SavedFilterController::class, 'index'])->name('projects.saved-filters.index');
+        Route::post('/{project}/saved-filters', [SavedFilterController::class, 'store'])->name('projects.saved-filters.store');
+        Route::delete('/{project}/saved-filters/{savedFilter}', [SavedFilterController::class, 'destroy'])->name('projects.saved-filters.destroy');
     });
 
     // Issues (project-scoped): read = any member; write = lead/member (enforced in Form Requests)
