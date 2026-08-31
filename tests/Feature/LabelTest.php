@@ -54,8 +54,8 @@ class LabelTest extends TestCase
 
         $this->actingAs($manager)
             ->post(route('issues.store'), [
-                'project_id' => $project->id, 'title' => 'Login broken', 'type' => 'Bug',
-                'status' => 'Open', 'priority' => 'high', 'labels' => [$label->id],
+                'project_id' => $project->id, 'title' => 'Login broken', 'type' => 'bug',
+                'status' => 'open', 'priority' => 'high', 'labels' => [$label->id],
             ])
             ->assertRedirect();
 
@@ -82,8 +82,8 @@ class LabelTest extends TestCase
 
         $this->actingAs($manager)
             ->post(route('issues.store'), [
-                'project_id' => $project->id, 'title' => 'X', 'type' => 'Task',
-                'status' => 'Open', 'priority' => 'low', 'labels' => [$foreign->id],
+                'project_id' => $project->id, 'title' => 'X', 'type' => 'task',
+                'status' => 'open', 'priority' => 'low', 'labels' => [$foreign->id],
             ])
             ->assertSessionHasErrors('labels.0');
     }

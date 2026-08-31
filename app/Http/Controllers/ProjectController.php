@@ -15,9 +15,14 @@ class ProjectController extends Controller
 {
     public function index(Request $request): View
     {
-        $projects = Project::with('owner')
-            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->q.'%')
-                ->orWhere('key', 'like', '%'.$request->q.'%'))
+        $projects = Project::query()
+            ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
+            ->when($request->filled('q'), function ($q) use ($request) {
+                $q->where(function ($q2) use ($request) {
+                    $q2->where('name', 'like', '%'.$request->q.'%')
+                        ->orWhere('key', 'like', '%'.$request->q.'%');
+                });
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -41,6 +46,12 @@ class ProjectController extends Controller
 
     public function show(Project $project): View
     {
+        abort_unless(
+            ProjectMember::hasRole(auth()->user(), $project, [
+                ProjectMember::ROLE_LEAD, ProjectMember::ROLE_MEMBER, ProjectMember::ROLE_VIEWER,
+            ]),
+            403
+        );
         $project->load(['members.user', 'labels', 'issues' => fn ($q) => $q->latest()->limit(5)]);
         $users = User::orderBy('name')->get();
 

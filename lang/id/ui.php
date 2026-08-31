@@ -288,6 +288,8 @@ return [
     'comment_added' => 'Komentar ditambahkan.',
     'comment_updated' => 'Komentar diperbarui.',
     'comment_deleted' => 'Komentar dihapus.',
+    'attachments' => 'Lampiran',
+    'no_attachments' => 'Belum ada lampiran.',
     'attachment_added' => 'Gambar dilampirkan.',
 
     // ── issue tracker: labels ──

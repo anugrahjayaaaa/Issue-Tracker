@@ -70,6 +70,32 @@
                 @endcan
             </div>
         </div>
+        {{-- Issue-level attachments (Phase A: list + upload, scoped folder) --}}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>{{ ui('attachments') }}</span>
+            </div>
+            <div class="card-body">
+                @if ($issue->attachments->isNotEmpty())
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    @foreach ($issue->attachments as $att)
+                        <a href="{{ $att->url() }}" target="_blank" class="text-decoration-none">
+                            <span class="badge text-bg-light border">{{ basename($att->path) }}</span>
+                        </a>
+                    @endforeach
+                </div>
+                @else
+                <div class="text-muted small">{{ ui('no_attachments') }}</div>
+                @endif
+                @can('comment.create')
+                <form method="POST" action="{{ route('issues.attachments.store', $issue) }}" enctype="multipart/form-data" class="mt-2">
+                    @csrf
+                    <input type="file" name="file" class="form-control form-control-sm" required>
+                    <button type="submit" class="btn btn-sm btn-outline-primary mt-2">{{ ui('add') }}</button>
+                </form>
+                @endcan
+            </div>
+        </div>
         {{-- Activity timeline --}}
         <div class="card shadow-sm">
             <div class="card-header">{{ ui('activity_timeline') }}</div>
@@ -99,8 +125,8 @@
             <div class="card-body">
                 <table class="table table-sm mb-0">
                     <tr><td>{{ ui('project') }}</td><td>{{ $issue->project->key }}</td></tr>
-                    <tr><td>{{ ui('type') }}</td><td><span class="badge" style="background:{{ $issue->project->issueTypes->firstWhere('name', $issue->type)?->color ?? '#6c757d' }};color:#fff">{{ $issue->type }}</span></td></tr>
-                    <tr><td>{{ ui('status') }}</td><td><span class="badge" style="background:{{ $issue->project->statuses->firstWhere('name', $issue->status)?->color ?? '#6c757d' }};color:#fff">{{ $issue->status }}</span></td></tr>
+                    <tr><td>{{ ui('type') }}</td><td><x-issue-badge :issue="$issue" field="type" /></td></tr>
+                    <tr><td>{{ ui('status') }}</td><td><x-issue-badge :issue="$issue" field="status" /></td></tr>
                     <tr><td>{{ ui('priority') }}</td><td>{{ ui('issue_priority_'.$issue->priority) }}</td></tr>
                     @php
                         $canEditMeta = App\Models\ProjectMember::hasRole(auth()->user(), $issue->project, [App\Models\ProjectMember::ROLE_LEAD, App\Models\ProjectMember::ROLE_MEMBER]);

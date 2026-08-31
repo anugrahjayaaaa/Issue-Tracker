@@ -91,6 +91,8 @@ return [
     'issue_status_changed' => 'Issue status changed.',
     'status_transition_not_allowed' => 'That status transition is not allowed by the workflow.',
     'issues_deleted_count' => ':count issue(s) deleted.',
+    'status_in_use' => 'Cannot delete a status that is still used by issues.',
+    'issue_type_in_use' => 'Cannot delete an issue type that is still used by issues.',
 
     // ── auth (login lock / verification) ──
     'too_many_attempts' => 'Too many attempts. Try again in :seconds s.',

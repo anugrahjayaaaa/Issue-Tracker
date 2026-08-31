@@ -23,7 +23,7 @@ class IssueStatusRequest extends FormRequest
         $project = $this->route('issue')->project;
 
         return [
-            'status' => 'required|exists:statuses,name,project_id,'.$project->id,
+            'status' => 'required|exists:statuses,key,project_id,'.$project->id,
             'order' => 'nullable|integer|min:0',
         ];
     }

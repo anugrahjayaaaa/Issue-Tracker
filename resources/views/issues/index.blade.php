@@ -21,11 +21,11 @@
     @if ($project)
     @php
         $filters = [
-            'status' => $project->statuses->pluck('name')->all(),
+            'status' => $project->statuses->pluck('key')->all(),
             'priority' => [App\Models\Issue::PRIORITY_LOW, App\Models\Issue::PRIORITY_MEDIUM, App\Models\Issue::PRIORITY_HIGH, App\Models\Issue::PRIORITY_URGENT],
         ];
-        $statusMap = $project->statuses->pluck('color', 'name')->all();
-        $typeMap = $project->issueTypes->pluck('color', 'name')->all();
+        $statusMap = $project->statuses->pluck('color', 'key')->all();
+        $typeMap = $project->issueTypes->pluck('color', 'key')->all();
     @endphp
     <div class="d-flex flex-wrap gap-2 align-items-end">
         <div>
@@ -94,8 +94,8 @@
                 <tr>
                     <td><span class="badge text-bg-secondary">{{ $issue->code }}</span></td>
                     <td><a href="{{ route('issues.show', $issue) }}" class="text-decoration-none">{{ $issue->title }}</a></td>
-                    <td><span class="badge" style="background:{{ $typeMap[$issue->type] ?? '#6c757d' }};color:#fff">{{ $issue->type }}</span></td>
-                    <td><span class="badge" style="background:{{ $statusMap[$issue->status] ?? '#6c757d' }};color:#fff">{{ $issue->status }}</span></td>
+                    <td><x-issue-badge :issue="$issue" field="type" /></td>
+                    <td><x-issue-badge :issue="$issue" field="status" /></td>
                     <td>{{ ui('issue_priority_'.$issue->priority) }}</td>
                     <td>{{ $issue->assignee->name ?? '-' }}</td>
                     <td>

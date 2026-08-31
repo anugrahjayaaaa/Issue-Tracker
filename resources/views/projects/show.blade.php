@@ -34,7 +34,7 @@
                         <a href="{{ route('issues.show', $issue) }}" class="text-decoration-none">
                             <span class="badge text-bg-secondary me-1">{{ $issue->code }}</span>{{ $issue->title }}
                         </a>
-                        <span class="badge" style="background:{{ $project->statuses->firstWhere('name', $issue->status)?->color ?? '#6c757d' }};color:#fff">{{ $issue->status }}</span>
+                        <span class="badge" style="background:{{ $project->statuses->firstWhere('key', $issue->status)?->color ?? '#6c757d' }};color:#fff">{{ $issue->statusName() }}</span>
                     </li>
                     @endforeach
                 </ul>

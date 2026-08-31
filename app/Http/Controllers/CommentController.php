@@ -75,9 +75,12 @@ class CommentController extends Controller
 
     public function attach(CommentAttachRequest $request, Issue $issue): RedirectResponse
     {
-        $path = $request->file('file')->store('comments', 'public');
+        // ponytail: store in the issue's scoped folder; comment_id set later (Phase B)
+        // when the route gains a {comment} segment. File lives under project/issue/attachments.
+        $folder = 'projects/'.$issue->project->folder().'/issues/'.$issue->code.'/attachments';
+        $path = $request->file('file')->store($folder, 'public');
 
-        $attachment = Attachment::create([
+        Attachment::create([
             'issue_id' => $issue->id,
             'user_id' => $request->user()->id,
             'path' => $path,

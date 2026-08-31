@@ -30,6 +30,8 @@ class ProjectObserver
 
     public function deleted(Project $project): void
     {
+        // ponytail: root-cause cleanup — project folder + all descendant issue folders.
+        deleteStorageFolder('projects/'.$project->folder());
         activity()->causedBy(auth()->user())->withProperties([
             'ip' => Request::ip(), 'user_agent' => Request::userAgent(),
         ])->performedOn($project)->log('project_deleted');

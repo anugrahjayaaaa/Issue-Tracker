@@ -15,16 +15,7 @@ class Issue extends Model
 {
     use HasFactory, SoftDeletes;
 
-    public const TYPE_BUG = 'bug';
-    public const TYPE_FEATURE = 'feature';
-    public const TYPE_TASK = 'task';
-    public const TYPE_EPIC = 'epic';
-
-    public const STATUS_OPEN = 'open';
-    public const STATUS_IN_PROGRESS = 'in_progress';
-    public const STATUS_BLOCKED = 'blocked';
-    public const STATUS_DONE = 'done';
-
+    // Priorities are a fixed global enum (no per-project config) — keep as constants.
     public const PRIORITY_LOW = 'low';
     public const PRIORITY_MEDIUM = 'medium';
     public const PRIORITY_HIGH = 'high';
@@ -34,6 +25,31 @@ class Issue extends Model
         'project_id', 'code', 'title', 'description', 'type', 'status',
         'priority', 'reporter_id', 'assignee_id', 'parent_id', 'due_date', 'order',
     ];
+
+    /**
+     * `type` / `status` store the STABLE key slug of the project's issue_type / status.
+     * (Renaming a label keeps the key, so issues stay attached — see migration.)
+     * These accessors resolve the human label for display.
+     */
+    public function typeName(): ?string
+    {
+        return $this->project->issueTypes()->where('key', $this->type)->value('name');
+    }
+
+    public function statusName(): ?string
+    {
+        return $this->project->statuses()->where('key', $this->status)->value('name');
+    }
+
+    public function statusColor(): ?string
+    {
+        return $this->project->statuses()->where('key', $this->status)->value('color');
+    }
+
+    public function typeColor(): ?string
+    {
+        return $this->project->issueTypes()->where('key', $this->type)->value('color');
+    }
 
     protected function casts(): array
     {
@@ -76,23 +92,24 @@ class Issue extends Model
     }
 
     /**
-     * Whether a status change to $toName is allowed by the project's workflow.
-     * ponytail: empty transition table = free transitions (no scheme yet).
+     * Whether a status change to $toKey (status key slug) is allowed by the workflow.
+     * ponytail: empty transition table = free transitions (no scheme yet). Compares
+     * stable `key` slugs, not human `name` — renaming a status keeps issues valid.
      */
-    public function canTransitionTo(string $toName): bool
+    public function canTransitionTo(string $toKey): bool
     {
         $transitions = $this->project->statusTransitions;
         if ($transitions->isEmpty()) {
             return true;
         }
-        $from = $this->project->statuses()->where('name', $this->status)->first();
+        $from = $this->project->statuses()->where('key', $this->status)->first();
         if (! $from) {
             return true;
         }
 
         return $transitions->contains(
             fn ($t) => $t->from_status_id === $from->id
-                && $t->to->name === $toName
+                && $t->to->key === $toKey
         );
     }
 
@@ -106,6 +123,11 @@ class Issue extends Model
     public function labels(): BelongsToMany
     {
         return $this->belongsToMany(Label::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class);
     }
 
     /**

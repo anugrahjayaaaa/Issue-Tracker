@@ -28,7 +28,7 @@
     <div class="col-md-3">
         <div class="card shadow-sm h-100">
             <div class="card-header d-flex justify-content-between">
-                <span>{{ $status }}</span>
+                <span>{{ $project->statuses->firstWhere('key', $status)?->name ?? $status }}</span>
                 <span class="badge text-bg-secondary">{{ $cards->count() }}</span>
             </div>
             <div class="card-body" data-status="{{ $status }}">
@@ -59,7 +59,7 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="{{ asset('vendor/sortable.min.js') }}"></script>
 <script>
 document.querySelectorAll('[data-status]').forEach(col => {
     new Sortable(col, {

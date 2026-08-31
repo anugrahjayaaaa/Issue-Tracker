@@ -38,8 +38,8 @@ class NotificationTest extends TestCase
         [$manager, $project, $assignee] = $this->setupProject();
 
         $this->actingAs($manager)->post(route('issues.store'), [
-            'project_id' => $project->id, 'title' => 'T', 'type' => 'Task',
-            'status' => 'Open', 'priority' => 'low', 'assignee_id' => $assignee->id,
+            'project_id' => $project->id, 'title' => 'T', 'type' => 'task',
+            'status' => 'open', 'priority' => 'low', 'assignee_id' => $assignee->id,
         ]);
 
         $this->assertDatabaseHas('notifications', [
@@ -54,12 +54,12 @@ class NotificationTest extends TestCase
         [$manager, $project, $assignee, $reporter] = $this->setupProject();
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
-            'type' => 'Task', 'status' => 'Open', 'priority' => 'low',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low',
             'reporter_id' => $reporter->id, 'assignee_id' => $assignee->id,
         ]);
 
         $this->actingAs($manager)->post(route('issues.status', $issue), [
-            'status' => 'Done', 'order' => 0,
+            'status' => 'done', 'order' => 0,
         ]);
 
         // reporter + assignee notified (not the actor = manager)
@@ -76,7 +76,7 @@ class NotificationTest extends TestCase
         [$manager, $project, $assignee, $reporter] = $this->setupProject();
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
-            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $manager->id,
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $manager->id,
         ]);
 
         $this->actingAs($manager)->post(route('issues.comments.store', $issue), [
@@ -94,8 +94,8 @@ class NotificationTest extends TestCase
 
         // manager assigns to self -> no notification to self
         $this->actingAs($manager)->post(route('issues.store'), [
-            'project_id' => $project->id, 'title' => 'T', 'type' => 'Task',
-            'status' => 'Open', 'priority' => 'low', 'assignee_id' => $manager->id,
+            'project_id' => $project->id, 'title' => 'T', 'type' => 'task',
+            'status' => 'open', 'priority' => 'low', 'assignee_id' => $manager->id,
         ]);
 
         $this->assertDatabaseMissing('notifications', ['notifiable_id' => $manager->id]);
