@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Project\IssueTypeRequest;
+use App\Http\Requests\Project\StatusRequest;
+use App\Http\Requests\Project\TransitionRequest;
 use App\Models\IssueType;
 use App\Models\Status;
 use App\Models\StatusTransition;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ProjectFieldController extends Controller
@@ -32,31 +34,19 @@ class ProjectFieldController extends Controller
     }
 
     // ── Issue types ──
-    public function storeType(Request $request, Project $project): RedirectResponse
+    public function storeType(IssueTypeRequest $request, Project $project): RedirectResponse
     {
         $this->abortIfNotLead($project);
-        $data = $request->validate([
-            'name' => 'required|string|max:50|unique:issue_types,name,NULL,id,project_id,'.$project->id,
-            'color' => 'nullable|string|max:7',
-            'icon' => 'nullable|string|max:50',
-            'description' => 'nullable|string',
-        ]);
         $order = $project->issueTypes()->max('order') + 1;
-        $project->issueTypes()->create([...$data, 'order' => $order]);
+        $project->issueTypes()->create([...$request->validated(), 'order' => $order]);
 
         return redirect()->route('projects.fields', $project)->with('success', __('messages.saved'));
     }
 
-    public function updateType(Request $request, Project $project, IssueType $type): RedirectResponse
+    public function updateType(IssueTypeRequest $request, Project $project, IssueType $type): RedirectResponse
     {
         $this->abortIfNotLead($project);
-        $data = $request->validate([
-            'name' => 'required|string|max:50|unique:issue_types,name,'.$type->id.',id,project_id,'.$project->id,
-            'color' => 'nullable|string|max:7',
-            'icon' => 'nullable|string|max:50',
-            'description' => 'nullable|string',
-        ]);
-        $type->update($data);
+        $type->update($request->validated());
 
         return redirect()->route('projects.fields', $project)->with('success', __('messages.saved'));
     }
@@ -64,35 +54,31 @@ class ProjectFieldController extends Controller
     public function destroyType(Project $project, IssueType $type): RedirectResponse
     {
         $this->abortIfNotLead($project);
+        abort_if($type->issues()->exists(), 409, __('messages.issue_type_in_use'));
+
         $type->delete();
 
         return redirect()->route('projects.fields', $project)->with('success', __('messages.deleted'));
     }
 
     // ── Statuses ──
-    public function storeStatus(Request $request, Project $project): RedirectResponse
+    public function storeStatus(StatusRequest $request, Project $project): RedirectResponse
     {
         $this->abortIfNotLead($project);
-        $data = $request->validate([
-            'name' => 'required|string|max:50|unique:statuses,name,NULL,id,project_id,'.$project->id,
-            'color' => 'nullable|string|max:7',
-            'is_closed' => 'nullable|boolean',
-        ]);
         $order = $project->statuses()->max('order') + 1;
-        $project->statuses()->create([...$data, 'order' => $order, 'is_closed' => $request->boolean('is_closed')]);
+        $data = $request->validated();
+        $data['is_closed'] = $request->boolean('is_closed');
+        $project->statuses()->create([...$data, 'order' => $order]);
 
         return redirect()->route('projects.fields', $project)->with('success', __('messages.saved'));
     }
 
-    public function updateStatus(Request $request, Project $project, Status $status): RedirectResponse
+    public function updateStatus(StatusRequest $request, Project $project, Status $status): RedirectResponse
     {
         $this->abortIfNotLead($project);
-        $data = $request->validate([
-            'name' => 'required|string|max:50|unique:statuses,name,'.$status->id.',id,project_id,'.$project->id,
-            'color' => 'nullable|string|max:7',
-            'is_closed' => 'nullable|boolean',
-        ]);
-        $status->update([...$data, 'is_closed' => $request->boolean('is_closed')]);
+        $data = $request->validated();
+        $data['is_closed'] = $request->boolean('is_closed');
+        $status->update($data);
 
         return redirect()->route('projects.fields', $project)->with('success', __('messages.saved'));
     }
@@ -100,19 +86,18 @@ class ProjectFieldController extends Controller
     public function destroyStatus(Project $project, Status $status): RedirectResponse
     {
         $this->abortIfNotLead($project);
+        abort_if($status->issues()->exists(), 409, __('messages.status_in_use'));
+
         $status->delete();
 
         return redirect()->route('projects.fields', $project)->with('success', __('messages.deleted'));
     }
 
     // ── Workflow transitions ──
-    public function storeTransition(Request $request, Project $project): RedirectResponse
+    public function storeTransition(TransitionRequest $request, Project $project): RedirectResponse
     {
         $this->abortIfNotLead($project);
-        $data = $request->validate([
-            'from_status_id' => 'required|exists:statuses,id,project_id,'.$project->id,
-            'to_status_id' => 'required|exists:statuses,id,project_id,'.$project->id,
-        ]);
+        $data = $request->validated();
         if ($data['from_status_id'] === $data['to_status_id']) {
             return redirect()->route('projects.fields', $project)->with('error', __('messages.invalid_transition'));
         }

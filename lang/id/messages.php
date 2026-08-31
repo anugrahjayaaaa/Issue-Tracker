@@ -91,6 +91,8 @@ return [
     'issue_status_changed' => 'Status isu diubah.',
     'status_transition_not_allowed' => 'Perubahan status itu tidak diizinkan oleh workflow.',
     'issues_deleted_count' => ':count isu dihapus.',
+    'status_in_use' => 'Tidak bisa menghapus status yang masih dipakai oleh isu.',
+    'issue_type_in_use' => 'Tidak bisa menghapus tipe isu yang masih dipakai oleh isu.',
 
     // ── auth (login lock / verification) ──
     'too_many_attempts' => 'Terlalu banyak percobaan. Coba lagi dalam :seconds detik.',

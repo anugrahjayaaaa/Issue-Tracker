@@ -33,7 +33,9 @@ class IssueController extends Controller
 
     public function index(Request $request): View
     {
-        $projects = Project::orderBy('name')->get();
+        $projects = Project::query()
+            ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
+            ->orderBy('name')->get();
         $project = $request->filled('project_id') ? Project::find($request->project_id) : null;
 
         $issues = collect();
@@ -41,7 +43,7 @@ class IssueController extends Controller
             $this->abortIfNotReader($project);
             $issues = Issue::with(['assignee', 'labels'])
                 ->where('project_id', $project->id)
-                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status)) // status = key slug
                 ->when($request->filled('assignee_id'), fn ($q) => $q->where('assignee_id', $request->assignee_id))
                 ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
                 ->when($request->filled('label_id'), fn ($q) => $q->whereHas('labels', fn ($l) => $l->where('labels.id', $request->label_id)))
@@ -55,17 +57,19 @@ class IssueController extends Controller
 
     public function board(Request $request): View
     {
-        $projects = Project::orderBy('name')->get();
+        $projects = Project::query()
+            ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
+            ->orderBy('name')->get();
         $project = $request->filled('project_id') ? Project::find($request->project_id) : null;
 
         $columns = [];
         if ($project) {
             $this->abortIfNotReader($project);
-            $statuses = $project->statuses->pluck('name')->all();
-            foreach ($statuses as $status) {
-                $columns[$status] = Issue::with('assignee')
+            $statuses = $project->statuses->pluck('key')->all();
+            foreach ($statuses as $statusKey) {
+                $columns[$statusKey] = Issue::with('assignee')
                     ->where('project_id', $project->id)
-                    ->where('status', $status)
+                    ->where('status', $statusKey)
                     ->orderBy('order')
                     ->get();
             }
@@ -76,7 +80,9 @@ class IssueController extends Controller
 
     public function create(Request $request): View
     {
-        $projects = Project::orderBy('name')->get();
+        $projects = Project::query()
+            ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
+            ->orderBy('name')->get();
         $project = $request->filled('project_id') ? Project::find($request->project_id) : null;
         $users = $project ? $project->users : collect();
         $types = $project ? $project->issueTypes : collect();
@@ -93,7 +99,7 @@ class IssueController extends Controller
         $issue->code = $project->nextIssueCode();
         $issue->reporter_id = $request->user()->id;
         $issue->status = $request->input('status')
-            ?? $project->statuses()->orderBy('order')->value('name');
+            ?? $project->statuses()->orderBy('order')->value('key');
         $issue->save();
         $issue->labels()->sync($request->input('labels', []));
 
@@ -108,7 +114,7 @@ class IssueController extends Controller
     public function show(Issue $issue): View
     {
         $this->abortIfNotReader($issue->project);
-        $issue->load('assignee', 'reporter', 'parent', 'comments.user', 'comments.attachments', 'labels');
+        $issue->load('assignee', 'reporter', 'parent', 'comments.user', 'comments.attachments', 'labels', 'attachments');
 
         return view('issues.show', compact('issue'));
     }
@@ -181,7 +187,12 @@ class IssueController extends Controller
     public function bulk(IssueBulkRequest $request): RedirectResponse
     {
         $projectId = $request->input('project_id');
-        $count = Issue::whereIn('id', $request->input('ids'))->delete();
+        $project = Project::findOrFail($projectId);
+        // Re-check membership scope: only delete IDs that belong to THIS project
+        // and the user can act on (prevents cross-project mass delete).
+        $count = Issue::where('project_id', $projectId)
+            ->whereIn('id', $request->input('ids'))
+            ->delete();
 
         return redirect()->route('issues.index', ['project_id' => $projectId])
             ->with('success', __('messages.issues_deleted_count', ['count' => $count]));

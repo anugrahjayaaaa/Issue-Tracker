@@ -288,6 +288,8 @@ return [
     'comment_added' => 'Comment added.',
     'comment_updated' => 'Comment updated.',
     'comment_deleted' => 'Comment deleted.',
+    'attachments' => 'Attachments',
+    'no_attachments' => 'No attachments yet.',
     'attachment_added' => 'Image attached.',
 
     // ── issue tracker: labels ──

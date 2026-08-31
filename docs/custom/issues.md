@@ -151,20 +151,22 @@ for the broad permission, finer checks in FormRequest/controller.
 - [x] `IssueUpdateRequest` `sometimes` + member authorize; redirect to show
 - [x] Comments full (rich/edit/del/mention/activity) — `comments.md`
 - [x] `IssueObserver` → created/updated/deleted/status in timeline
-- [x] Tests: `IssueTest` (code gen, scope gate, quota, meta patch) + `CommentTest`
+- [x] **Per-project dynamic issue types & statuses + workflow transitions** (Phase A)
+- [x] **Stable `key` slug** on `issue_types`/`statuses`; `Issue.type`/`status` store the key
+      (rename a label keeps issues attached — migration backfills existing rows)
+- [x] **In-use guards** on status/type delete (`destroyStatus`/`destroyType` abort 409)
+- [x] **Storage cleanup** on issue/project delete (observer `deleting()` → `deleteStorageFolder`)
+- [x] **Bulk route wired** (`POST /issues/bulk`, scoped to project + membership re-check)
+- [x] **Project pickers scoped** to memberships; `ProjectController::show` 403 for non-members
+- [x] **Issue attachments** (scoped folder, list + upload on detail page)
+- [x] **`issue-badge` component** (status/type) replacing inline copies
+- [x] **SortableJS vendored** to `public/vendor/sortable.min.js` (no CDN)
+- [x] Tests: `IssueTest` + `CommentTest` + `NotificationTest` + `LabelTest` + `IssueTimelineTest` green
 
-### TODO (phased)
-- [ ] **Sub-task tree UI** (parent_id exists; render hierarchy + rollup)
-- [ ] **Labels management on issue** (currently project-page only)
-- [ ] **Watchers / participants** + auto-subscribe
-- [ ] **Standalone attachments** (non-image files on issue)
-- [ ] **Search / Cmd+K** global issue search
-- [ ] **Saved filters / JQL-lite**
-- [ ] **Sprints / Cycles**
-- [ ] **Components / modules**
-- [ ] **REST API** `/api/v1/issues`
-- [ ] **Comment threading** (see comments.md §6)
-- [ ] **Workflow schemes** (mandatory transitions)
+### TODO (phased — see `roadmap-issue-tracker.md`)
+- [ ] **Phase B** — labels on issue, sub-task tree + rollup, watchers, standalone attachments UI
+- [ ] **Phase C** — search/Cmd+K, saved filters/views, REST API, correct board ordering + JSON
+- [ ] **Phase D (deferred)** — sprints/cycles, components, comment threading, automation, strict workflow
 
 ## 10. Open decisions (discuss)
 

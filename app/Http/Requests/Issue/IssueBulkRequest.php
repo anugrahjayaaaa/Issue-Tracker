@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Issue;
 
 use App\Models\Issue;
+use App\Models\Project;
 use App\Models\ProjectMember;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -10,7 +11,10 @@ class IssueBulkRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $project = $this->route('project');
+        $project = $this->route('project') ?? Project::find($this->input('project_id'));
+        if (! $project) {
+            return false;
+        }
 
         return $this->user()->can('issue.delete')
             && ProjectMember::hasRole($this->user(), $project, [ProjectMember::ROLE_LEAD, ProjectMember::ROLE_MEMBER]);

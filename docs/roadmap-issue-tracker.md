@@ -199,7 +199,7 @@ Every phase reuses existing patterns (FormRequest, observers, `ProjectMember::ha
 `partials/rich-text-field`, `Sortable` concern). Tests: Pest, green before merge. Docs: update
 `docs/custom/*` in the same PR.
 
-### Phase A — Stabilise (no new features)
+### Phase A — Stabilise (no new features) — ✅ DONE (2026-09-01)
 **Goal:** remove the debts that make everything else expensive; zero behaviour change for users.
 **Files:**
 - migration `add_key_to_statuses_and_issue_types` + backfill; keep `name` as label.

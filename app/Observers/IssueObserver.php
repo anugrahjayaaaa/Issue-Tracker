@@ -29,6 +29,9 @@ class IssueObserver
 
     public function deleted(Issue $issue): void
     {
+        // ponytail: root-cause cleanup — any delete path (controller/bulk/console)
+        // removes the issue's scoped storage folder.
+        deleteStorageFolder('projects/'.$issue->project->folder().'/issues/'.$issue->code);
         activity()->causedBy(auth()->user())->withProperties([
             'ip' => Request::ip(), 'user_agent' => Request::userAgent(),
         ])->performedOn($issue)->log('issue_deleted');

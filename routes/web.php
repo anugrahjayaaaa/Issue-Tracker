@@ -159,6 +159,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update');
         Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
         Route::delete('/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->middleware('can:issue.delete');
+        Route::post('/bulk', [IssueController::class, 'bulk'])->name('issues.bulk')->middleware('can:issue.delete');
         // rich-text description image upload (scoped to issue folder)
         Route::post('/{issue}/image', [IssueImageController::class, 'store'])->name('issues.image.upload');
         Route::post('/comments/{comment}/image', [CommentImageController::class, 'store'])->name('comments.image.upload');

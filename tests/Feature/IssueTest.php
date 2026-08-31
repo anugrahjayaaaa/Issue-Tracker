@@ -44,8 +44,8 @@ class IssueTest extends TestCase
         $response = $this->actingAs($user)->post(route('issues.store'), [
             'project_id' => $project->id,
             'title' => 'Login broken',
-            'type' => 'Bug',
-            'status' => 'Open',
+            'type' => 'bug',
+            'status' => 'open',
             'priority' => 'high',
         ]);
 
@@ -56,8 +56,8 @@ class IssueTest extends TestCase
     public function test_issue_code_increments_per_project(): void
     {
         [$manager, $project, $user] = $this->seedAndProject();
-        $this->actingAs($user)->post(route('issues.store'), ['project_id' => $project->id, 'title' => 'A', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low']);
-        $this->actingAs($user)->post(route('issues.store'), ['project_id' => $project->id, 'title' => 'B', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low']);
+        $this->actingAs($user)->post(route('issues.store'), ['project_id' => $project->id, 'title' => 'A', 'type' => 'task', 'status' => 'open', 'priority' => 'low']);
+        $this->actingAs($user)->post(route('issues.store'), ['project_id' => $project->id, 'title' => 'B', 'type' => 'task', 'status' => 'open', 'priority' => 'low']);
 
         $this->assertDatabaseHas('issues', ['code' => 'HEL-1']);
         $this->assertDatabaseHas('issues', ['code' => 'HEL-2']);
@@ -74,20 +74,20 @@ class IssueTest extends TestCase
 
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'X',
-            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
         ]);
 
         // allowed
-        $this->actingAs($user)->post(route('issues.status', $issue), ['status' => 'In Progress', 'order' => 0])
+        $this->actingAs($user)->post(route('issues.status', $issue), ['status' => 'in-progress', 'order' => 0])
             ->assertRedirect();
         $issue->refresh();
-        $this->assertSame('In Progress', $issue->status);
+        $this->assertSame('in-progress', $issue->status);
 
         // blocked: In Progress -> Done has no rule
-        $this->actingAs($user)->post(route('issues.status', $issue), ['status' => 'Done', 'order' => 0])
+        $this->actingAs($user)->post(route('issues.status', $issue), ['status' => 'done', 'order' => 0])
             ->assertRedirect();
         $issue->refresh();
-        $this->assertSame('In Progress', $issue->status, 'status must not change when transition disallowed');
+        $this->assertSame('in-progress', $issue->status, 'status must not change when transition disallowed');
     }
 
     public function test_show_renders_with_timeline_and_comments(): void
@@ -95,7 +95,7 @@ class IssueTest extends TestCase
         [$manager, $project, $user] = $this->seedAndProject();
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'X',
-            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
         ]);
         Comment::create(['issue_id' => $issue->id, 'user_id' => $user->id, 'body' => 'hi']);
 
@@ -109,8 +109,8 @@ class IssueTest extends TestCase
     public function test_index_sorts_by_query_and_renders_due_date_column(): void
     {
         [$manager, $project, $user] = $this->seedAndProject();
-        Issue::create(['project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'A', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id, 'due_date' => '2026-01-01']);
-        Issue::create(['project_id' => $project->id, 'code' => 'HEL-2', 'title' => 'B', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id, 'due_date' => '2026-02-01']);
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'A', 'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id, 'due_date' => '2026-01-01']);
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-2', 'title' => 'B', 'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id, 'due_date' => '2026-02-01']);
 
         $this->actingAs($user)
             ->get(route('issues.index', ['project_id' => $project->id, 'sort' => 'due_date', 'dir' => 'desc']))
@@ -122,10 +122,10 @@ class IssueTest extends TestCase
     public function test_index_filter_bar_renders_reset_when_filtered(): void
     {
         [$manager, $project, $user] = $this->seedAndProject();
-        Issue::create(['project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'A', 'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id]);
+        Issue::create(['project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'A', 'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id]);
 
         $this->actingAs($user)
-            ->get(route('issues.index', ['project_id' => $project->id, 'status' => 'Open']))
+            ->get(route('issues.index', ['project_id' => $project->id, 'status' => 'open']))
             ->assertOk()
             ->assertSee('form-select')      // filter selects present
             ->assertSee('btn-outline-secondary'); // reset button shown
@@ -148,8 +148,8 @@ class IssueTest extends TestCase
     {
         [$manager, $project, $user] = $this->seedAndProject();
         $this->actingAs($user)->post(route('issues.store'), [
-            'project_id' => $project->id, 'title' => 'X', 'type' => 'Task',
-            'status' => 'Open', 'priority' => 'low',
+            'project_id' => $project->id, 'title' => 'X', 'type' => 'task',
+            'status' => 'open', 'priority' => 'low',
             'description' => '<script>alert(1)</script><p>ok <strong>bold</strong></p>',
         ]);
 
@@ -162,12 +162,12 @@ class IssueTest extends TestCase
     {
         [$manager, $project, $user] = $this->seedAndProject();
         $this->actingAs($user)->post(route('issues.store'), [
-            'project_id' => $project->id, 'title' => 'No status', 'type' => 'Task', 'priority' => 'low',
+            'project_id' => $project->id, 'title' => 'No status', 'type' => 'task', 'priority' => 'low',
         ])->assertRedirect(route('issues.index', ['project_id' => $project->id]));
 
         $issue = Issue::where('code', 'HEL-1')->first();
         $this->assertNotNull($issue);
-        $this->assertSame('Open', $issue->status);
+        $this->assertSame('open', $issue->status);
     }
 
     public function test_image_upload_is_scoped_to_issue_folder_and_returns_url(): void
@@ -176,7 +176,7 @@ class IssueTest extends TestCase
         [$manager, $project, $user] = $this->seedAndProject();
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
-            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
         ]);
 
         $response = $this->actingAs($user)
@@ -196,7 +196,7 @@ class IssueTest extends TestCase
         [$manager, $project, $user] = $this->seedAndProject(ProjectMember::ROLE_LEAD);
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
-            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
         ]);
 
         $free = \App\Models\Plan::where('slug', 'free')->first();
@@ -219,7 +219,7 @@ class IssueTest extends TestCase
         [$manager, $project, $user] = $this->seedAndProject();
         $issue = Issue::create([
             'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'T',
-            'type' => 'Task', 'status' => 'Open', 'priority' => 'low', 'reporter_id' => $user->id,
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
         ]);
 
         // member (no issue.edit permission) patches only meta fields
