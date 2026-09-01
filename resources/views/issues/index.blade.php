@@ -21,49 +21,66 @@
     @if ($project)
     <div class="d-flex flex-wrap gap-2 align-items-end">
         <div>
+            <label class="form-label small mb-1">{{ ui('select_project') }}</label>
+            <select name="project_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                <option value="">{{ ui('select_project') }}</option>
+                @foreach ($projects as $p)
+                    <option value="{{ $p->id }}" {{ $project && $project->id == $p->id ? 'selected' : '' }}>{{ $p->key }} - {{ $p->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="vr h-100 mx-1 d-none d-sm-block"></div>
+
+        <div>
             <label class="form-label small mb-1">{{ __('Search') }}</label>
             <input type="search" name="q" class="form-control form-control-sm" style="width:220px" value="{{ request('q') }}" placeholder="{{ __('Search issues...') }}" id="issue-search-input">
             <div class="form-text small">Press <kbd>Cmd</kbd>+<kbd>K</kbd> / <kbd>Ctrl</kbd>+<kbd>K</kbd></div>
         </div>
-        <div>
-            <label class="form-label small mb-1">{{ ui('all_status') }}</label>
-            <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                <option value="">{{ ui('all_status') }}</option>
-                @foreach ($filters['status'] as $s)
-                    <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ $s }}</option>
-                @endforeach
-            </select>
+
+        <div id="saved-filters-toolbar" class="d-flex flex-column gap-1">
+            <label class="form-label small mb-0">{{ ui('saved_filters') ?? 'Saved filters' }}</label>
+            <div class="input-group input-group-sm">
+                <select id="saved-filter-select" class="form-select">
+                    <option value="">{{ ui('select_saved_filter') ?? 'Select filter...' }}</option>
+                </select>
+                <button id="apply-saved-filter" class="btn btn-outline-secondary" type="button">{{ __('Apply') }}</button>
+                <button id="save-current-filter" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#saveFilterModal">{{ __('Save') }}</button>
+            </div>
         </div>
-        <div>
-            <label class="form-label small mb-1">{{ ui('all_priority') }}</label>
-            <select name="priority" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                <option value="">{{ ui('all_priority') }}</option>
-                @foreach ($filters['priority'] as $pr)
-                    <option value="{{ $pr }}" {{ request('priority') == $pr ? 'selected' : '' }}>{{ ui('issue_priority_'.$pr) }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label class="form-label small mb-1">{{ ui('all_assignee') }}</label>
-            <select name="assignee_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                <option value="">{{ ui('all_assignee') }}</option>
-                @foreach ($project->users as $u)
-                    <option value="{{ $u->id }}" {{ request('assignee_id') == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label class="form-label small mb-1">{{ ui('all_labels') }}</label>
-            <select name="label_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                <option value="">{{ ui('all_labels') }}</option>
-                @foreach ($project->labels as $l)
-                    <option value="{{ $l->id }}" {{ request('label_id') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>
-                @endforeach
-            </select>
-        </div>
+
         @if (request()->anyFilled(['q','status','priority','assignee_id','label_id']))
             <a href="{{ route('issues.index', ['project_id' => $project->id]) }}" class="btn btn-sm btn-outline-secondary mb-1">{{ ui('reset') }}</a>
         @endif
+    </div>
+
+    <div class="modal fade" id="saveFilterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ __('Save current filter') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
+                </div>
+                <form id="save-filter-form" method="POST" action="{{ route('projects.saved-filters.store', $project) }}">
+                    <div class="modal-body">
+                        @csrf
+                        <input type="hidden" name="project_id" value="{{ $project->id }}">
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Name') }}</label>
+                            <input type="text" name="name" class="form-control" required maxlength="100">
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="1" name="is_public" id="filterIsPublic">
+                            <label class="form-check-label" for="filterIsPublic">{{ __('Public') }}</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     @endif
 </form>
@@ -79,6 +96,43 @@ document.addEventListener('keydown', function(e) {
         if (el) { el.focus(); el.select(); }
     }
 });
+
+(function() {
+    var projectId = @json($project->id);
+    var savedFilterUrl = '/projects/' + projectId + '/saved-filters';
+    var select = document.getElementById('saved-filter-select');
+    var applyBtn = document.getElementById('apply-saved-filter');
+
+    function loadSavedFilters() {
+        fetch(savedFilterUrl, { headers: { 'Accept': 'application/json' } })
+            .then(function(r) { return r.json(); })
+            .then(function(items) {
+                items.forEach(function(item) {
+                    var opt = document.createElement('option');
+                    opt.value = item.id;
+                    opt.textContent = (item.is_public ? '[public] ' : '') + item.name;
+                    opt.dataset.params = JSON.stringify(item.filter_params || {});
+                    select.appendChild(opt);
+                });
+            })
+            .catch(function() {});
+    }
+
+    if (select && applyBtn) {
+        loadSavedFilters();
+        applyBtn.addEventListener('click', function() {
+            var opt = select.options[select.selectedIndex];
+            if (!opt || !opt.dataset.params) { return; }
+            var params = JSON.parse(opt.dataset.params);
+            Object.keys(params).forEach(function(k) {
+                if (params[k] === null || params[k] === undefined || params[k] === '') { return; }
+                var existing = document.querySelector('[name="' + k + '"]');
+                if (existing) { existing.value = params[k]; }
+            });
+            document.querySelector('form').submit();
+        });
+    }
+})();
 </script>
 
 <div class="card shadow-sm">
