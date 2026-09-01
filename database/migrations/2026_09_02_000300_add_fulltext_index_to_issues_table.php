@@ -9,16 +9,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->fullText('title');
-            $table->fullText('description');
+            if (config('database.default') === 'mysql') {
+                $table->fullText('title');
+                $table->fullText('description');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('issues', function (Blueprint $table) {
-            $table->dropFullText('title');
-            $table->dropFullText('description');
+            if (config('database.default') === 'mysql') {
+                $table->dropFullText('title');
+                $table->dropFullText('description');
+            }
         });
     }
 };

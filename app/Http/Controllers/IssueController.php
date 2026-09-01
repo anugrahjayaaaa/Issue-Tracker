@@ -48,9 +48,8 @@ class IssueController extends Controller
                 ->when($request->filled('q'), function ($q) use ($request) {
                     $term = $request->query('q');
                     $q->where(function ($q2) use ($term) {
-                        $q2->where('title', 'like', '%'.$term.'%')
-                            ->orWhere('code', 'like', '%'.$term.'%')
-                            ->orWhere('description', 'like', '%'.$term.'%');
+                        $q2->whereRaw('MATCH(title, description) AGAINST(? IN BOOLEAN MODE)', [$term.'*'])
+                            ->orWhere('code', 'like', '%'.$term.'%');
                     });
                 })
                 ->when(true, fn ($q) => $this->sortIndex($q, $request, 'order', ['code', 'title', 'type', 'status', 'priority', 'assignee_id', 'due_date']))
