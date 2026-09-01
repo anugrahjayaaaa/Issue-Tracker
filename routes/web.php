@@ -26,6 +26,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\SavedFilterController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -153,6 +154,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/{project}/saved-filters', [SavedFilterController::class, 'index'])->name('projects.saved-filters.index')->withoutMiddleware('can:project.manage');
         Route::post('/{project}/saved-filters', [SavedFilterController::class, 'store'])->name('projects.saved-filters.store')->withoutMiddleware('can:project.manage');
         Route::delete('/{project}/saved-filters/{savedFilter}', [SavedFilterController::class, 'destroy'])->name('projects.saved-filters.destroy')->withoutMiddleware('can:project.manage');
+
+        Route::get('/{project}/sprints', [SprintController::class, 'index'])->name('projects.sprints.index')->middleware('can:issue.view');
+        Route::post('/{project}/sprints', [SprintController::class, 'store'])->name('projects.sprints.store');
+        Route::get('/{project}/sprints/{sprint}', [SprintController::class, 'show'])->name('projects.sprints.show');
+        Route::put('/{project}/sprints/{sprint}', [SprintController::class, 'update'])->name('projects.sprints.update');
+        Route::delete('/{project}/sprints/{sprint}', [SprintController::class, 'destroy'])->name('projects.sprints.destroy');
     });
 
     // Issues (project-scoped): read = any member; write = lead/member (enforced in Form Requests)

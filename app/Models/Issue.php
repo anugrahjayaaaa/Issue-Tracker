@@ -23,7 +23,7 @@ class Issue extends Model
 
     protected $fillable = [
         'project_id', 'code', 'title', 'description', 'type', 'status',
-        'priority', 'reporter_id', 'assignee_id', 'parent_id', 'due_date', 'order',
+        'priority', 'reporter_id', 'assignee_id', 'parent_id', 'due_date', 'order', 'sprint_id',
     ];
 
     /**
@@ -133,6 +133,11 @@ class Issue extends Model
     public function watchers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'issue_watchers')->withTimestamps();
+    }
+
+    public function sprint(): BelongsTo
+    {
+        return $this->belongsTo(Sprint::class);
     }
 
     /** Auto-subscribe reporter + assignee + commenter (decision #3). */
