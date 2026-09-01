@@ -73,6 +73,7 @@
                 @include('partials.rich-text-field', ['uploadUrl' => ''])
             </div>
             @include('partials.labels-field')
+            @include('partials.components-field')
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> {{ ui('save') }}</button>
             @endif
         </form>
