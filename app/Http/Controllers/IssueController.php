@@ -123,6 +123,7 @@ class IssueController extends Controller
             ?? $project->statuses()->orderBy('order')->value('key');
         $issue->save();
         $issue->labels()->sync($request->input('labels', []));
+        $issue->components()->sync($request->input('components', []));
 
         if ($issue->assignee_id && $issue->assignee_id !== $request->user()->id) {
             $issue->assignee->notify(new IssueAssigned($issue));
@@ -165,6 +166,7 @@ class IssueController extends Controller
         $oldAssignee = $issue->assignee_id;
         $issue->update($request->validated());
         $issue->labels()->sync($request->input('labels', []));
+        $issue->components()->sync($request->input('components', []));
         // Auto-subscribe new assignee (decision #3).
         if ($issue->assignee_id && $issue->assignee_id !== $oldAssignee) {
             $issue->syncWatchers([$issue->assignee_id]);

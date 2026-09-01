@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesProject;
 use App\Http\Requests\Issue\IssueIndexRequest;
 use App\Models\Issue;
 use App\Models\Project;
