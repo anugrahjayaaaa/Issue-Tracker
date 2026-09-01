@@ -21,22 +21,12 @@
     @if ($project)
     <div class="d-flex flex-wrap gap-2 align-items-end">
         <div>
-            <label class="form-label small mb-1">{{ ui('select_project') }}</label>
-            <select name="project_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                <option value="">{{ ui('select_project') }}</option>
-                @foreach ($projects as $p)
-                    <option value="{{ $p->id }}" {{ $project && $project->id == $p->id ? 'selected' : '' }}>{{ $p->key }} - {{ $p->name }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="vr h-100 mx-1 d-none d-sm-block"></div>
-
-        <div>
             <label class="form-label small mb-1">{{ __('Search') }}</label>
             <input type="search" name="q" class="form-control form-control-sm" style="width:220px" value="{{ request('q') }}" placeholder="{{ __('Search issues...') }}" id="issue-search-input">
             <div class="form-text small">Press <kbd>Cmd</kbd>+<kbd>K</kbd> / <kbd>Ctrl</kbd>+<kbd>K</kbd></div>
         </div>
+
+        <div class="vr h-100 mx-1 d-none d-sm-block"></div>
 
         <div id="saved-filters-toolbar" class="d-flex flex-column gap-1">
             <label class="form-label small mb-0">{{ ui('saved_filters') ?? 'Saved filters' }}</label>
@@ -46,6 +36,7 @@
                 </select>
                 <button id="apply-saved-filter" class="btn btn-outline-secondary" type="button">{{ __('Apply') }}</button>
                 <button id="save-current-filter" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#saveFilterModal">{{ __('Save') }}</button>
+                <button id="delete-saved-filter" class="btn btn-outline-danger" type="button">{{ __('Delete') }}</button>
             </div>
         </div>
 
@@ -102,23 +93,42 @@ document.addEventListener('keydown', function(e) {
     var savedFilterUrl = '/projects/' + projectId + '/saved-filters';
     var select = document.getElementById('saved-filter-select');
     var applyBtn = document.getElementById('apply-saved-filter');
+    var deleteBtn = document.getElementById('delete-saved-filter');
 
     function loadSavedFilters() {
         fetch(savedFilterUrl, { headers: { 'Accept': 'application/json' } })
             .then(function(r) { return r.json(); })
             .then(function(items) {
+                select.innerHTML = '<option value="">{{ ui('select_saved_filter') ?? 'Select filter...' }}</option>';
                 items.forEach(function(item) {
                     var opt = document.createElement('option');
                     opt.value = item.id;
                     opt.textContent = (item.is_public ? '[public] ' : '') + item.name;
                     opt.dataset.params = JSON.stringify(item.filter_params || {});
+                    opt.dataset.ownerId = item.user_id;
                     select.appendChild(opt);
                 });
             })
             .catch(function() {});
     }
 
-    if (select && applyBtn) {
+    function deleteSelectedFilter() {
+        var opt = select.options[select.selectedIndex];
+        if (!opt || !opt.value) { return; }
+        if (!confirm('{{ __('Delete this saved filter?') }}')) { return; }
+        fetch(savedFilterUrl + '/' + opt.value, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+            }
+        }).then(function(r) {
+            if (r.status === 204) { loadSavedFilters(); }
+            else if (r.status === 403) { alert('{{ __('Not allowed') }}'); }
+        }).catch(function() {});
+    }
+
+    if (select && applyBtn && deleteBtn) {
         loadSavedFilters();
         applyBtn.addEventListener('click', function() {
             var opt = select.options[select.selectedIndex];
@@ -131,6 +141,7 @@ document.addEventListener('keydown', function(e) {
             });
             document.querySelector('form').submit();
         });
+        deleteBtn.addEventListener('click', deleteSelectedFilter);
     }
 })();
 </script>
