@@ -131,6 +131,25 @@ class IssueTest extends TestCase
             ->assertSee('btn-outline-secondary'); // reset button shown
     }
 
+    public function test_board_returns_json_with_columns(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        $issue = Issue::create([
+            'project_id' => $project->id,
+            'code' => 'HEL-1',
+            'title' => 'JS',
+            'type' => 'task',
+            'status' => 'open',
+            'priority' => 'low',
+            'reporter_id' => $user->id,
+        ]);
+
+        $this->actingAs($user)
+            ->getJson(route('issues.board', ['project_id' => $project->id]))
+            ->assertOk()
+            ->assertJsonStructure(['columns' => ['open']]);
+    }
+
     public function test_non_member_cannot_view_board(): void
     {
         $this->seed();

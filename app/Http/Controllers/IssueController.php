@@ -80,7 +80,7 @@ class IssueController extends Controller
                 $columns[$statusKey] = Issue::with(['assignee', 'labels'])
                     ->where('project_id', $project->id)
                     ->where('status', $statusKey)
-                    ->orderByRaw('ISNULL(`order`)')
+                    ->orderByRaw('`order` IS NULL')
                     ->orderBy('order')
                     ->orderBy('id')
                     ->get();
