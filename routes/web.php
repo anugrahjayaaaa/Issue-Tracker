@@ -30,6 +30,7 @@ use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ComponentController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
 // Health check (no auth)

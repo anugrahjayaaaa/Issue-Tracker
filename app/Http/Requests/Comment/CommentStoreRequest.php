@@ -5,6 +5,7 @@ namespace App\Http\Requests\Comment;
 use App\Models\Issue;
 use App\Models\ProjectMember;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CommentStoreRequest extends FormRequest
 {
@@ -20,8 +21,15 @@ class CommentStoreRequest extends FormRequest
     /** @return array<string,mixed> */
     public function rules(): array
     {
+        $issueId = $this->route('issue')?->id;
+
         return [
             'body' => 'required|string|max:10000',
+            'parent_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('comments', 'id')->where(fn ($q) => $q->where('issue_id', $issueId)),
+            ],
         ];
     }
 }

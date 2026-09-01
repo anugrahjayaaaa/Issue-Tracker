@@ -267,6 +267,22 @@
                 @endif
             </div>
         </div>
+
+        {{-- Components --}}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header">{{ ui('components') }}</div>
+            <div class="card-body">
+                @if ($issue->components->isNotEmpty())
+                    <div class="d-flex flex-wrap gap-1">
+                        @foreach ($issue->components as $c)
+                            <span class="badge text-bg-light border">{{ $c->name }}</span>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-muted small">{{ ui('no_components') }}</div>
+                @endif
+            </div>
+        </div>
     </div>
 </div>
 

@@ -27,6 +27,7 @@ class CommentController extends Controller
             'issue_id' => $issue->id,
             'user_id' => $request->user()->id,
             'body' => $request->input('body'),
+            'parent_id' => $request->input('parent_id'),
         ]);
 
         // Decision #3: commenter auto-subscribes to the issue.

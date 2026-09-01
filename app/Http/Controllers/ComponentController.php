@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Component\StoreComponentRequest;
 use App\Http\Requests\Component\UpdateComponentRequest;
+use App\Http\Controllers\Concerns\AuthorizesProject;
 use App\Models\Component;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
