@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesProject;
 use App\Http\Requests\Project\ProjectStoreRequest;
 use App\Http\Requests\Project\ProjectUpdateRequest;
 use App\Models\Project;
@@ -13,6 +14,7 @@ use Illuminate\View\View;
 
 class ProjectController extends Controller
 {
+    use AuthorizesProject;
     public function index(Request $request): View
     {
         $projects = Project::query()
@@ -46,12 +48,7 @@ class ProjectController extends Controller
 
     public function show(Project $project): View
     {
-        abort_unless(
-            ProjectMember::hasRole(auth()->user(), $project, [
-                ProjectMember::ROLE_LEAD, ProjectMember::ROLE_MEMBER, ProjectMember::ROLE_VIEWER,
-            ]),
-            403
-        );
+        $this->ensureProjectReader($project);
         $project->load(['members.user', 'labels', 'issues' => fn ($q) => $q->latest()->limit(5)]);
         $users = User::orderBy('name')->get();
 

@@ -50,10 +50,11 @@ Every protected action requires **all** of:
 2. Global permission gate (`can:{perm}` on the route).
 3. Module enabled (`feature:issues` on the route) — except `project.manage`
    holders operating `/features`.
-4. **Project scope gate** — for issue/comment actions, the acting user must
-   have a `project_members` row on the target project with a role granting the
-   action (lead/member for write, viewer+ for read). Implement as a
-   route-model-bound policy or a small `ProjectMember` helper, never inline in
+4. **Project scope gate** — for issue/comment/project-member actions, the
+   acting user must have a `project_members` row on the target project with a
+   role granting the action (`lead`/`member` for write, `viewer`+ for read).
+   Implement centrally via the shared `AuthorizesProject` trait
+   (`app/Http/Controllers/Concerns/AuthorizesProject.php`), never inline in
    every controller.
 
 See `docs/coding-standard.md` §Authorization — gate on the **route**, not the

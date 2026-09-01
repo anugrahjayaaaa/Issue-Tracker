@@ -47,10 +47,11 @@ Global (spatie, seeded in `DatabaseSeeder`):
 - `issue.view`, `issue.create`, `issue.edit`, `issue.delete`
 - `comment.create`, `comment.edit`, `comment.delete`
 
-Project-level (dynamic, answered per project):
+Project-level (fixed for v1, Jira-like base model):
 - Stored in `project_members.role`: `lead` | `member` | `viewer`
 - A user may belong to many projects with **different roles**.
 - Effective access = global `issue.*` permission AND a `project_members` row
   with sufficient role for the target project.
-- The PM / "assign users to project" capability is a **project-level role**
-  (`lead`), not a single global switch — it is dynamic per project.
+- The PM / "assign users to project" capability is the **`lead` role**.
+- Authorization is enforced via the shared `AuthorizesProject` trait, not
+  inline per controller.

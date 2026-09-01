@@ -37,7 +37,8 @@ projects with different roles. This is the "PM can assign users" requirement.
   `users()` → User via members.
 - A `ProjectMember` helper (or Policy) centralizes the scope gate:
   `ProjectMember::hasRole(user, project, ['lead','member'])`.
-  Reused by Issue/Comment controllers so the check lives in ONE place.
+  Reused by Issue/Comment/SavedFilter controllers via the shared
+  `AuthorizesProject` trait so the check lives in ONE place.
 - Audit: Project + ProjectMember mutations logged via activitylog observer
   (reuse base `app/Observers` pattern).
 
