@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('project_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->json('filter_params');
+            $table->boolean('is_public')->default(false);
             $table->timestamps();
 
             $table->unique(['user_id', 'project_id', 'name']);

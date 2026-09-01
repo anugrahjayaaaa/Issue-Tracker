@@ -17,6 +17,7 @@ class StoreSavedFilterRequest extends FormRequest
             'project_id' => 'required|exists:projects,id',
             'name' => 'required|string|max:100',
             'filter_params' => 'required|array',
+            'is_public' => ['nullable', 'boolean'],
         ];
     }
 }

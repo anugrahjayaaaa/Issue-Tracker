@@ -148,9 +148,9 @@ Route::middleware('auth')->group(function () {
         // rich-text description image upload (scoped to project folder)
         Route::post('/{project}/image', [ProjectImageController::class, 'store'])->name('projects.image.upload');
 
-        Route::get('/{project}/saved-filters', [SavedFilterController::class, 'index'])->name('projects.saved-filters.index');
-        Route::post('/{project}/saved-filters', [SavedFilterController::class, 'store'])->name('projects.saved-filters.store');
-        Route::delete('/{project}/saved-filters/{savedFilter}', [SavedFilterController::class, 'destroy'])->name('projects.saved-filters.destroy');
+        Route::get('/{project}/saved-filters', [SavedFilterController::class, 'index'])->name('projects.saved-filters.index')->withoutMiddleware('can:project.manage');
+        Route::post('/{project}/saved-filters', [SavedFilterController::class, 'store'])->name('projects.saved-filters.store')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/saved-filters/{savedFilter}', [SavedFilterController::class, 'destroy'])->name('projects.saved-filters.destroy')->withoutMiddleware('can:project.manage');
     });
 
     // Issues (project-scoped): read = any member; write = lead/member (enforced in Form Requests)

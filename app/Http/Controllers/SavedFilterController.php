@@ -25,11 +25,17 @@ class SavedFilterController extends Controller
     public function index(Request $request, Project $project)
     {
         $this->ensureMember($project);
+        $user = $request->user();
 
-        $filters = SavedFilter::where('user_id', $request->user()->id)
+        $filters = SavedFilter::query()
             ->where('project_id', $project->id)
+            ->when(! $user->can('project.manage'), function ($q) use ($user) {
+                $q->where(function ($q2) use ($user) {
+                    $q2->where('user_id', $user->id)->orWhere('is_public', true);
+                });
+            })
             ->orderBy('name')
-            ->get(['id', 'name', 'filter_params']);
+            ->get(['id', 'name', 'filter_params', 'is_public']);
 
         return response()->json($filters);
     }
@@ -43,6 +49,7 @@ class SavedFilterController extends Controller
             'project_id' => $project->id,
             'name' => $request->input('name'),
             'filter_params' => $request->query(),
+            'is_public' => (bool) $request->input('is_public', false),
         ]);
 
         return response()->json($filter, 201);
