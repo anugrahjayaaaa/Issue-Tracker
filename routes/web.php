@@ -29,6 +29,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ComponentController;
 use Illuminate\Support\Facades\Route;
 
 // Health check (no auth)
@@ -135,6 +136,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/{project}/labels', [LabelController::class, 'store'])->name('projects.labels.store');
         Route::put('/{project}/labels/{label}', [LabelController::class, 'update'])->name('projects.labels.update');
         Route::delete('/{project}/labels/{label}', [LabelController::class, 'destroy'])->name('projects.labels.destroy');
+        Route::post('/{project}/components', [ComponentController::class, 'store'])->name('projects.components.store')->withoutMiddleware('can:project.manage');
+        Route::put('/{project}/components/{component}', [ComponentController::class, 'update'])->name('projects.components.update')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/components/{component}', [ComponentController::class, 'destroy'])->name('projects.components.destroy')->withoutMiddleware('can:project.manage');
         // dynamic issue types / statuses / workflow transitions (per-project, lead only)
         Route::get('/{project}/fields', [ProjectFieldController::class, 'index'])->name('projects.fields')->withoutMiddleware('can:project.manage');
         Route::post('/{project}/types', [ProjectFieldController::class, 'storeType'])->name('projects.types.store')->withoutMiddleware('can:project.manage');

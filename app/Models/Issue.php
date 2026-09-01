@@ -66,6 +66,11 @@ class Issue extends Model
         return $this->belongsTo(Project::class);
     }
 
+    public function components(): BelongsToMany
+    {
+        return $this->belongsToMany(Component::class, 'component_issue');
+    }
+
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_id');

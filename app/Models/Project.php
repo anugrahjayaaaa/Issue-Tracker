@@ -118,6 +118,11 @@ class Project extends Model
         return $this->hasMany(Sprint::class);
     }
 
+    public function components(): HasMany
+    {
+        return $this->hasMany(Component::class);
+    }
+
     /** Next issue code, e.g. HEL-12. Increments issue_seq atomically-ish. */
     public function nextIssueCode(): string
     {
