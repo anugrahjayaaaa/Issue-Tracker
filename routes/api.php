@@ -3,14 +3,22 @@
 use App\Http\Controllers\Api\ApiTokenApiController;
 use App\Http\Controllers\Api\AuditApiController;
 use App\Http\Controllers\Api\AuthApiController;
+use App\Http\Controllers\Api\CommentApiController;
 use App\Http\Controllers\Api\FeatureApiController;
+use App\Http\Controllers\Api\IssueApiController;
 use App\Http\Controllers\Api\NotificationApiController;
 use App\Http\Controllers\Api\PermissionApiController;
 use App\Http\Controllers\Api\ProfileApiController;
+use App\Http\Controllers\Api\ProjectApiController;
 use App\Http\Controllers\Api\RoleApiController;
 use App\Http\Controllers\Api\SessionApiController;
 use App\Http\Controllers\Api\UserApiController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Issue;
+use App\Models\Project;
+
+Route::model('project', Project::class);
+Route::model('issue', Issue::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -68,5 +76,26 @@ Route::prefix('v1')->group(function () {
 
         // Permissions (permission.*)
         Route::apiResource('permissions', PermissionApiController::class)->middleware('can:permission.view');
+
+        // Projects
+        Route::middleware('can:project.manage')->group(function () {
+            Route::post('projects', [ProjectApiController::class, 'store'])->name('api.projects.store');
+            Route::put('projects/{project}', [ProjectApiController::class, 'update'])->name('api.projects.update');
+            Route::delete('projects/{project}', [ProjectApiController::class, 'destroy'])->name('api.projects.destroy');
+        });
+        Route::get('projects', [ProjectApiController::class, 'index'])->name('api.projects.index');
+        Route::get('projects/{project}', [ProjectApiController::class, 'show'])->name('api.projects.show');
+
+        // Issues (scoped to authenticated user's projects)
+        Route::prefix('projects/{project}')->group(function () {
+            Route::get('issues', [IssueApiController::class, 'index'])->name('api.projects.issues.index');
+            Route::get('issues/{issue}', [IssueApiController::class, 'show'])->name('api.projects.issues.show');
+            Route::post('issues', [IssueApiController::class, 'store'])->middleware('can:issue.create')->name('api.projects.issues.store');
+            Route::put('issues/{issue}', [IssueApiController::class, 'update'])->name('api.projects.issues.update');
+            Route::delete('issues/{issue}', [IssueApiController::class, 'destroy'])->name('api.projects.issues.destroy');
+
+            Route::get('issues/{issue}/comments', [CommentApiController::class, 'index'])->name('api.projects.issues.comments.index');
+            Route::get('issues/{issue}/comments/{comment}', [CommentApiController::class, 'show'])->name('api.projects.issues.comments.show');
+        });
     });
 });

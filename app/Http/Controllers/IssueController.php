@@ -14,22 +14,20 @@ use App\Models\Attachment;
 use App\Notifications\IssueAssigned;
 use App\Notifications\IssueStatusChanged;
 use App\Http\Controllers\Concerns\Sortable;
+use App\Http\Controllers\Concerns\AuthorizesProject;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class IssueController extends Controller
 {
-    use Sortable;
+    use Sortable, AuthorizesProject;
+
     /** Read-gate: must be a project member (any role). */
     private function abortIfNotReader(Project $project): void
     {
-        abort_unless(
-            ProjectMember::hasRole(auth()->user(), $project, [
-                ProjectMember::ROLE_LEAD, ProjectMember::ROLE_MEMBER, ProjectMember::ROLE_VIEWER,
-            ]),
-            403
-        );
+        $this->ensureProjectReader($project);
     }
 
     public function index(Request $request): View
@@ -41,22 +39,33 @@ class IssueController extends Controller
 
         $issues = collect();
         if ($project) {
-            $this->abortIfNotReader($project);
+            $this->ensureProjectReader($project);
             $issues = Issue::with(['assignee', 'labels'])
                 ->where('project_id', $project->id)
-                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status)) // status = key slug
+                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
                 ->when($request->filled('assignee_id'), fn ($q) => $q->where('assignee_id', $request->assignee_id))
                 ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
                 ->when($request->filled('label_id'), fn ($q) => $q->whereHas('labels', fn ($l) => $l->where('labels.id', $request->label_id)))
+                ->when($request->filled('q'), function ($q) use ($request) {
+                    $term = $request->query('q');
+                    $q->where(function ($q2) use ($term) {
+                        $q2->whereRaw('MATCH(title, description) AGAINST(? IN BOOLEAN MODE)', [$term.'*'])
+                            ->orWhere('code', 'like', '%'.$term.'%');
+                    });
+                })
                 ->when(true, fn ($q) => $this->sortIndex($q, $request, 'order', ['code', 'title', 'type', 'status', 'priority', 'assignee_id', 'due_date']))
                 ->paginate(20)
                 ->withQueryString();
         }
 
-        return view('issues.index', compact('projects', 'project', 'issues'));
+        return view('issues.index', compact('projects', 'project', 'issues'))
+            ->with('filters', [
+                'status' => $project?->statuses->pluck('key')->all() ?? [],
+                'priority' => [Issue::PRIORITY_LOW, Issue::PRIORITY_MEDIUM, Issue::PRIORITY_HIGH, Issue::PRIORITY_URGENT],
+            ]);
     }
 
-    public function board(Request $request): View
+    public function board(Request $request): View|JsonResponse
     {
         $projects = Project::query()
             ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
@@ -65,15 +74,21 @@ class IssueController extends Controller
 
         $columns = [];
         if ($project) {
-            $this->abortIfNotReader($project);
+            $this->ensureProjectReader($project);
             $statuses = $project->statuses->pluck('key')->all();
             foreach ($statuses as $statusKey) {
-                $columns[$statusKey] = Issue::with('assignee')
+                $columns[$statusKey] = Issue::with(['assignee', 'labels'])
                     ->where('project_id', $project->id)
                     ->where('status', $statusKey)
+                    ->orderByRaw('`order` IS NULL')
                     ->orderBy('order')
+                    ->orderBy('id')
                     ->get();
             }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['columns' => $columns]);
         }
 
         return view('issues.board', compact('projects', 'project', 'columns'));
@@ -119,7 +134,7 @@ class IssueController extends Controller
 
     public function show(Issue $issue): View
     {
-        $this->abortIfNotReader($issue->project);
+        $this->ensureProjectReader($issue->project);
         $issue->load('assignee', 'reporter', 'parent', 'children.statusLink', 'comments.user', 'comments.attachments', 'labels', 'attachments', 'watchers');
 
         return view('issues.show', compact('issue'));
@@ -164,7 +179,7 @@ class IssueController extends Controller
 
     public function watch(Issue $issue): RedirectResponse
     {
-        $this->abortIfNotReader($issue->project);
+        $this->ensureProjectReader($issue->project);
         $issue->syncWatchers([auth()->id()]);
 
         return redirect()->route('issues.show', $issue)->with('success', __('messages.watched'));
@@ -172,7 +187,7 @@ class IssueController extends Controller
 
     public function unwatch(Issue $issue): RedirectResponse
     {
-        $this->abortIfNotReader($issue->project);
+        $this->ensureProjectReader($issue->project);
         $issue->watchers()->detach(auth()->id());
 
         return redirect()->route('issues.show', $issue)->with('success', __('messages.unwatched'));

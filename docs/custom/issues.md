@@ -169,7 +169,7 @@ for the broad permission, finer checks in FormRequest/controller.
 - [x] Tests: `WatcherSubtaskTest` green (auto-subscribe, fan-out, cycle guard, rollup, attachment delete)
 
 ### TODO (phased — see `roadmap-issue-tracker.md`)
-- [ ] **Phase C** — search/Cmd+K, saved filters/views, REST API, correct board ordering + JSON
+- [x] **Phase C** — search/Cmd+K, saved filters/views, REST API, correct board ordering + JSON
 - [ ] **Phase D (deferred)** — sprints/cycles, components, comment threading, automation, strict workflow
 
 ## 10. Open decisions (discuss)

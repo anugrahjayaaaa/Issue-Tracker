@@ -57,6 +57,8 @@ undefined-method class of bugs.
 - Only: validate (via Form Request), call a Service/Action, return a view/redirect/response.
 - Business logic → `app/Services/*` or action classes.
 - Models use `SoftDeletes`; mutations logged via observer/activitylog.
+- Shared controller concerns belong in `app/Http/Controllers/Concerns/*` traits.
+  Use them to avoid duplicating authorization or other cross-cutting logic.
 
 ## 5. Feature flags
 - Declared in `config/pennant.php`, defined in `AppServiceProvider::boot()`.

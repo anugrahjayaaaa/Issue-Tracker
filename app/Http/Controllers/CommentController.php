@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesProject;
 use App\Http\Requests\Comment\CommentAttachRequest;
 use App\Http\Requests\Comment\CommentStoreRequest;
 use App\Http\Requests\Comment\CommentUpdateRequest;
@@ -16,18 +17,12 @@ use Illuminate\Support\Facades\Storage;
 
 class CommentController extends Controller
 {
-    private function abortIfNotReader(Issue $issue): void
-    {
-        abort_unless(
-            ProjectMember::hasRole(auth()->user(), $issue->project, [
-                ProjectMember::ROLE_LEAD, ProjectMember::ROLE_MEMBER, ProjectMember::ROLE_VIEWER,
-            ]),
-            403
-        );
-    }
+    use AuthorizesProject;
 
     public function store(CommentStoreRequest $request, Issue $issue): RedirectResponse
     {
+        $this->ensureProjectReader($issue);
+
         $comment = Comment::create([
             'issue_id' => $issue->id,
             'user_id' => $request->user()->id,
@@ -51,6 +46,8 @@ class CommentController extends Controller
 
     public function update(CommentUpdateRequest $request, Comment $comment): RedirectResponse
     {
+        $this->ensureProjectReader($comment->issue);
+
         $oldBody = $comment->body;
         $newBody = $request->input('body');
 
@@ -64,6 +61,7 @@ class CommentController extends Controller
     public function destroy(Comment $comment): RedirectResponse
     {
         $issue = $comment->issue;
+        $this->ensureProjectReader($issue);
         // owner only (leads may not delete others' comments)
         abort_unless($comment->user_id === auth()->id(), 403);
 
@@ -78,6 +76,8 @@ class CommentController extends Controller
 
     public function attach(CommentAttachRequest $request, Issue $issue): RedirectResponse
     {
+        $this->ensureProjectReader($issue);
+
         // ponytail: store in the issue's scoped folder; comment_id set later (Phase B)
         // when the route gains a {comment} segment. File lives under project/issue/attachments.
         $folder = 'projects/'.$issue->project->folder().'/issues/'.$issue->code.'/attachments';
