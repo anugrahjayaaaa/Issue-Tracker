@@ -61,4 +61,14 @@ class SavedFilterTest extends TestCase
             ->assertOk()
             ->assertJsonCount(0);
     }
+
+    public function test_non_owner_cannot_delete_filter(): void
+    {
+        [$manager, $member, , $project] = $this->seedProject();
+        $filter = SavedFilter::create(['user_id' => $manager->id, 'project_id' => $project->id, 'name' => 'Private', 'filter_params' => []]);
+
+        $this->actingAs($member)
+            ->delete(route('projects.saved-filters.destroy', [$project, $filter]))
+            ->assertStatus(403);
+    }
 }
