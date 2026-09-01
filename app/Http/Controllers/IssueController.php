@@ -15,6 +15,7 @@ use App\Notifications\IssueAssigned;
 use App\Notifications\IssueStatusChanged;
 use App\Http\Controllers\Concerns\Sortable;
 use App\Http\Controllers\Concerns\AuthorizesProject;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -64,7 +65,7 @@ class IssueController extends Controller
             ]);
     }
 
-    public function board(Request $request): View
+    public function board(Request $request): View|JsonResponse
     {
         $projects = Project::query()
             ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
@@ -76,7 +77,7 @@ class IssueController extends Controller
             $this->ensureProjectReader($project);
             $statuses = $project->statuses->pluck('key')->all();
             foreach ($statuses as $statusKey) {
-                $columns[$statusKey] = Issue::with('assignee')
+                $columns[$statusKey] = Issue::with(['assignee', 'labels'])
                     ->where('project_id', $project->id)
                     ->where('status', $statusKey)
                     ->orderByRaw('ISNULL(`order`)')
@@ -84,6 +85,10 @@ class IssueController extends Controller
                     ->orderBy('id')
                     ->get();
             }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['columns' => $columns]);
         }
 
         return view('issues.board', compact('projects', 'project', 'columns'));
