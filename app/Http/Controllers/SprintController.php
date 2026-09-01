@@ -7,6 +7,7 @@ use App\Http\Requests\Sprint\UpdateSprintRequest;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\Sprint;
+use App\Http\Controllers\Concerns\AuthorizesProject;
 use Illuminate\Http\Request;
 
 class SprintController extends Controller
