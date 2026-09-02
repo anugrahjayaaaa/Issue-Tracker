@@ -15,6 +15,7 @@ return [
     'delete_confirm_body' => 'Are you sure you want to delete this item? This cannot be undone.',
     'close' => 'Close',
     'search' => 'Search',
+    'search_translation' => 'Search group, key, or text…',
     'filter' => 'Filter',
     'copy' => 'Copy',
     'copied' => 'Copied',

@@ -11,7 +11,15 @@ class TranslationController extends Controller
 
     public function index()
     {
-        $lines = LanguageLine::orderBy('group')->orderBy('key')->paginate(25);
+        $lines = LanguageLine::query()
+            ->when(request('q'), fn ($q, $s) => $q->where(function ($sq) use ($s) {
+                $sq->where('group', 'like', "%$s%")
+                    ->orWhere('key', 'like', "%$s%")
+                    ->orWhereJsonContains('text->en', $s);
+            }))
+            ->orderBy(request('sort') ?: 'group', request('dir') ?: 'asc')
+            ->paginate(25)
+            ->withQueryString();
 
         return view('settings.translations.index', [
             'lines' => $lines,

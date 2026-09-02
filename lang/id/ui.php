@@ -15,6 +15,7 @@ return [
     'delete_confirm_body' => 'Yakin ingin menghapus item ini? Tindakan tidak dapat dibatalkan.',
     'close' => 'Tutup',
     'search' => 'Cari',
+    'search_translation' => 'Cari grup, kunci, atau teks…',
     'filter' => 'Filter',
     'copy' => 'Salin',
     'copied' => 'Disalin',
