@@ -8,10 +8,10 @@
         <form method="POST" action="{{ route('projects.components.store', $project) }}" class="mb-3">
             @csrf
             <div class="input-group input-group-sm">
-                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" placeholder="{{ ui('component_name') }}">
+                <input type="text" name="component_name" class="form-control @error('component_name') is-invalid @enderror" placeholder="{{ ui('component_name') }}">
                 <button class="btn btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('add') }}" aria-label="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
             </div>
-            @error('name')<div class="invalid-feedback d-block small mt-1">{{ $message }}</div>@enderror
+            @error('component_name')<div class="invalid-feedback d-block small mt-1">{{ $message }}</div>@enderror
         </form>
 
         <ul class="list-group list-group-flush">

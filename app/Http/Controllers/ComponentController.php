@@ -17,7 +17,11 @@ class ComponentController extends Controller
     {
         $this->ensureProjectLead($project);
 
-        $project->components()->create($request->validated());
+        $data = $request->validated();
+        // ponytail: form field 'component_name' maps to model 'name'
+        $data['name'] = $data['component_name'];
+        unset($data['component_name']);
+        $project->components()->create($data);
 
         return back()->with('success', __('messages.component_created'));
     }
@@ -27,7 +31,12 @@ class ComponentController extends Controller
         $this->ensureProjectLead($project);
         abort_unless($component->project_id === $project->id, 404);
 
-        $component->update($request->validated());
+        $data = $request->validated();
+        if (array_key_exists('component_name', $data)) {
+            $data['name'] = $data['component_name'];
+            unset($data['component_name']);
+        }
+        $component->update($data);
 
         return back()->with('success', __('messages.component_updated'));
     }

@@ -12,13 +12,18 @@ class LabelStoreRequest extends FormRequest
         return $this->user()->can('project.manage');
     }
 
+    public function attributes(): array
+    {
+        return ['label_name' => 'label name'];
+    }
+
     /** @return array<string,mixed> */
     public function rules(): array
     {
         $project = $this->route('project');
 
         return [
-            'name' => [
+            'label_name' => [
                 'required', 'string', 'max:50',
                 Rule::unique('labels')->where('project_id', $project->id),
             ],

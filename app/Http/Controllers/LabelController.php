@@ -12,7 +12,11 @@ class LabelController extends Controller
 {
     public function store(LabelStoreRequest $request, Project $project): RedirectResponse
     {
-        $project->labels()->create($request->validated());
+        $data = $request->validated();
+        // ponytail: form field 'label_name' maps to model 'name'
+        $data['name'] = $data['label_name'];
+        unset($data['label_name']);
+        $project->labels()->create($data);
 
         return back()->with('success', __('messages.label_created'));
     }
@@ -20,7 +24,13 @@ class LabelController extends Controller
     public function update(LabelUpdateRequest $request, Project $project, Label $label): RedirectResponse
     {
         abort_unless($label->project_id === $project->id, 404);
-        $label->update($request->validated());
+
+        $data = $request->validated();
+        if (array_key_exists('label_name', $data)) {
+            $data['name'] = $data['label_name'];
+            unset($data['label_name']);
+        }
+        $label->update($data);
 
         return back()->with('success', __('messages.label_updated'));
     }

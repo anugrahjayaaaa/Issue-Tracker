@@ -11,10 +11,15 @@ class UpdateComponentRequest extends FormRequest
         return true;
     }
 
+    public function attributes(): array
+    {
+        return ['component_name' => 'component name'];
+    }
+
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string', 'max:255'],
+            'component_name' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'lead_id' => ['nullable', 'exists:users,id'],
         ];

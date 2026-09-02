@@ -8,11 +8,11 @@
         <form method="POST" action="{{ route('projects.labels.store', $project) }}" class="mb-3">
             @csrf
             <div class="input-group input-group-sm">
-                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" placeholder="{{ ui('label_name') }}">
+                <input type="text" name="label_name" class="form-control @error('label_name') is-invalid @enderror" placeholder="{{ ui('label_name') }}">
                 <input type="color" name="color" class="form-control form-control-color p-1" style="width:34px;flex:0 0 34px" value="#3b82f6" data-bs-toggle="tooltip" data-bs-title="{{ ui('color') }}">
                 <button class="btn btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('add') }}" aria-label="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
             </div>
-            @error('name')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+            @error('label_name')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
         </form>
 
         <ul class="list-group list-group-flush">
@@ -34,7 +34,7 @@
                     </summary>
                     <form method="POST" action="{{ route('projects.labels.update', [$project, $label]) }}" class="d-flex gap-2 mt-2">
                         @csrf @method('PUT')
-                        <input type="text" name="name" value="{{ $label->name }}" class="form-control form-control-sm flex-grow-1">
+                        <input type="text" name="label_name" value="{{ $label->name }}" class="form-control form-control-sm flex-grow-1">
                         <input type="color" name="color" value="{{ $label->color }}" class="form-control form-control-sm form-control-color p-1" style="width:34px;flex:0 0 34px">
                         <button class="btn btn-sm btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('save') }}" aria-label="{{ ui('save') }}"><i class="bi bi-check-lg"></i></button>
                     </form>
