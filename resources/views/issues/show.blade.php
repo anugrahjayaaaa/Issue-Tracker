@@ -134,6 +134,25 @@
                 @endif
             </div>
         </div>
+        {{-- Automation logs --}}
+        @if($issue->automationLogs->isNotEmpty())
+        <div class="card shadow-sm mt-3">
+            <div class="card-header">{{ ui('automation') }}</div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                        @foreach($issue->automationLogs as $log)
+                            <tr>
+                                <td class="text-muted small">{{ $log->created_at?->format('Y-m-d H:i') }}</td>
+                                <td><code>{{ $log->rule_name ?? $log->rule->name ?? '-' }}</code></td>
+                                <td>{{ $log->status }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
     </div>
     <div class="col-lg-4">
         <div class="card shadow-sm">

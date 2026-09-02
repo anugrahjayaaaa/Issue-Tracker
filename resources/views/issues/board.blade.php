@@ -12,6 +12,17 @@
                 @endforeach
             </select>
         </form>
+        @if ($project)
+        <form method="GET">
+            <input type="hidden" name="project_id" value="{{ $project->id }}">
+            <select name="component_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="all">{{ ui('all_components') }}</option>
+                @foreach ($project->components as $c)
+                    <option value="{{ $c->id }}" {{ request('component_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                @endforeach
+            </select>
+        </form>
+        @endif
         @can('issue.create')
         @if ($project)
         <a href="{{ route('issues.create', ['project_id' => $project->id]) }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> {{ ui('new_issue') }}</a>
@@ -68,7 +79,7 @@ document.querySelectorAll('[data-status]').forEach(col => {
         onEnd(evt) {
             const issueId = evt.item.dataset.issue;
             const status = evt.to.dataset.status;
-            fetch('{{ route('issues.status') }}'.replace('/status','/'+issueId+'/status'), {
+            fetch('{{ route('issues.status', ['issue' => '__ID__']) }}'.replace('__ID__', issueId), {
                 method: 'POST',
                 headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json'},
                 body: JSON.stringify({status: status, order: evt.newIndex})

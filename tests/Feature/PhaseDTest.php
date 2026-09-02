@@ -259,4 +259,59 @@ class PhaseDTest extends TestCase
         $resAll = $this->actingAs($user)->get(route('issues.index', ['project_id' => $project->id, 'component_id' => 'all']));
         $resAll->assertOk()->assertSee('HEL-1')->assertSee('HEL-2');
     }
+
+    /** @test */
+    public function test_automation_logs_visible_in_issue_timeline(): void
+    {
+        [$manager, $project, $user] = $this->setupProject();
+
+        $rule = AutomationRule::create([
+            'project_id' => $project->id,
+            'name' => 'Auto-resolve',
+            'event' => 'issue:status_changed',
+            'trigger' => 'status',
+            'conditions' => [['field' => 'status', 'operator' => 'changed_to', 'value' => 'done']],
+            'actions' => ['change_status' => 'resolved'],
+            'enabled' => true,
+        ]);
+
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'TM-8', 'title' => 'Audit log',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        // fire automation → creates a log
+        $this->actingAs($manager)->post(route('issues.status', $issue), ['status' => 'done']);
+
+        $issue->refresh();
+        $this->assertCount(1, $issue->automationLogs);
+        $this->assertDatabaseHas('automation_rule_logs', ['issue_id' => $issue->id, 'status' => 'completed', 'automation_rule_id' => $rule->id]);
+
+        // visible in show view
+        $res = $this->actingAs($user)->get(route('issues.show', $issue));
+        $res->assertOk()->assertSee('Auto-resolve')->assertSee('completed');
+    }
+
+    /** @test */
+    public function test_board_component_filter(): void
+    {
+        [$manager, $project, $user] = $this->setupProject();
+
+        // statuses are created automatically by Project::boot
+        $comp = \App\Models\Component::create(['project_id' => $project->id, 'name' => 'UI']);
+
+        $issue1 = Issue::create([
+            'project_id' => $project->id, 'code' => 'B-1', 'title' => 'Board filter A',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ])->components()->attach($comp->id);
+
+        Issue::create([
+            'project_id' => $project->id, 'code' => 'B-2', 'title' => 'Board filter B',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        $filtered = $this->actingAs($user)->get(route('issues.board', ['project_id' => $project->id, 'component_id' => $comp->id]));
+        $filtered->assertOk()->assertSee('B-1')->assertSee('Board filter A');
+        $this->assertStringNotContainsString('B-2', $filtered->content());
+    }
 }

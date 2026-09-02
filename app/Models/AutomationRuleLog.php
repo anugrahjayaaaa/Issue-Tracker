@@ -11,7 +11,13 @@ class AutomationRuleLog extends Model
 
     public function rule(): BelongsTo
     {
-        return $this->belongsTo(AutomationRule::class);
+        return $this->belongsTo(AutomationRule::class, 'automation_rule_id', 'id');
+    }
+
+    /** Ponytail: fallback name so the timeline never renders `-` when the rule was deleted. */
+    public function getRuleNameAttribute(): ?string
+    {
+        return $this->rule?->name;
     }
 
     public function issue(): BelongsTo

@@ -46,10 +46,15 @@ class AutomationRule extends Model
     public function executeOn(Issue $issue): void
     {
         // ponytail: use saveQuietly() to avoid re-triggering IssueObserver + infinite loop.
-        foreach ($this->actions as $action) {
-            $type = $action['type'] ?? null;
-            $value = $action['value'] ?? null;
-
+        // support both ['assign', value] (compact) and [['type'=>'assign','value'=>...]] (explicit) formats
+        foreach ($this->actions as $key => $action) {
+            if (is_array($action)) {
+                $type = $action['type'] ?? null;
+                $value = $action['value'] ?? null;
+            } else {
+                $type = $key;
+                $value = $action;
+            }
             match ($type) {
                 'assign' => $issue->fill(['assignee_id' => $value])->saveQuietly(),
                 'change_status' => $issue->fill(['status' => $value])->saveQuietly(),
@@ -60,6 +65,6 @@ class AutomationRule extends Model
             };
         }
 
-        $this->logs()->create(['issue_id' => $issue->id, 'status' => 'success']);
+        $this->logs()->create(['automation_rule_id' => $this->id, 'issue_id' => $issue->id, 'status' => 'completed']);
     }
 }

@@ -38,7 +38,8 @@ class IssueObserver
 
     public function updated(Issue $issue): void
     {
-        $dirty = $issue->getDirty();
+        $dirty = $issue->getChanges();
+        $dirty = $dirty ?: $issue->getDirty();
         $old = [];
         foreach ($dirty as $k => $v) {
             $old[$k] = $issue->getOriginal($k);

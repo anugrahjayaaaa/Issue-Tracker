@@ -91,6 +91,11 @@ class Issue extends Model
         return $this->belongsTo(Status::class, 'status', 'key');
     }
 
+    public function automationLogs(): HasMany
+    {
+        return $this->hasMany(AutomationRuleLog::class);
+    }
+
     public function children(): HasMany
     {
         return $this->hasMany(Issue::class, 'parent_id');
@@ -213,7 +218,7 @@ class Issue extends Model
     {
         $commentIds = $this->comments()->pluck('id');
 
-        return Activity::query()
+        $timeline = Activity::query()
             ->with('causer')
             ->where(function ($q) use ($commentIds) {
                 $q->where('subject_type', self::class)->where('subject_id', $this->id);
@@ -225,6 +230,8 @@ class Issue extends Model
             })
             ->orderBy('id', 'desc')
             ->get();
+
+        return $timeline;
     }
 
     /** Phase D: fire automation rules for the given event on this issue. */

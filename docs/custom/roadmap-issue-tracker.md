@@ -228,7 +228,7 @@ Every phase reuses existing patterns (FormRequest, observers, `ProjectMember::ha
 **Goal:** sprints, components, threading, automation, strict workflows.
 **Features:** sprints/cycles (backlog + active sprint board, capacity, burndown-lite); components per project + lead; comment threading (1 level); automation rules (event→condition→action) on existing observers; strict workflow schemes (required transitions, per-role transition permission, resolution field).
 **Files:** migrations `create_sprints_table` (+`issues.sprint_id`), `create_components_table` (+pivot), `add_parent_id_to_comments`, `create_automation_rules_table`; models `Sprint`/`Component`/`AutomationRule`; controllers + views `sprints/*`, `issues/backlog`; `Listeners/RunAutomationRules` on observers; `canTransitionTo()` role-aware; transition UI accepts required-role column; one-level reply render in `show.blade.php`.
-**Acceptance:** drag between backlog/active sprint; closing sprint moves unfinished to next; component filter works list+board; reply nested under parent, soft-delete tombstone keeps replies; automation rule fires once per transition + visible in timeline; member without transition role blocked; `php artisan test` green; `docs/custom/` updated.
+**Acceptance:** drag between backlog/active sprint; closing sprint moves unfinished to next; component filter works list+board (query string `?component_id=`); reply nested under parent, soft-delete tombstone keeps replies; automation rule fires once per transition (saveQuietly+gate) + visible in timeline; member without transition role blocked; `php artisan test` green; `docs/custom/` updated. **Status: ✅ all acceptance criteria met per `PhaseDTest` (11/11).**
 
 ---
 

@@ -72,16 +72,17 @@ class IssueController extends Controller
         $projects = Project::query()
             ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
             ->orderBy('name')->get();
-        $project = $request->filled('project_id') ? Project::find($request->project_id) : null;
+        $project = $request->filled('project_id') ? Project::with('components')->find($request->project_id) : null;
 
         $columns = [];
         if ($project) {
             $this->ensureProjectReader($project);
             $statuses = $project->statuses->pluck('key')->all();
             foreach ($statuses as $statusKey) {
-                $columns[$statusKey] = Issue::with(['assignee', 'labels'])
+                $columns[$statusKey] = Issue::with(['assignee', 'labels', 'components'])
                     ->where('project_id', $project->id)
                     ->where('status', $statusKey)
+                    ->when($request->filled('component_id') && $request->input('component_id') !== 'all', fn ($q) => $q->whereHas('components', fn ($c) => $c->where('components.id', $request->component_id)))
                     ->orderByRaw('`order` IS NULL')
                     ->orderBy('order')
                     ->orderBy('id')
@@ -161,7 +162,7 @@ class IssueController extends Controller
     public function show(Issue $issue): View
     {
         $this->ensureProjectReader($issue->project);
-        $issue->load('assignee', 'reporter', 'parent', 'children.statusLink', 'comments.user', 'comments.attachments', 'comments.replies.user', 'comments.replies.attachments', 'labels', 'attachments', 'watchers', 'components');
+        $issue->load('assignee', 'reporter', 'parent', 'children.statusLink', 'comments.user', 'comments.attachments', 'comments.replies.user', 'comments.replies.attachments', 'labels', 'attachments', 'watchers', 'components', 'automationLogs.rule');
 
         return view('issues.show', compact('issue'));
     }
