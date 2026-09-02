@@ -6,8 +6,8 @@
     $qs = request()->except(['page']);
     $qs['sort'] = $column;
     $qs['dir'] = $nextDir;
+    $caret = ($active && $dir === 'asc') ? 'up-fill' : ($active ? 'down-fill' : 'up-fill');
 @endphp
-@php($caret = $active && $dir === 'asc' ? 'up-fill' : ($active ? 'down-fill' : 'up-fill'));
 <th class="text-nowrap" style="min-width:90px">
     <a href="{{ url()->current() . '?' . http_build_query($qs) }}" class="text-decoration-none text-reset d-block">
         {{ $label }}
