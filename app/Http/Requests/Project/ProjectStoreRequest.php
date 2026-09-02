@@ -11,6 +11,23 @@ class ProjectStoreRequest extends FormRequest
         return $this->user()->can('project.manage');
     }
 
+    public function messages(): array
+    {
+        return [
+            'required' => ui('validation_required'),
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'key' => ui('project_key'),
+            'name' => ui('project'),
+            'slug' => ui('slug'),
+            'description' => ui('description'),
+        ];
+    }
+
     /** @return array<string,mixed> */
     public function rules(): array
     {

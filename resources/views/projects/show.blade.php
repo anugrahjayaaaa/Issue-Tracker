@@ -7,6 +7,9 @@
         <div>
             <h3 class="mb-0 d-flex align-items-center gap-2">{{ $project->name }} <span class="badge text-bg-secondary fs-6">{{ $project->key }}</span></h3>
             <div class="text-muted small mt-0">{{ ui('owner') }}: {{ $project->owner->name ?? '-' }} <span class="text-secondary">·</span> {{ ui('created') }}: {{ $project->created_at->format('d M Y') }}</div>
+            @if ($project->slug)
+            <div class="text-muted small mt-0"><i class="bi bi-link-45deg"></i> {{ $project->slug }}</div>
+            @endif
         </div>
     </div>
     @can('project.manage')
