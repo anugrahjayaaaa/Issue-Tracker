@@ -358,6 +358,7 @@ return [
     'automation_hint' => 'Otomatisasi aksi berulang (pindah isu, assign, komentar) berdasarkan event seperti perubahan status.',
     // ── D.2 component filter ──
     'component' => 'Komponen',
+    'components' => 'Komponen',
     'all_components' => 'Semua komponen',
     // D.3 sprint complete
     'complete_sprint' => 'Selesaikan sprint',

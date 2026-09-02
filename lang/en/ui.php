@@ -367,6 +367,7 @@ return [
     'confirm_delete' => 'Are you sure?',
     // ── D.2 component filter ──
     'component' => 'Component',
+    'components' => 'Components',
     'all_components' => 'All components',
     // D.3 sprint complete
     'complete_sprint' => 'Complete sprint',
