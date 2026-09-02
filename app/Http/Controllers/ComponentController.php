@@ -17,10 +17,7 @@ class ComponentController extends Controller
     {
         $this->ensureProjectLead($project);
 
-        $data = $request->validated();
-        // ponytail: klik + tanpa nama → buat default, input tetap kosong (tidak error)
-        $data['name'] = $data['name'] ?? 'Untitled';
-        $project->components()->create($data);
+        $project->components()->create($request->validated());
 
         return back()->with('success', __('messages.component_created'));
     }

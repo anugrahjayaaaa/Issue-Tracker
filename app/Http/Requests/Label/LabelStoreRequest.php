@@ -19,7 +19,7 @@ class LabelStoreRequest extends FormRequest
 
         return [
             'name' => [
-                'nullable', 'string', 'max:50',
+                'required', 'string', 'max:50',
                 Rule::unique('labels')->where('project_id', $project->id),
             ],
             'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
