@@ -227,7 +227,7 @@ return [
     'project' => 'Proyek',
     'new_project' => 'Proyek Baru',
     'edit_project' => 'Edit Proyek',
-    'slug_hint' => 'Otomatis dari nama ketika kosong (dipakai URL/folder).',
+    'slug_hint' => 'Otomatis dari nama proyek.',
     'validation_required' => 'Bidang :attribute wajib diisi.',
     'project_key' => 'Kode',
     'project_key_hint' => 'Kode pendek, mis. HEL (huruf besar, huruf/angka).',

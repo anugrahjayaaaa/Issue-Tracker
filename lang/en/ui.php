@@ -227,7 +227,7 @@ return [
     'project' => 'Project',
     'new_project' => 'New Project',
     'edit_project' => 'Edit Project',
-    'slug_hint' => 'Auto from name when left blank (used for URLs/folders).',
+    'slug_hint' => 'Auto-generated from the project name.',
     'validation_required' => 'The :attribute field is required.',
     'project_key' => 'Key',
     'project_key_hint' => 'Short code, e.g. HEL (uppercase, letters/numbers).',

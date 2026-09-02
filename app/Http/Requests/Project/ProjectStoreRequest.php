@@ -34,8 +34,18 @@ class ProjectStoreRequest extends FormRequest
         return [
             'key' => 'required|string|max:10|unique:projects,key|regex:/^[A-Z0-9]+$/',
             'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|alpha_dash|unique:projects,slug',
+            'slug' => 'required|string|max:255|alpha_dash|unique:projects,slug',
             'description' => 'nullable|string|max:2000',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        // ponytail: auto-fill slug from name if client didn't send it (disabled field / no JS)
+        if (! $this->filled('slug') && $this->filled('name')) {
+            $this->merge([
+                'slug' => \Str::slug($this->input('name')),
+            ]);
+        }
     }
 }

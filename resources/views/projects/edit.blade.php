@@ -17,7 +17,7 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">{{ ui('slug') }}</label>
-                <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug', $project->slug) }}">
+                <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug', $project->slug) }}" disabled>
                 <div class="form-text">{{ ui('slug_hint') }}</div>
                 @error('slug')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>

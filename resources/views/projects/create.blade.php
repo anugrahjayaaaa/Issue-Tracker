@@ -17,7 +17,7 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">{{ ui('slug') }}</label>
-                <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug') }}" placeholder="{{ ui('slug_hint') }}">
+                <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug') }}" placeholder="{{ ui('slug_hint') }}" disabled>
                 <div class="form-text">{{ ui('slug_hint') }}</div>
                 @error('slug')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
@@ -33,3 +33,16 @@
     </div>
 </div>
 @endsection
+@push('scripts')
+<script>
+// ponytail: auto-generate slug from name, minimal — no deps
+(function(){
+    const name = document.querySelector('input[name="name"]');
+    const slug = document.querySelector('input[name="slug"]');
+    if (!name || !slug) return;
+    const sync = () => slug.value = name.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    name.addEventListener('input', sync);
+    sync();
+})();
+</script>
+@endpush
