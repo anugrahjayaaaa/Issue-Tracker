@@ -46,9 +46,17 @@
     @foreach($sprints as $sprint)
         <div class="col-12">
             <div class="card shadow-sm">
-                <div class="card-header bg-transparent">
-                    <h5 class="mb-0">{{ $sprint->name }}</h5>
-                    <small class="text-muted">{{ $sprint->goal ?? '' }}</small>
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="mb-0">{{ $sprint->name }}</h5>
+                        <small class="text-muted">{{ $sprint->goal ?? '' }}</small>
+                    </div>
+                    @can('project.manage')
+                    <form method="POST" action="{{ route('projects.sprints.complete', [$project, $sprint]) }}" onsubmit="return confirm('Complete sprint? Unfinished issues move to backlog.')">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-warning">{{ ui('complete_sprint') }}</button>
+                    </form>
+                    @endcan
                 </div>
                 <div class="card-body" id="sprint-{{ $sprint->id }}" data-sprint-id="{{ $sprint->id }}">
                     @forelse($grouped->get($sprint->id, []) as $issue)

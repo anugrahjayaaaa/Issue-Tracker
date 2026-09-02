@@ -173,6 +173,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{project}/sprints/{sprint}', [SprintController::class, 'show'])->name('projects.sprints.show');
         Route::put('/{project}/sprints/{sprint}', [SprintController::class, 'update'])->name('projects.sprints.update');
         Route::delete('/{project}/sprints/{sprint}', [SprintController::class, 'destroy'])->name('projects.sprints.destroy');
+        Route::post('/{project}/sprints/{sprint}/complete', [SprintController::class, 'complete'])->name('projects.sprints.complete')->withoutMiddleware('can:project.manage');
         Route::get('/{project}/backlog', [\App\Http\Controllers\IssueController::class, 'backlog'])->name('projects.backlog')->withoutMiddleware('can:project.manage');
     });
 

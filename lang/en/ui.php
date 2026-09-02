@@ -365,4 +365,6 @@ return [
     // ── D.2 component filter ──
     'component' => 'Component',
     'all_components' => 'All components',
+    // D.3 sprint complete
+    'complete_sprint' => 'Complete sprint',
 ];

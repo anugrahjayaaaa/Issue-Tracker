@@ -58,9 +58,16 @@ class SprintController extends Controller
     {
         $this->ensureProjectLead($project);
         abort_if($sprint->project_id !== $project->id, 404);
-
         $sprint->delete();
-
         return response()->json(null, 204);
+    }
+
+    /** Complete a sprint — moves unfinished issues to backlog. */
+    public function complete(Request $request, Project $project, Sprint $sprint)
+    {
+        $this->ensureProjectLead($project);
+        abort_if($sprint->project_id !== $project->id, 404);
+        $sprint->complete();
+        return response()->json($sprint);
     }
 }

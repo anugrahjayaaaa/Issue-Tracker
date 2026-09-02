@@ -180,6 +180,33 @@ class PhaseDTest extends TestCase
     }
 
     /** @test */
+    public function test_sprint_completion_moves_unfinished_issues(): void
+    {
+        [$manager, $project, $user] = $this->setupProject();
+        $sprint = Sprint::create([
+            'project_id' => $project->id, 'name' => 'S1', 'state' => 'active',
+            'starts_at' => now(), 'ends_at' => now()->addDays(7),
+        ]);
+        $openIssue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'Open issue',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+            'sprint_id' => $sprint->id,
+        ]);
+        // closed issue stays attached to sprint
+        $closedIssue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-2', 'title' => 'Done issue',
+            'type' => 'task', 'status' => 'done', 'priority' => 'low', 'reporter_id' => $user->id,
+            'sprint_id' => $sprint->id,
+        ]);
+
+        $sprint->complete();
+
+        $this->assertNull($openIssue->fresh()->sprint_id); // moved to backlog
+        $this->assertEquals($sprint->id, $closedIssue->fresh()->sprint_id); // stays on sprint
+        $this->assertEquals('completed', $sprint->fresh()->state);
+    }
+
+    /** @test */
     public function test_strict_transition_requires_role(): void
     {
         [$manager, $project, $user] = $this->setupProject(ProjectMember::ROLE_VIEWER);
