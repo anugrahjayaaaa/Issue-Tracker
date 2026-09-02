@@ -30,7 +30,7 @@
                 @endcan
             </li>
             @empty
-            <li class="list-group-item border-0 px-0 text-muted">{{ ui('no_components') ?? 'No components yet.' }}</li>
+            <li class="list-group-item border-0 px-3 py-2 text-muted small">{{ ui('no_components') }}</li>
             @endforelse
         </ul>
     </div>

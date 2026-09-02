@@ -118,16 +118,16 @@
                 <i class="bi bi-gear text-secondary"></i>
                 <span>{{ ui('automation') }}</span>
             </div>
-            <div class="card-body">
+            <div class="card-body py-3">
                 @if($project->automationRules?->isEmpty())
-                    <p class="text-muted small">{{ ui('no_automation_rules') }}</p>
+                    <p class="text-muted small mb-0">{{ ui('no_automation_rules') }}</p>
                 @else
                     <ul class="list-group list-group-flush">
                         @foreach($project->automationRules as $rule)
-                            <li class="list-group-item border-0 d-flex justify-content-between align-items-center">
+                            <li class="list-group-item border-0 d-flex justify-content-between align-items-center py-2">
                                 <div>
                                     <span class="fw-medium">{{ $rule->name }}</span>
-                                    <small class="text-muted">({{ $rule->event }})</small>
+                                    <small class="text-muted ms-2">({{ $rule->event }})</small>
                                 </div>
                                 <a href="{{ route('projects.automation-rules.show', [$project, $rule]) }}" class="btn btn-sm btn-light"><i class="bi bi-eye"></i></a>
                             </li>
