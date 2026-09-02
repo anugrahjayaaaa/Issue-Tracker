@@ -20,7 +20,7 @@
                 <option value="member" selected>{{ ui('role_member') }}</option>
                 <option value="viewer">{{ ui('role_viewer') }}</option>
             </select>
-            @error('user_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+            @error('user_id')<div class="invalid-feedback d-block small mt-1">{{ $message }}</div>@enderror
         </form>
         @endcan
 

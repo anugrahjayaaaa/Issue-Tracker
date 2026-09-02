@@ -12,7 +12,7 @@
                 <input type="color" name="color" class="form-control form-control-color p-1" style="width:34px;flex:0 0 34px" value="#3b82f6" data-bs-toggle="tooltip" data-bs-title="{{ ui('color') }}">
                 <button class="btn btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('add') }}" aria-label="{{ ui('add') }}"><i class="bi bi-plus-lg"></i></button>
             </div>
-            @error('label_name')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+            @error('label_name')<div class="invalid-feedback d-block small mt-1">{{ $message }}</div>@enderror
         </form>
 
         <ul class="list-group list-group-flush">
