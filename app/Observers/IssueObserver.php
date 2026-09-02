@@ -38,7 +38,8 @@ class IssueObserver
 
     public function updated(Issue $issue): void
     {
-        $dirty = $issue->getDirty();
+        $dirty = $issue->getChanges();
+        $dirty = $dirty ?: $issue->getDirty();
         $old = [];
         foreach ($dirty as $k => $v) {
             $old[$k] = $issue->getOriginal($k);
@@ -47,6 +48,12 @@ class IssueObserver
             'ip' => Request::ip(), 'user_agent' => Request::userAgent(),
             'old' => $old, 'new' => $dirty,
         ])->performedOn($issue)->log('issue_updated');
+
+        // Phase D: fire automation rules on status change.
+        // ponytail: skip if this save was triggered by an automation rule itself (prevents loop)
+        if (isset($dirty['status']) && ! $issue->getAttribute('automationProcessing')) {
+            $issue->fireAutomationRules('issue:status_changed');
+        }
     }
 
     public function deleted(Issue $issue): void

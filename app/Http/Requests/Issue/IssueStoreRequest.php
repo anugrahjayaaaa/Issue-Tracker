@@ -38,9 +38,13 @@ class IssueStoreRequest extends FormRequest
             'priority' => 'required|in:'.implode(',', [Issue::PRIORITY_LOW, Issue::PRIORITY_MEDIUM, Issue::PRIORITY_HIGH, Issue::PRIORITY_URGENT]),
             'assignee_id' => 'nullable|exists:users,id',
             'parent_id' => 'nullable|exists:issues,id',
+            'sprint_id' => 'nullable|exists:sprints,id',
+            'components' => ['nullable', 'array'],
+            'components.*' => Rule::exists('components', 'id')->where(fn ($q) => $q->where('project_id', $project->id)),
             'due_date' => 'nullable|date',
             'labels' => ['nullable', 'array'],
             'labels.*' => Rule::exists('labels', 'id')->where(fn ($q) => $q->where('project_id', $project->id)),
+            'sprint_id' => ['nullable', Rule::exists('sprints', 'id')->where(fn ($q) => $q->where('project_id', $project->id))],
         ];
     }
 }

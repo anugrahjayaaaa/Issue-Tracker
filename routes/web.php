@@ -14,6 +14,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AutomationRuleController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectFieldController;
 use App\Http\Controllers\ProjectImageController;
@@ -26,8 +27,11 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\SavedFilterController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TranslationController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ComponentController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
 // Health check (no auth)
@@ -134,6 +138,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/{project}/labels', [LabelController::class, 'store'])->name('projects.labels.store');
         Route::put('/{project}/labels/{label}', [LabelController::class, 'update'])->name('projects.labels.update');
         Route::delete('/{project}/labels/{label}', [LabelController::class, 'destroy'])->name('projects.labels.destroy');
+        Route::post('/{project}/components', [ComponentController::class, 'store'])->name('projects.components.store')->withoutMiddleware('can:project.manage');
+        Route::put('/{project}/components/{component}', [ComponentController::class, 'update'])->name('projects.components.update')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/components/{component}', [ComponentController::class, 'destroy'])->name('projects.components.destroy')->withoutMiddleware('can:project.manage');
+
+        // automation rules (lead only)
+        Route::get('/{project}/automation-rules', [AutomationRuleController::class, 'index'])->name('projects.automation-rules.index');
+        Route::get('/{project}/automation-rules/create', [AutomationRuleController::class, 'create'])->name('projects.automation-rules.create');
+        Route::post('/{project}/automation-rules', [AutomationRuleController::class, 'store'])->name('projects.automation-rules.store')->withoutMiddleware('can:project.manage');
+        Route::put('/{project}/automation-rules/{rule}', [AutomationRuleController::class, 'update'])->name('projects.automation-rules.update')->withoutMiddleware('can:project.manage');
+        Route::delete('/{project}/automation-rules/{rule}', [AutomationRuleController::class, 'destroy'])->name('projects.automation-rules.destroy')->withoutMiddleware('can:project.manage');
         // dynamic issue types / statuses / workflow transitions (per-project, lead only)
         Route::get('/{project}/fields', [ProjectFieldController::class, 'index'])->name('projects.fields')->withoutMiddleware('can:project.manage');
         Route::post('/{project}/types', [ProjectFieldController::class, 'storeType'])->name('projects.types.store')->withoutMiddleware('can:project.manage');
@@ -153,6 +167,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/{project}/saved-filters', [SavedFilterController::class, 'index'])->name('projects.saved-filters.index')->withoutMiddleware('can:project.manage');
         Route::post('/{project}/saved-filters', [SavedFilterController::class, 'store'])->name('projects.saved-filters.store')->withoutMiddleware('can:project.manage');
         Route::delete('/{project}/saved-filters/{savedFilter}', [SavedFilterController::class, 'destroy'])->name('projects.saved-filters.destroy')->withoutMiddleware('can:project.manage');
+
+        Route::get('/{project}/sprints', [SprintController::class, 'index'])->name('projects.sprints.index')->withoutMiddleware('can:project.manage');
+        Route::post('/{project}/sprints', [SprintController::class, 'store'])->name('projects.sprints.store');
+        Route::get('/{project}/sprints/{sprint}', [SprintController::class, 'show'])->name('projects.sprints.show');
+        Route::put('/{project}/sprints/{sprint}', [SprintController::class, 'update'])->name('projects.sprints.update');
+        Route::delete('/{project}/sprints/{sprint}', [SprintController::class, 'destroy'])->name('projects.sprints.destroy');
+        Route::post('/{project}/sprints/{sprint}/complete', [SprintController::class, 'complete'])->name('projects.sprints.complete')->withoutMiddleware('can:project.manage');
+        Route::get('/{project}/backlog', [\App\Http\Controllers\IssueController::class, 'backlog'])->name('projects.backlog')->withoutMiddleware('can:project.manage');
     });
 
     // Issues (project-scoped): read = any member; write = lead/member (enforced in Form Requests)
@@ -165,6 +187,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{issue}/edit', [IssueController::class, 'edit'])->name('issues.edit')->middleware('can:issue.edit');
         Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update');
         Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
+        Route::put('/{issue}/sprint', [IssueController::class, 'updateSprint'])->name('issues.sprint')->middleware('can:issue.edit');
         Route::post('/{issue}/watch', [IssueController::class, 'watch'])->name('issues.watch')->middleware('can:issue.view');
         Route::post('/{issue}/unwatch', [IssueController::class, 'unwatch'])->name('issues.unwatch')->middleware('can:issue.view');
         Route::delete('/{issue}/attachments/{attachmentId}', [IssueController::class, 'destroyAttachment'])->name('issues.attachments.destroy')->middleware('can:issue.edit');

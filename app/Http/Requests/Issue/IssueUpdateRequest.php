@@ -33,9 +33,13 @@ class IssueUpdateRequest extends FormRequest
             'priority' => 'sometimes|required|in:'.implode(',', [Issue::PRIORITY_LOW, Issue::PRIORITY_MEDIUM, Issue::PRIORITY_HIGH, Issue::PRIORITY_URGENT]),
             'assignee_id' => 'sometimes|nullable|exists:users,id',
             'parent_id' => 'sometimes|nullable|exists:issues,id|not_in:'.$issue->id,
+            'sprint_id' => 'sometimes|nullable|exists:sprints,id',
+            'components' => ['sometimes', 'nullable', 'array'],
+            'components.*' => Rule::exists('components', 'id')->where(fn ($q) => $q->where('project_id', $issue->project->id)),
             'due_date' => 'sometimes|nullable|date',
             'labels' => ['sometimes', 'nullable', 'array'],
             'labels.*' => Rule::exists('labels', 'id')->where(fn ($q) => $q->where('project_id', $issue->project->id)),
+            'sprint_id' => ['sometimes', 'nullable', Rule::exists('sprints', 'id')->where(fn ($q) => $q->where('project_id', $issue->project->id))],
         ];
     }
 }

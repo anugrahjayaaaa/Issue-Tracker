@@ -106,6 +106,22 @@ class IssueTest extends TestCase
             ->assertSee('hi');
     }
 
+    public function test_show_includes_components(): void
+    {
+        [$manager, $project, $user] = $this->seedAndProject();
+        $component = $project->components()->create(['name' => 'Backend', 'description' => '']);
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'X',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+        $issue->components()->attach($component->id);
+
+        $this->actingAs($user)
+            ->get(route('issues.show', $issue))
+            ->assertOk()
+            ->assertSee('Backend');
+    }
+
     public function test_index_sorts_by_query_and_renders_due_date_column(): void
     {
         [$manager, $project, $user] = $this->seedAndProject();

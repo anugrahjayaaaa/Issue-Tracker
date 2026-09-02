@@ -152,4 +152,9 @@ return [
     'no_data' => 'No data.',
     'current_plan' => 'Current plan',
     'cancel_subscription' => 'Cancel subscription',
+    // ── Phase D: sprints ──
+    'issue_sprint_updated' => 'Issue sprint updated.',
+    'component_created' => 'Component created.',
+    'component_updated' => 'Component updated.',
+    'component_deleted' => 'Component deleted.',
 ];

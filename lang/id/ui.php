@@ -324,4 +324,38 @@ return [
     'name' => 'Nama',
     'invalid_transition' => 'Transisi tidak boleh berawal dan berakhir di status sama.',
     'saved' => 'Tersimpan.',
+    // ── Phase D: sprints ──
+    'backlog' => 'Backlog',
+    'unstarted' => 'Belum mulai',
+    'sprint' => 'Sprint',
+    'no_sprints' => 'Belum ada sprint.',
+    'issue_sprint_updated' => 'Sprint isu diperbarui.',
+    // ── Phase D: components ──
+    'component_name' => 'Nama komponen',
+    'no_components' => 'Belum ada komponen.',
+    'lead' => 'Lead',
+    // ── Phase D: comments threading ──
+    'reply' => 'Balas',
+    'post_reply' => 'Kirim balasan',
+    // ── Phase D: D.2 backlog drag ──
+    // (no_issues already defined above — reused)
+    // ── Phase D: D.2 automation UI ── (existing common keys reused below)
+    'automation' => 'Otomatisasi',
+    'manage' => 'Kelola',
+    'create_rule' => 'Buat aturan',
+    'edit_rule' => 'Edit aturan',
+    'trigger' => 'Trigger',
+    'conditions' => 'Kondisi',
+    'conditions_help' => 'JSON array, mis. [{"field":"status","value":"done"}]',
+    'actions' => 'Aksi',
+    'logs' => 'Log',
+    'timestamp' => 'Waktu',
+    'result' => 'Hasil',
+    'disabled' => 'Non-aktif',
+    'no_automation_rules' => 'Belum ada aturan otomatisasi.',
+    // ── D.2 component filter ──
+    'component' => 'Komponen',
+    'all_components' => 'Semua komponen',
+    // D.3 sprint complete
+    'complete_sprint' => 'Selesaikan sprint',
 ];

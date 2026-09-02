@@ -23,7 +23,7 @@ class Issue extends Model
 
     protected $fillable = [
         'project_id', 'code', 'title', 'description', 'type', 'status',
-        'priority', 'reporter_id', 'assignee_id', 'parent_id', 'due_date', 'order',
+        'priority', 'reporter_id', 'assignee_id', 'parent_id', 'due_date', 'order', 'sprint_id',
     ];
 
     /**
@@ -66,6 +66,11 @@ class Issue extends Model
         return $this->belongsTo(Project::class);
     }
 
+    public function components(): BelongsToMany
+    {
+        return $this->belongsToMany(Component::class, 'component_issue');
+    }
+
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_id');
@@ -86,6 +91,11 @@ class Issue extends Model
         return $this->belongsTo(Status::class, 'status', 'key');
     }
 
+    public function automationLogs(): HasMany
+    {
+        return $this->hasMany(AutomationRuleLog::class);
+    }
+
     public function children(): HasMany
     {
         return $this->hasMany(Issue::class, 'parent_id');
@@ -100,8 +110,9 @@ class Issue extends Model
      * Whether a status change to $toKey (status key slug) is allowed by the workflow.
      * ponytail: empty transition table = free transitions (no scheme yet). Compares
      * stable `key` slugs, not human `name` — renaming a status keeps issues valid.
+     * If a transition has `required_role`, the acting user must satisfy it.
      */
-    public function canTransitionTo(string $toKey): bool
+    public function canTransitionTo(string $toKey, ?User $user = null): bool
     {
         $transitions = $this->project->statusTransitions;
         if ($transitions->isEmpty()) {
@@ -112,10 +123,21 @@ class Issue extends Model
             return true;
         }
 
-        return $transitions->contains(
-            fn ($t) => $t->from_status_id === $from->id
-                && $t->to->key === $toKey
+        $transition = $transitions->first(
+            fn ($t) => $t->from_status_id === $from->id && $t->to->key === $toKey
         );
+
+        if (! $transition) {
+            return false;
+        }
+
+        // Phase D: role-aware transitions — if transition defines required_role, user must have it.
+        if ($transition->required_role && $user) {
+            return ProjectMember::hasRole($user, $this->project, [$transition->required_role])
+                || $user->can('project.manage');
+        }
+
+        return true;
     }
 
     /** Project members who may act on issues (lead/member). Viewers excluded. */
@@ -133,6 +155,11 @@ class Issue extends Model
     public function watchers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'issue_watchers')->withTimestamps();
+    }
+
+    public function sprint(): BelongsTo
+    {
+        return $this->belongsTo(Sprint::class);
     }
 
     /** Auto-subscribe reporter + assignee + commenter (decision #3). */
@@ -187,15 +214,11 @@ class Issue extends Model
         return ['done' => $done, 'total' => $total];
     }
 
-    /**
-     * Aggregated activity timeline: issue events + events on its comments.
-     * Reuses the existing activity_log (written by observers) — no new schema.
-     */
     public function activityTimeline(): Collection
     {
         $commentIds = $this->comments()->pluck('id');
 
-        return Activity::query()
+        $timeline = Activity::query()
             ->with('causer')
             ->where(function ($q) use ($commentIds) {
                 $q->where('subject_type', self::class)->where('subject_id', $this->id);
@@ -207,5 +230,23 @@ class Issue extends Model
             })
             ->orderBy('id', 'desc')
             ->get();
+
+        return $timeline;
+    }
+
+    /** Phase D: fire automation rules for the given event on this issue. */
+    public function fireAutomationRules(string $event): void
+    {
+        // ponytail: rules are per-project; only run if enabled. Minimal evaluator.
+        $rules = AutomationRule::where('project_id', $this->project_id)
+            ->where('event', $event)
+            ->where('enabled', true)
+            ->get();
+
+        foreach ($rules as $rule) {
+            if ($rule->matchesIssue($this)) {
+                $rule->executeOn($this);
+            }
+        }
     }
 }

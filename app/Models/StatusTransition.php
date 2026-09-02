@@ -10,7 +10,7 @@ class StatusTransition extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['project_id', 'from_status_id', 'to_status_id'];
+    protected $fillable = ['project_id', 'from_status_id', 'to_status_id', 'required_role', 'resolution'];
 
     public function project(): BelongsTo
     {
