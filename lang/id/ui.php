@@ -334,8 +334,8 @@ return [
     'issue_sprint_updated' => 'Sprint isu diperbarui.',
     // ── Phase D: components ──
     'component_name' => 'Nama komponen',
+    'component_hint' => 'Kelompokkan isu berdasarkan area fungsional, mis. Backend, Frontend, API.',
     'no_components' => 'Belum ada komponen.',
-    'lead' => 'Lead',
     // ── Phase D: comments threading ──
     'reply' => 'Balas',
     'post_reply' => 'Kirim balasan',
@@ -355,6 +355,7 @@ return [
     'result' => 'Hasil',
     'disabled' => 'Non-aktif',
     'no_automation_rules' => 'Belum ada aturan otomatisasi.',
+    'automation_hint' => 'Otomatisasi aksi berulang (pindah isu, assign, komentar) berdasarkan event seperti perubahan status.',
     // ── D.2 component filter ──
     'component' => 'Komponen',
     'all_components' => 'Semua komponen',

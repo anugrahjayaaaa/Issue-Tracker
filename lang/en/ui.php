@@ -334,7 +334,7 @@ return [
     'issue_sprint_updated' => 'Issue sprint updated.',
     // ── Phase D: components ──
     'component_name' => 'Component name',
-    'lead' => 'Lead',
+    'component_hint' => 'Group issues by functional area, e.g. Backend, Frontend, API.',
     'no_components' => 'No components yet.',
     // ── Phase D: comments threading ──
     'reply' => 'Reply',
@@ -363,6 +363,7 @@ return [
     'name' => 'Name',
     'conditions_help' => 'JSON array, e.g. [{"field":"status","value":"done"}]',
     'no_automation_rules' => 'No automation rules yet.',
+    'automation_hint' => 'Automate repetitive actions (move issues, assign, comment) based on events like status changes.',
     'confirm_delete' => 'Are you sure?',
     // ── D.2 component filter ──
     'component' => 'Component',

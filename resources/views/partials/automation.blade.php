@@ -3,6 +3,7 @@
     <div class="card-header d-flex align-items-center gap-2">
         <i class="bi bi-gear text-secondary"></i>
         <span>{{ ui('automation') }}</span>
+        <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="{{ ui('automation_hint') }}"></i>
     </div>
     <div class="card-body py-3">
         @if($project->automationRules?->isEmpty())

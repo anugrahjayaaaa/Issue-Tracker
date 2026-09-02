@@ -2,9 +2,10 @@
 <div class="card shadow-sm mb-3">
     <div class="card-header d-flex align-items-center gap-2">
         <i class="bi bi-boxes text-secondary"></i> {{ ui('components') }}
+        <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-title="{{ ui('component_hint') }}"></i>
     </div>
     <div class="card-body">
-        <form method="POST" action="{{ route('projects.components.store', $project) }}" class="mb-3">
+        <form method="POST" action="{{ route('projects.components.store', $project) }}" class="mb-3" onsubmit="var f=this.elements.name;if(!f.value.trim()){f.value='Untitled';}">
             @csrf
             <div class="input-group input-group-sm">
                 <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" placeholder="{{ ui('component_name') }}">
@@ -19,7 +20,7 @@
                 <div class="flex-grow-1 min-w-0">
                     <div class="fw-medium text-truncate">{{ $component->name }}</div>
                     @if ($component->lead)
-                    <small class="text-muted">{{ ui('lead') }}: {{ $component->lead->name }}</small>
+                    <small class="text-muted">{{ ui('role_lead') }}: {{ $component->lead->name }}</small>
                     @endif
                 </div>
                 @can('project.manage')
