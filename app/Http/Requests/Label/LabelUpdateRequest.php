@@ -27,7 +27,7 @@ class LabelUpdateRequest extends FormRequest
         return [
             'label_name' => [
                 'required', 'string', 'max:50',
-                Rule::unique('labels')->where('project_id', $project->id)->ignore($label->id),
+                Rule::unique('labels', 'name')->where('project_id', $project->id)->ignore($label->id),
             ],
             'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ];

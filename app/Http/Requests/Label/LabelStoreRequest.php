@@ -25,7 +25,8 @@ class LabelStoreRequest extends FormRequest
         return [
             'label_name' => [
                 'required', 'string', 'max:50',
-                Rule::unique('labels')->where('project_id', $project->id),
+                // ponytail: explicit column = 'name' (form field renamed to label_name for error isolation)
+                Rule::unique('labels', 'name')->where('project_id', $project->id),
             ],
             'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ];
