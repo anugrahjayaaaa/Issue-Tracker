@@ -65,3 +65,23 @@ it('lets a feature.manage holder reach translations while the flag is off', func
 
     $this->actingAs($u)->get(route('translations.index'))->assertNotFound();
 });
+
+it('search translation by group/key/text', function () {
+    $u = User::where('email', 'admin@laravel-base.local')->first();
+    $this->actingAs($u)
+        ->get(route('translations.index', ['q' => 'users']))
+        ->assertOk()
+        ->assertSee('users');
+    $this->actingAs($u)
+        ->get(route('translations.index', ['q' => 'nonexistent_xyz_123']))
+        ->assertOk()
+        ->assertSee(ui('no_translations'));
+});
+
+it('sorts translations table by column', function () {
+    $u = User::where('email', 'admin@laravel-base.local')->first();
+    $this->actingAs($u)
+        ->get(route('translations.index', ['sort' => 'key', 'dir' => 'desc']))
+        ->assertOk()
+        ->assertSee('users');
+});
