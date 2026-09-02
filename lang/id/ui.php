@@ -332,35 +332,27 @@ return [
     'issue_sprint_updated' => 'Sprint isu diperbarui.',
     // ── Phase D: components ──
     'component_name' => 'Nama komponen',
-    'lead' => 'Lead',
     'no_components' => 'Belum ada komponen.',
+    'lead' => 'Lead',
     // ── Phase D: comments threading ──
     'reply' => 'Balas',
     'post_reply' => 'Kirim balasan',
     // ── Phase D: D.2 backlog drag ──
-    'no_issues' => 'Tidak ada isu di bagian ini.',
-    // ── Phase D: D.2 automation UI ──
+    // (no_issues already defined above — reused)
+    // ── Phase D: D.2 automation UI ── (existing common keys reused below)
     'automation' => 'Otomatisasi',
     'manage' => 'Kelola',
     'create_rule' => 'Buat aturan',
     'edit_rule' => 'Edit aturan',
     'trigger' => 'Trigger',
     'conditions' => 'Kondisi',
+    'conditions_help' => 'JSON array, mis. [{"field":"status","value":"done"}]',
     'actions' => 'Aksi',
-    'enabled' => 'Aktif',
-    'disabled' => 'Non-aktif',
-    'status' => 'Status',
     'logs' => 'Log',
     'timestamp' => 'Waktu',
     'result' => 'Hasil',
-    'issue' => 'Isu',
-    'edit' => 'Edit',
-    'save' => 'Simpan',
-    'cancel' => 'Batal',
-    'create' => 'Buat',
-    'name' => 'Nama',
+    'disabled' => 'Non-aktif',
     'no_automation_rules' => 'Belum ada aturan otomatisasi.',
-    'confirm_delete' => 'Anda yakin?',
     // ── D.2 component filter ──
     'component' => 'Komponen',
     'all_components' => 'Semua komponen',
