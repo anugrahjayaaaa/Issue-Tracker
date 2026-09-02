@@ -9,7 +9,9 @@ class LanguageLineSeeder extends Seeder
 {
     public function run(): void
     {
-        $groups = ['messages', 'ui', 'validation'];
+        // ponytail: validation lang stays file-only — spatie DB loader can't handle
+        // nested array (between/size/password/attributes) → getTranslation() TypeError
+        $groups = ['messages', 'ui'];
         $locales = config('app.available_locales');
 
         foreach ($groups as $group) {
