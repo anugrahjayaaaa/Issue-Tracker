@@ -53,4 +53,5 @@
         @include('partials.automation')
     </div>
 </div>
+@include('partials.modals.delete-modal')
 @endsection

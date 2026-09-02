@@ -26,10 +26,7 @@
                         </div>
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             <i class="bi bi-pencil text-secondary" data-bs-toggle="tooltip" data-bs-title="{{ ui('edit') }}"></i>
-                            <form method="POST" action="{{ route('projects.labels.destroy', [$project, $label]) }}" class="d-inline" onsubmit="return confirm('{{ ui('confirm_delete_label') }}')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-light border-0 text-danger p-0" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-light border-0 text-danger p-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-action="{{ route('projects.labels.destroy', [$project, $label]) }}" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
                         </div>
                     </summary>
                     <form method="POST" action="{{ route('projects.labels.update', [$project, $label]) }}" class="d-flex gap-2 mt-2">

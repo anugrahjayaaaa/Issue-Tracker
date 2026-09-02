@@ -24,10 +24,7 @@
                     @endif
                 </div>
                 @can('project.manage')
-                <form method="POST" action="{{ route('projects.components.destroy', [$project, $component]) }}" class="d-inline ms-2" onsubmit="return confirm('{{ ui('confirm_delete') }}')">
-                    @csrf @method('DELETE')
-                    <button class="btn btn-sm btn-light border-0 text-danger p-1" type="submit" data-bs-toggle="tooltip" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
-                </form>
+                <button type="button" class="btn btn-sm btn-light border-0 text-danger p-1" data-bs-toggle="modal" data-bs-target="#deleteModal" data-action="{{ route('projects.components.destroy', [$project, $component]) }}" data-bs-title="{{ ui('remove') }}" aria-label="{{ ui('remove') }}"><i class="bi bi-trash"></i></button>
                 @endcan
             </li>
             @empty
