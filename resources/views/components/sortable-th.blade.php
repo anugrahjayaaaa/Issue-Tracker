@@ -8,7 +8,7 @@
     $qs['dir'] = $nextDir;
 @endphp
 <th>
-    <a href="{{ url()->current() . '?' . http_build_query($qs) }}" class="text-decoration-none text-reset d-block text-nowrap">
+    <a href="{{ url()->current() . '?' . http_build_query($qs) }}" class="text-decoration-none text-reset text-nowrap">
         {{ $label }}
         @if ($active)
             <i class="bi bi-caret-{{ $dir === 'asc' ? 'up' : 'down' }}-fill small ms-1"></i>
