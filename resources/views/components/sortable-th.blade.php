@@ -7,13 +7,10 @@
     $qs['sort'] = $column;
     $qs['dir'] = $nextDir;
 @endphp
-<th>
-    <a href="{{ url()->current() . '?' . http_build_query($qs) }}" class="text-decoration-none text-reset text-nowrap">
+@php($caret = $active && $dir === 'asc' ? 'up-fill' : ($active ? 'down-fill' : 'up-fill'));
+<th class="text-nowrap" style="min-width:90px">
+    <a href="{{ url()->current() . '?' . http_build_query($qs) }}" class="text-decoration-none text-reset d-block">
         {{ $label }}
-        @if ($active)
-            <i class="bi bi-caret-{{ $dir === 'asc' ? 'up' : 'down' }}-fill small ms-1"></i>
-        @else
-            <i class="bi bi-caret-up small text-muted opacity-50 ms-1"></i>
-        @endif
+        <i class="bi bi-caret-{{ $caret }} small ms-1{{ $active ? '' : ' text-muted opacity-50' }}"></i>
     </a>
 </th>
