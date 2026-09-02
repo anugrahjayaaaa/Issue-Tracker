@@ -159,6 +159,27 @@ class PhaseDTest extends TestCase
     }
 
     /** @test */
+    public function test_automation_rule_change_status_action(): void
+    {
+        [$manager, $project, $user] = $this->setupProject();
+        $issue = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'Auto status',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        AutomationRule::create([
+            'project_id' => $project->id, 'name' => 'Resolve on close',
+            'event' => 'issue:status_changed', 'enabled' => true,
+            'conditions' => [['field' => 'status', 'value' => 'closed']],
+            'actions' => [['type' => 'change_status', 'value' => 'resolved']],
+        ]);
+
+        $issue->update(['status' => 'closed']);
+
+        $this->assertEquals('resolved', $issue->fresh()->status);
+    }
+
+    /** @test */
     public function test_strict_transition_requires_role(): void
     {
         [$manager, $project, $user] = $this->setupProject(ProjectMember::ROLE_VIEWER);

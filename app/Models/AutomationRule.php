@@ -42,13 +42,20 @@ class AutomationRule extends Model
         return true;
     }
 
-    /** Execute actions on the issue. ponytail: only assign for v1. */
+    /** Execute actions on the issue. ponytail: supports assign, change_status, add_label, add_component, notify_watchers. */
     public function executeOn(Issue $issue): void
     {
         // ponytail: use saveQuietly() to avoid re-triggering IssueObserver + infinite loop.
         foreach ($this->actions as $action) {
-            match ($action['type'] ?? null) {
-                'assign' => $issue->fill(['assignee_id' => $action['value']])->saveQuietly(),
+            $type = $action['type'] ?? null;
+            $value = $action['value'] ?? null;
+
+            match ($type) {
+                'assign' => $issue->fill(['assignee_id' => $value])->saveQuietly(),
+                'change_status' => $issue->fill(['status' => $value])->saveQuietly(),
+                'add_label' => $issue->labels()->syncWithoutDetaching([$value]),
+                'add_component' => $issue->components()->syncWithoutDetaching([$value]),
+                'notify_watchers' => null, // placeholder: emit notification event
                 default => null,
             };
         }
