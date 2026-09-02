@@ -1,71 +1,56 @@
 # Phase D — Implementation Plan
 
-## Status: ✅ Complete (feature/phase-d)
+## Status: ✅ COMPLETE (feature/phase-d) — D.1 + D.2 + D.3
 
 ## Scope
-Phase D = "Agile & structural" dari roadmap. Fokus: **sprints, components, comment threading, automation rules, strict workflow**.
+Phase D = "Agile & structural" dari roadmap. Fokus: sprints, components, comment threading, automation rules, strict workflow, epic linkage.
 
-## Analysis — What exists vs. what's missing
-
-### ✅ Foundation sudah ada (committed)
+## Analysis
+### ✅ Foundation (sudah ada sebelum Phase D)
 | Fitur | Files | Status |
 |-------|-------|--------|
-| Sprints | migration, `Sprint` model, `SprintController`, routes, FormRequests | API-only (JSON), no Blade view |
-| Components | migration, `Component` model, `ComponentController`, routes, FormRequests | No management view, issue form wiring partial |
-| Comment threading | migration `add_parent_id_to_comments`, `Comment.parent()/replies()` relasi | Model OK, no reply UI, controller already accepts parent_id |
+| Sprints | migration, Sprint model, SprintController (JSON API), routes, FormRequests | API-only, no Blade view |
+| Components | migration, Component model, ComponentController, routes, FormRequests | No management view, issue form partial exists |
+| Comment threading | migration, Comment model (parent/replies) | Model OK, controller accepts parent_id |
 
-### ❌ Missing
-| Fitur | What to build |
-|-------|--------------|
-| Sprint UI | backlog view, drag antar sprint |
-| Component UI | project components CRUD view, issue form checkboxes |
-| Threaded comment UI | Reply button per komentar, nested rendering |
-| Automation rules | migration + model + listener |
-| Strict workflow | role-aware transitions on StatusTransition |
-| Tests | coverage untuk semua di atas |
+### ❌ Built in Phase D
+| Fitur | What |
+|-------|-----|
+| Sprint UI | backlog view, drag-drop via SortableJS, sprint complete action |
+| Component UI | project management card + index list filter |
+| Threaded comment UI | nested reply partial, recursive rendering, eager-load replies |
+| Automation rules | migration + model + logs + observer + admin CRUD UI |
+| Strict workflow | role-aware transitions (required_role column) |
+| Sprint state | state (planning/active/completed) + velocity columns |
+| Tests | 11 tests in PhaseDTest.php |
 
-## Task Breakdown (T1–T6)
+## Task Breakdown
 
-### T1: Sprint backlog view + route ✅
-- `resources/views/issues/backlog.blade.php` — list issues per project, grouped by sprint
-- `IssueController.php` — method `backlog(Project $project)` + `updateSprint()`
-- `routes/web.php` — route `projects.backlog` + `issues.sprint`
-- `tests/Feature/PhaseDTest.php` — auth renders, non-member 403, sprint assignment
-- **Skip**: drag UI (SortableJS) — manual via issue edit form. ponytail: simple list.
+### D.1 Core (✅ committed at 904d144)
+- T1: Sprint backlog view, route, controller (`backlog(Project $project)`, `updateSprint()`)
+- T2: Component management card on project show
+- T3: Threaded comment reply UI (`comment.blade.php` partial)
+- T4: Automation rules (migration, model, observer fire on status change)
+- T5: Strict workflow (`required_role`, `canTransitionTo(User)`, controller updates)
 
-### T2: Component management view ✅
-- `resources/views/partials/components.blade.php` — card on project show, list + inline-add
-- `ProjectController.php` — eager load `components.lead` di `show()`
-- `routes/web.php` — route `projects.components.store` (already exists in ComponentController)
-- Lang keys di `ui.php`/`messages.php` (en+id)
-- `tests/Feature/PhaseDTest.php` — component renders di project show, create
+### D.2 Polish (✅ committed at b22ad21, cd73572, 35fe163)
+- Drag-drop sprint assignment in backlog (SortableJS, `sortable.min.js` already vendored)
+- Component filter di issue list index (`component_id` query param, `whereHas`)
+- Full automation action types: assign, change_status, add_label, add_component, notify_watchers
 
-### T3: Threaded comment reply UI ✅
-- `resources/views/issues/partials/comment.blade.php` — recursive partial, reply button per comment
-- `resources/views/issues/show.blade.php` — replace loop dengan partial, render top-level + replies
-- `IssueController.php` show() — eager load `comments.replies.user`
-- Lang keys: `reply`, `post_reply` (en+id)
-- `tests/Feature/PhaseDTest.php` — reply creates threaded comment
+### D.3 Sprint complete (✅ committed at efccf9d)
+- Migration `add_state_to_sprints` (state + velocity columns)
+- `Sprint::complete()` — moves unfinished issues to backlog
+- `SprintController@complete()` + route `projects.sprints.complete`
+- Complete button di backlog view
 
-### T4: Automation rules (minimal) ✅
-- `database/migrations/2026_09_02_030000_create_automation_rules_table.php`
-- `app/Models/AutomationRule.php` + `AutomationRuleLog.php`
-- `app/Observers/IssueObserver.php` — fire rules on status change
-- `app/Models/Issue.php` — `fireAutomationRules()` method
-- **Skip**: admin UI. ponytail: only "assign" action.
-- `tests/Feature/PhaseDTest.php` — rule fires on status change, assigns, logs
-
-### T5: Strict workflow (role-aware) ✅
-- `database/migrations/2026_09_02_030100_add_strict_workflow_to_status_transitions.php`
-- `app/Models/StatusTransition.php` — add `required_role` to fillable
-- `app/Models/Issue.php` — update `canTransitionTo()` to accept User, check role
-- `IssueController.php` — pass `request->user()` ke `canTransitionTo()` di update + changeStatus
-- `tests/Feature/PhaseDTest.php` — viewer blocked, lead allowed
-
-### T6: Tests consolidation ✅
-- `tests/Feature/PhaseDTest.php` — 8 tests, all passing
-- Full suite green
+## Skipped (YAGNI — not built, add when needed)
+| Item | Reason | Add when |
+|------|-------|---------|
+| Board WIP limits | JS board refactor needed | product wants WIP on columns |
+| Epic linkage UI | issue type model needs epic type | epic feature scoped in |
+| Burndown-lite chart | needs chart.js dep (not vendored) | reporting phase |
 
 ## Verify ✅
-- `php artisan test --filter=PhaseDTest` → 8/8 passed, 18 assertions
-- Full suite → green (no regressions)
+- `php artisan test --filter=PhaseDTest` → 11/11 passed, 29 assertions
+- Full suite → 208 tests, 540 assertions, green (no regressions)
