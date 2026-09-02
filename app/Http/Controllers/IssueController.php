@@ -111,7 +111,11 @@ class IssueController extends Controller
             ->whereIn('status', $project->statuses()->where('is_closed', false)->pluck('key'))
             ->orderBy('priority', 'desc')->get();
 
-        return view('issues.backlog', compact('project', 'projects', 'backlogIssues'));
+        $sprints = Sprint::where('project_id', $project->id)
+            ->whereIn('state', ['planning', 'active'])
+            ->orderBy('starts_at')->get(['id', 'name', 'goal', 'starts_at', 'ends_at']);
+
+        return view('issues.backlog', compact('project', 'projects', 'backlogIssues', 'sprints'));
     }
 
     public function create(Request $request): View
@@ -232,7 +236,7 @@ class IssueController extends Controller
             return response()->json($issue->fresh());
         }
 
-        return redirect()->route('projects.backlog', ['project_id' => $issue->project_id])
+        return redirect()->route('projects.backlog', $issue->project)
             ->with('success', __('messages.issue_sprint_updated'));
     }
 

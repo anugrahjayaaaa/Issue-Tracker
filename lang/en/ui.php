@@ -337,4 +337,6 @@ return [
     // ── Phase D: comments threading ──
     'reply' => 'Reply',
     'post_reply' => 'Post reply',
+    // ── Phase D: D.2 backlog drag ──
+    'no_issues' => 'No issues in this section.',
 ];

@@ -20,19 +20,82 @@
     </div>
 </div>
 
-@if($backlogIssues->isEmpty())
-    <div class="alert alert-info">{{ ui('no_issues_in_backlog') ?? 'No issues in backlog' }}</div>
-@else
-    <div class="list-group">
-        @foreach($backlogIssues as $issue)
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <a href="{{ route('issues.show', $issue) }}" class="text-decoration-none fw-medium">{{ $issue->code }}</a>
-                    <span class="text-muted">{{ $issue->title }}</span>
-                </div>
-                <span class="badge bg-secondary">{{ $issue->sprint ? $issue->sprint->name : ui('unstarted') }}</span>
+@php
+    // Group issues by sprint; unstarted = null sprint
+    $grouped = $backlogIssues->groupBy(fn($i) => $i->sprint_id ?? 'unstarted');
+@endphp
+
+<div class="row g-3">
+    {{-- Unstarted (no sprint) — draggable --}}
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">{{ ui('unstarted') }}</h5>
             </div>
-        @endforeach
+            <div class="card-body" id="sprint-unstarted" data-sprint-id="">
+                @forelse($grouped->get('unstarted', []) as $issue)
+                    @include('issues.partials.backlog-item', ['issue' => $issue])
+                @empty
+                    <p class="text-muted small mb-0">{{ ui('no_issues') ?? 'No issues' }}</p>
+                @endforelse
+            </div>
+        </div>
     </div>
-@endif
+
+    {{-- Active sprints --}}
+    @foreach($sprints as $sprint)
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">{{ $sprint->name }}</h5>
+                    <small class="text-muted">{{ $sprint->goal ?? '' }}</small>
+                </div>
+                <div class="card-body" id="sprint-{{ $sprint->id }}" data-sprint-id="{{ $sprint->id }}">
+                    @forelse($grouped->get($sprint->id, []) as $issue)
+                        @include('issues.partials.backlog-item', ['issue' => $issue])
+                    @empty
+                        <p class="text-muted small mb-0">{{ ui('no_issues') ?? 'No issues' }}</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    @endforeach
+</div>
+
+@section('scripts')
+@verbatim
+<script src="{{ url('vendor/sortable.min.js') }}"></script>
+<script>
+// ponytail: drag-drop between sprints — minimal, fetch PUT to issues.sprint
+(function() {
+    const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const headers = { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json', 'Accept': 'application/json' };
+
+    document.querySelectorAll('[id^="sprint-"]').forEach(el => {
+        new Sortable(el, {
+            group: 'backlog',
+            animation: 150,
+            onEnd: async function(evt) {
+                const targetId = evt.to.dataset.sprintId; // '' = unstarted
+                const issueId = evt.item.dataset.issueId;
+                try {
+                    const res = await fetch(`/issues/${issueId}/sprint`, {
+                        method: 'PUT',
+                        headers: headers,
+                        body: JSON.stringify({ sprint_id: targetId || null })
+                    });
+                    if (!res.ok) {
+                        alert('Failed to update sprint');
+                        location.reload();
+                    }
+                } catch(e) {
+                    alert('Network error: ' + e.message);
+                    location.reload();
+                }
+            }
+        });
+    });
+})();
+</script>
+@endverbatim
 @endsection
