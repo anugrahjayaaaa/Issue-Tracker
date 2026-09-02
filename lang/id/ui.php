@@ -361,4 +361,7 @@ return [
     'name' => 'Nama',
     'no_automation_rules' => 'Belum ada aturan otomatisasi.',
     'confirm_delete' => 'Anda yakin?',
+    // ── D.2 component filter ──
+    'component' => 'Komponen',
+    'all_components' => 'Semua komponen',
 ];

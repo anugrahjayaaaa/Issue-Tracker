@@ -36,17 +36,18 @@ class IssueController extends Controller
         $projects = Project::query()
             ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
             ->orderBy('name')->get();
-        $project = $request->filled('project_id') ? Project::find($request->project_id) : null;
+        $project = $request->filled('project_id') ? Project::with('components')->find($request->project_id) : null;
 
         $issues = collect();
         if ($project) {
             $this->ensureProjectReader($project);
-            $issues = Issue::with(['assignee', 'labels'])
+            $issues = Issue::with(['assignee', 'labels', 'components'])
                 ->where('project_id', $project->id)
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
                 ->when($request->filled('assignee_id'), fn ($q) => $q->where('assignee_id', $request->assignee_id))
                 ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
                 ->when($request->filled('label_id'), fn ($q) => $q->whereHas('labels', fn ($l) => $l->where('labels.id', $request->label_id)))
+                ->when($request->filled('component_id') && $request->input('component_id') !== 'all', fn ($q) => $q->whereHas('components', fn ($c) => $c->where('components.id', $request->component_id)))
                 ->when($request->filled('q'), function ($q) use ($request) {
                     $term = $request->query('q');
                     $q->where(function ($q2) use ($term) {

@@ -362,4 +362,7 @@ return [
     'conditions_help' => 'JSON array, e.g. [{"field":"status","value":"done"}]',
     'no_automation_rules' => 'No automation rules yet.',
     'confirm_delete' => 'Are you sure?',
+    // ── D.2 component filter ──
+    'component' => 'Component',
+    'all_components' => 'All components',
 ];

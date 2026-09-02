@@ -186,4 +186,29 @@ class PhaseDTest extends TestCase
         // lead can
         $this->assertTrue($issue->canTransitionTo('done', $manager));
     }
+
+    /** @test */
+    public function test_component_filter_in_issue_list(): void
+    {
+        [$manager, $project, $user] = $this->setupProject();
+        $comp = $project->components()->create(['name' => 'Backend']);
+        $issue1 = Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-1', 'title' => 'Issue 1',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+        $issue1->components()->attach($comp);
+        Issue::create([
+            'project_id' => $project->id, 'code' => 'HEL-2', 'title' => 'Issue 2',
+            'type' => 'task', 'status' => 'open', 'priority' => 'low', 'reporter_id' => $user->id,
+        ]);
+
+        // Filter by component → only issue1
+        $res = $this->actingAs($user)->get(route('issues.index', ['project_id' => $project->id, 'component_id' => $comp->id]));
+        $res->assertOk()->assertSee('HEL-1')->assertSee('Issue 1');
+        $this->assertStringNotContainsString('HEL-2', $res->content());
+
+        // All components → both
+        $resAll = $this->actingAs($user)->get(route('issues.index', ['project_id' => $project->id, 'component_id' => 'all']));
+        $resAll->assertOk()->assertSee('HEL-1')->assertSee('HEL-2');
+    }
 }

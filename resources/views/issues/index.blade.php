@@ -28,19 +28,31 @@
 
         <div class="vr h-100 mx-1 d-none d-sm-block"></div>
 
+        @if($project->components->isNotEmpty())
+        <div class="mb-2">
+            <label class="form-label small mb-1">{{ ui('component') }}</label>
+            <select name="component_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                <option value="all">{{ ui('all_components') }}</option>
+                @foreach($project->components as $c)
+                    <option value="{{ $c->id }}" {{ request('component_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        @endif
+
         <div id="saved-filters-toolbar" class="d-flex flex-column gap-1">
             <label class="form-label small mb-0">{{ ui('saved_filters') ?? 'Saved filters' }}</label>
             <div class="input-group input-group-sm">
                 <select id="saved-filter-select" class="form-select">
-                    <option value="">{{ ui('select_saved_filter') ?? 'Select filter...' }}</option>
+                    <option value="">Select filter...</option>
                 </select>
-                <button id="apply-saved-filter" class="btn btn-outline-secondary" type="button">{{ __('Apply') }}</button>
-                <button id="save-current-filter" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#saveFilterModal">{{ __('Save') }}</button>
-                <button id="delete-saved-filter" class="btn btn-outline-danger" type="button">{{ __('Delete') }}</button>
+                <button id="apply-saved-filter" class="btn btn-outline-secondary" type="button">Apply</button>
+                <button id="save-current-filter" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#saveFilterModal">Save</button>
+                <button id="delete-saved-filter" class="btn btn-outline-danger" type="button">Delete</button>
             </div>
         </div>
 
-        @if (request()->anyFilled(['q','status','priority','assignee_id','label_id']))
+        @if (request()->anyFilled(['q','status','priority','assignee_id','label_id','component_id']))
             <a href="{{ route('issues.index', ['project_id' => $project->id]) }}" class="btn btn-sm btn-outline-secondary mb-1">{{ ui('reset') }}</a>
         @endif
     </div>
