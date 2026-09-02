@@ -5,7 +5,7 @@
         <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-title="{{ ui('labels_hint') }}"></i>
     </div>
     <div class="card-body">
-        <form method="POST" action="{{ route('projects.labels.store', $project) }}" class="mb-3" onsubmit="var f=this.elements.name;if(!f.value.trim()){f.value='Untitled';var c=this.elements.color;c.value=c.value||'#6c757d';}">
+        <form method="POST" action="{{ route('projects.labels.store', $project) }}" class="mb-3">
             @csrf
             <div class="input-group input-group-sm">
                 <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" placeholder="{{ ui('label_name') }}">

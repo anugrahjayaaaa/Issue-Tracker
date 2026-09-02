@@ -12,7 +12,11 @@ class LabelController extends Controller
 {
     public function store(LabelStoreRequest $request, Project $project): RedirectResponse
     {
-        $project->labels()->create($request->validated());
+        $data = $request->validated();
+        // ponytail: klik + tanpa nama → buat default, input tetap kosong (tidak error)
+        $data['name'] ??= 'Untagged';
+        $data['color'] ??= '#6c757d';
+        $project->labels()->create($data);
 
         return back()->with('success', __('messages.label_created'));
     }
