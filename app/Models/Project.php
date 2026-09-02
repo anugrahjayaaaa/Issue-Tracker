@@ -123,6 +123,11 @@ class Project extends Model
         return $this->hasMany(Component::class);
     }
 
+    public function automationRules(): HasMany
+    {
+        return $this->hasMany(AutomationRule::class);
+    }
+
     /** Next issue code, e.g. HEL-12. Increments issue_seq atomically-ish. */
     public function nextIssueCode(): string
     {

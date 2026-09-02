@@ -49,7 +49,7 @@ class ProjectController extends Controller
     public function show(Project $project): View
     {
         $this->ensureProjectReader($project);
-        $project->load(['members.user', 'labels', 'components.lead', 'issues' => fn ($q) => $q->latest()->limit(5)]);
+        $project->load(['members.user', 'labels', 'components.lead', 'automationRules', 'issues' => fn ($q) => $q->latest()->limit(5)]);
         $users = User::orderBy('name')->get();
 
         return view('projects.show', compact('project', 'users'));
