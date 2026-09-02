@@ -324,4 +324,17 @@ return [
     'name' => 'Nama',
     'invalid_transition' => 'Transisi tidak boleh berawal dan berakhir di status sama.',
     'saved' => 'Tersimpan.',
+    // ── Phase D: sprints ──
+    'backlog' => 'Backlog',
+    'unstarted' => 'Belum mulai',
+    'sprint' => 'Sprint',
+    'no_sprints' => 'Belum ada sprint.',
+    'issue_sprint_updated' => 'Sprint isu diperbarui.',
+    // ── Phase D: components ──
+    'component_name' => 'Nama komponen',
+    'lead' => 'Lead',
+    'no_components' => 'Belum ada komponen.',
+    // ── Phase D: comments threading ──
+    'reply' => 'Balas',
+    'post_reply' => 'Kirim balasan',
 ];

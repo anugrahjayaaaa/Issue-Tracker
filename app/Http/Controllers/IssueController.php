@@ -11,6 +11,7 @@ use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\User;
 use App\Models\Attachment;
+use App\Models\Sprint;
 use App\Notifications\IssueAssigned;
 use App\Notifications\IssueStatusChanged;
 use App\Http\Controllers\Concerns\Sortable;
@@ -94,6 +95,25 @@ class IssueController extends Controller
         return view('issues.board', compact('projects', 'project', 'columns'));
     }
 
+    /**
+     * Backlog view: issues without a sprint, grouped by sprint for the project.
+     * ponytail: simple — just load issues + sprints, no drag yet (manual assign via edit).
+     */
+    public function backlog(Project $project, Request $request): View
+    {
+        $this->ensureProjectReader($project);
+
+        $projects = Project::query()
+            ->whereHas('members', fn ($q) => $q->where('user_id', auth()->id()))
+            ->orderBy('name')->get();
+
+        $backlogIssues = Issue::where('project_id', $project->id)
+            ->whereIn('status', $project->statuses()->where('is_closed', false)->pluck('key'))
+            ->orderBy('priority', 'desc')->get();
+
+        return view('issues.backlog', compact('project', 'projects', 'backlogIssues'));
+    }
+
     public function create(Request $request): View
     {
         $projects = Project::query()
@@ -136,7 +156,7 @@ class IssueController extends Controller
     public function show(Issue $issue): View
     {
         $this->ensureProjectReader($issue->project);
-        $issue->load('assignee', 'reporter', 'parent', 'children.statusLink', 'comments.user', 'comments.attachments', 'labels', 'attachments', 'watchers');
+        $issue->load('assignee', 'reporter', 'parent', 'children.statusLink', 'comments.user', 'comments.attachments', 'comments.replies.user', 'comments.replies.attachments', 'labels', 'attachments', 'watchers', 'components');
 
         return view('issues.show', compact('issue'));
     }
@@ -154,7 +174,7 @@ class IssueController extends Controller
 
     public function update(IssueUpdateRequest $request, Issue $issue): RedirectResponse
     {
-        if ($request->filled('status') && ! $issue->canTransitionTo($request->input('status'))) {
+        if ($request->filled('status') && ! $issue->canTransitionTo($request->input('status'), $request->user())) {
             return redirect()->route('issues.show', $issue)
                 ->with('error', __('messages.status_transition_not_allowed'));
         }
@@ -195,6 +215,27 @@ class IssueController extends Controller
         return redirect()->route('issues.show', $issue)->with('success', __('messages.unwatched'));
     }
 
+    /** Assign/remove an issue from a sprint. ponytail: validates sprint belongs to project. */
+    public function updateSprint(Request $request, Issue $issue)
+    {
+        $this->ensureProjectReader($issue->project);
+
+        $sprintId = $request->input('sprint_id');
+        if ($sprintId) {
+            $sprint = Sprint::where('project_id', $issue->project_id)->findOrFail($sprintId);
+            $issue->update(['sprint_id' => $sprint->id]);
+        } else {
+            $issue->update(['sprint_id' => null]);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json($issue->fresh());
+        }
+
+        return redirect()->route('projects.backlog', ['project_id' => $issue->project_id])
+            ->with('success', __('messages.issue_sprint_updated'));
+    }
+
     public function destroyAttachment(Issue $issue, int $attachmentId): RedirectResponse
     {
         $attachment = Attachment::findOrFail($attachmentId);
@@ -207,7 +248,7 @@ class IssueController extends Controller
     public function changeStatus(IssueStatusRequest $request, Issue $issue): RedirectResponse
     {
         $newStatus = $request->input('status');
-        if (! $issue->canTransitionTo($newStatus)) {
+        if (! $issue->canTransitionTo($newStatus, $request->user())) {
             return redirect()->route('issues.board', ['project_id' => $issue->project_id])
                 ->with('error', __('messages.status_transition_not_allowed'));
         }

@@ -107,6 +107,7 @@
         </div>
 
         @include('partials.labels')
+        @include('partials.components')
     </div>
 </div>
 @endsection

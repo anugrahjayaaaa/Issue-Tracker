@@ -324,4 +324,17 @@ return [
     'name' => 'Name',
     'invalid_transition' => 'A transition cannot start and end on the same status.',
     'saved' => 'Saved.',
+    // ── Phase D: sprints & backlog ──
+    'backlog' => 'Backlog',
+    'unstarted' => 'Unstarted',
+    'sprint' => 'Sprint',
+    'no_sprints' => 'No sprints yet.',
+    'issue_sprint_updated' => 'Issue sprint updated.',
+    // ── Phase D: components ──
+    'component_name' => 'Component name',
+    'lead' => 'Lead',
+    'no_components' => 'No components yet.',
+    // ── Phase D: comments threading ──
+    'reply' => 'Reply',
+    'post_reply' => 'Post reply',
 ];

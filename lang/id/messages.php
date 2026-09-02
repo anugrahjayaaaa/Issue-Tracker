@@ -152,4 +152,9 @@ return [
     'no_data' => 'Belum ada data.',
     'current_plan' => 'Paket saat ini',
     'cancel_subscription' => 'Batalkan langganan',
+    // ── Phase D: sprints ──
+    'issue_sprint_updated' => 'Sprint isu diperbarui.',
+    'component_created' => 'Komponen dibuat.',
+    'component_updated' => 'Komponen diperbarui.',
+    'component_deleted' => 'Komponen dihapus.',
 ];

@@ -160,11 +160,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/{project}/saved-filters', [SavedFilterController::class, 'store'])->name('projects.saved-filters.store')->withoutMiddleware('can:project.manage');
         Route::delete('/{project}/saved-filters/{savedFilter}', [SavedFilterController::class, 'destroy'])->name('projects.saved-filters.destroy')->withoutMiddleware('can:project.manage');
 
-        Route::get('/{project}/sprints', [SprintController::class, 'index'])->name('projects.sprints.index')->middleware('can:issue.view');
+        Route::get('/{project}/sprints', [SprintController::class, 'index'])->name('projects.sprints.index')->withoutMiddleware('can:project.manage');
         Route::post('/{project}/sprints', [SprintController::class, 'store'])->name('projects.sprints.store');
         Route::get('/{project}/sprints/{sprint}', [SprintController::class, 'show'])->name('projects.sprints.show');
         Route::put('/{project}/sprints/{sprint}', [SprintController::class, 'update'])->name('projects.sprints.update');
         Route::delete('/{project}/sprints/{sprint}', [SprintController::class, 'destroy'])->name('projects.sprints.destroy');
+        Route::get('/{project}/backlog', [\App\Http\Controllers\IssueController::class, 'backlog'])->name('projects.backlog')->withoutMiddleware('can:project.manage');
     });
 
     // Issues (project-scoped): read = any member; write = lead/member (enforced in Form Requests)
@@ -177,6 +178,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{issue}/edit', [IssueController::class, 'edit'])->name('issues.edit')->middleware('can:issue.edit');
         Route::put('/{issue}', [IssueController::class, 'update'])->name('issues.update');
         Route::post('/{issue}/status', [IssueController::class, 'changeStatus'])->name('issues.status')->middleware('can:issue.edit');
+        Route::put('/{issue}/sprint', [IssueController::class, 'updateSprint'])->name('issues.sprint')->middleware('can:issue.edit');
         Route::post('/{issue}/watch', [IssueController::class, 'watch'])->name('issues.watch')->middleware('can:issue.view');
         Route::post('/{issue}/unwatch', [IssueController::class, 'unwatch'])->name('issues.unwatch')->middleware('can:issue.view');
         Route::delete('/{issue}/attachments/{attachmentId}', [IssueController::class, 'destroyAttachment'])->name('issues.attachments.destroy')->middleware('can:issue.edit');
