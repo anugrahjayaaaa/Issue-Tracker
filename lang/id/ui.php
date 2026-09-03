@@ -362,4 +362,10 @@ return [
     'all_components' => 'Semua komponen',
     // D.3 sprint complete
     'complete_sprint' => 'Selesaikan sprint',
+    'search_issues' => 'Cari isu...',
+    'select_saved_filter' => 'Pilih filter...',
+    'save_filter' => 'Simpan filter',
+    'confirm_delete_filter' => 'Hapus filter tersimpan ini?',
+    'not_allowed' => 'Tidak diizinkan',
+    'kbd_cmd_k' => 'Tekan Cmd+K / Ctrl+K untuk mencari',
 ];

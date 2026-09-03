@@ -371,4 +371,10 @@ return [
     'all_components' => 'All components',
     // D.3 sprint complete
     'complete_sprint' => 'Complete sprint',
+    'search_issues' => 'Search issues...',
+    'select_saved_filter' => 'Select filter...',
+    'save_filter' => 'Save filter',
+    'confirm_delete_filter' => 'Delete this saved filter?',
+    'not_allowed' => 'Not allowed',
+    'kbd_cmd_k' => 'Press Cmd+K / Ctrl+K to search',
 ];
