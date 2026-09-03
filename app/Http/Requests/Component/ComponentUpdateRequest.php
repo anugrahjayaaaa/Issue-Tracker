@@ -3,23 +3,22 @@
 namespace App\Http\Requests\Component;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreComponentRequest extends FormRequest
+class ComponentUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return true; // route middleware gates this
     }
 
-    public function attributes(): array
-    {
-        return ['component_name' => 'component name'];
-    }
-
+    /** @return array<string,mixed> */
     public function rules(): array
     {
+        $project = $this->route('project');
+
         return [
-            'component_name' => ['required', 'string', 'max:255'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'lead_id' => ['nullable', 'exists:users,id'],
         ];

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Sprint\StoreSprintRequest;
-use App\Http\Requests\Sprint\UpdateSprintRequest;
+use App\Http\Requests\Sprint\SprintStoreRequest;
+use App\Http\Requests\Sprint\SprintUpdateRequest;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\Sprint;
@@ -25,7 +25,7 @@ class SprintController extends Controller
         return response()->json($sprints);
     }
 
-    public function store(StoreSprintRequest $request, Project $project)
+    public function store(SprintStoreRequest $request, Project $project)
     {
         $this->ensureProjectLead($project);
 
@@ -44,7 +44,7 @@ class SprintController extends Controller
         return response()->json($sprint);
     }
 
-    public function update(UpdateSprintRequest $request, Project $project, Sprint $sprint)
+    public function update(SprintUpdateRequest $request, Project $project, Sprint $sprint)
     {
         $this->ensureProjectLead($project);
         abort_if($sprint->project_id !== $project->id, 404);

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Automation\StoreAutomationRuleRequest;
-use App\Http\Requests\Automation\UpdateAutomationRuleRequest;
+use App\Http\Requests\Automation\AutomationRuleStoreRequest;
+use App\Http\Requests\Automation\AutomationRuleUpdateRequest;
 use App\Http\Controllers\Concerns\AuthorizesProject;
 use App\Models\AutomationRule;
 use App\Models\Project;
@@ -31,7 +31,7 @@ class AutomationRuleController extends Controller
         return view('projects.automation-rules.create', compact('project'));
     }
 
-    public function store(StoreAutomationRuleRequest $request, Project $project): RedirectResponse
+    public function store(AutomationRuleStoreRequest $request, Project $project): RedirectResponse
     {
         $this->ensureProjectLead($project);
 
@@ -59,7 +59,7 @@ class AutomationRuleController extends Controller
         return view('projects.automation-rules.edit', compact('project', 'rule'));
     }
 
-    public function update(UpdateAutomationRuleRequest $request, Project $project, AutomationRule $rule): RedirectResponse
+    public function update(AutomationRuleUpdateRequest $request, Project $project, AutomationRule $rule): RedirectResponse
     {
         $this->ensureProjectLead($project);
         abort_unless($rule->project_id === $project->id, 404);

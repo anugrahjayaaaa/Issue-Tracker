@@ -4,13 +4,14 @@ namespace App\Http\Requests\Sprint;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateSprintRequest extends FormRequest
+class SprintUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return true; // route middleware gates this
     }
 
+    /** @return array<string,mixed> */
     public function rules(): array
     {
         return [

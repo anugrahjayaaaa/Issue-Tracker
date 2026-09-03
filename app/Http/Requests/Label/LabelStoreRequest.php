@@ -12,20 +12,14 @@ class LabelStoreRequest extends FormRequest
         return $this->user()->can('project.manage');
     }
 
-    public function attributes(): array
-    {
-        return ['label_name' => 'label name'];
-    }
-
     /** @return array<string,mixed> */
     public function rules(): array
     {
         $project = $this->route('project');
 
         return [
-            'label_name' => [
+            'name' => [
                 'required', 'string', 'max:50',
-                // ponytail: explicit column = 'name' (form field renamed to label_name for error isolation)
                 Rule::unique('labels', 'name')->where('project_id', $project->id),
             ],
             'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],

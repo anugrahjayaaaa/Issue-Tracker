@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreSavedFilterRequest;
+use App\Http\Requests\SavedFilterStoreRequest;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\SavedFilter;
@@ -40,7 +40,7 @@ class SavedFilterController extends Controller
         return response()->json($filters);
     }
 
-    public function store(StoreSavedFilterRequest $request, Project $project)
+    public function store(SavedFilterStoreRequest $request, Project $project)
     {
         $this->ensureMember($project);
 
