@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Component\StoreComponentRequest;
-use App\Http\Requests\Component\UpdateComponentRequest;
+use App\Http\Requests\Component\ComponentStoreRequest;
+use App\Http\Requests\Component\ComponentUpdateRequest;
 use App\Http\Controllers\Concerns\AuthorizesProject;
 use App\Models\Component;
 use App\Models\Project;
@@ -13,7 +13,7 @@ class ComponentController extends Controller
 {
     use AuthorizesProject;
 
-    public function store(StoreComponentRequest $request, Project $project): RedirectResponse
+    public function store(ComponentStoreRequest $request, Project $project): RedirectResponse
     {
         $this->ensureProjectLead($project);
 
@@ -22,7 +22,7 @@ class ComponentController extends Controller
         return back()->with('success', __('messages.component_created'));
     }
 
-    public function update(UpdateComponentRequest $request, Project $project, Component $component): RedirectResponse
+    public function update(ComponentUpdateRequest $request, Project $project, Component $component): RedirectResponse
     {
         $this->ensureProjectLead($project);
         abort_unless($component->project_id === $project->id, 404);
@@ -36,6 +36,7 @@ class ComponentController extends Controller
     {
         $this->ensureProjectLead($project);
         abort_unless($component->project_id === $project->id, 404);
+
         $component->delete();
 
         return back()->with('success', __('messages.component_deleted'));

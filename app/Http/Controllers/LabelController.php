@@ -20,6 +20,7 @@ class LabelController extends Controller
     public function update(LabelUpdateRequest $request, Project $project, Label $label): RedirectResponse
     {
         abort_unless($label->project_id === $project->id, 404);
+
         $label->update($request->validated());
 
         return back()->with('success', __('messages.label_updated'));
@@ -28,6 +29,7 @@ class LabelController extends Controller
     public function destroy(Project $project, Label $label): RedirectResponse
     {
         abort_unless($label->project_id === $project->id, 404);
+
         $label->delete();
 
         return back()->with('success', __('messages.label_deleted'));

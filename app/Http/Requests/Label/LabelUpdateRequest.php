@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Label;
 
-use App\Models\Label;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,12 +16,12 @@ class LabelUpdateRequest extends FormRequest
     public function rules(): array
     {
         $project = $this->route('project');
-        $label = $this->route('label');
 
         return [
             'name' => [
                 'required', 'string', 'max:50',
-                Rule::unique('labels')->where('project_id', $project->id)->ignore($label->id),
+                Rule::unique('labels', 'name')->where('project_id', $project->id)
+                    ->ignore($this->route('label')),
             ],
             'color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ];

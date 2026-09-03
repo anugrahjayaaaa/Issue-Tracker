@@ -1,0 +1,7 @@
+#!/bin/bash
+# block commits on main — forces feature branch
+branch=$(git rev-parse --abbrev-ref HEAD)
+case "$branch" in main|master|develop)
+  echo "STOP: on $branch. Use 'git checkout -b feature/<name>' first."
+  exit 1;;
+esac
